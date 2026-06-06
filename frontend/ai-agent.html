@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crop Advisor — SmartZameen AI</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="css/theme.css">
+  <style>
+    .chat-wrap { display:flex; flex-direction:column; height:calc(100vh - 66px); max-width:880px; margin:0 auto; }
+    .chat-head { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:18px clamp(14px,3vw,24px) 12px; border-bottom:1px solid var(--border); }
+    .chat-head h1 { font-family:var(--font-serif); font-size:22px; font-weight:800; color:var(--dark); display:flex; align-items:center; gap:10px; }
+    .chat-head h1 svg { width:22px; height:22px; color:var(--accent); }
+    .chat-head p { font-size:12.5px; color:var(--text-light); margin-top:2px; }
+    .chat-tts { display:inline-flex; align-items:center; gap:7px; font:600 12.5px var(--font-sans); cursor:pointer; border:1px solid var(--border); background:#fff; color:var(--text-light); padding:7px 12px; border-radius:20px; }
+    .chat-tts svg { width:15px; height:15px; }
+    .chat-tts.on { background:var(--accent-soft); color:var(--accent); border-color:var(--accent-light); }
+
+    .chat-log { flex:1; overflow-y:auto; padding:18px clamp(14px,3vw,24px); display:flex; flex-direction:column; gap:14px; background:var(--bg-light); }
+    .chat-msg { display:flex; }
+    .chat-msg.user { justify-content:flex-end; }
+    .chat-msg.assistant { justify-content:flex-start; }
+    .chat-bubble { max-width:82%; padding:11px 15px; border-radius:16px; font-size:14.5px; line-height:1.55; box-shadow:var(--shadow-sm); }
+    .chat-msg.user .chat-bubble { background:var(--primary); color:#fff; border-bottom-right-radius:5px; }
+    .chat-msg.assistant .chat-bubble { background:#fff; color:var(--text); border:1px solid var(--border); border-bottom-left-radius:5px; }
+    .chat-img { display:block; max-width:240px; max-height:240px; border-radius:10px; margin-bottom:6px; }
+    .chat-file { font-size:13px; opacity:.9; margin-bottom:4px; }
+    .chat-text { white-space:pre-wrap; word-break:break-word; }
+    .chat-dots { display:flex; gap:5px; padding:3px 0; }
+    .chat-dots span { width:7px; height:7px; border-radius:50%; background:var(--accent-light); animation:cdot 1.2s infinite; }
+    .chat-dots span:nth-child(2){animation-delay:.2s} .chat-dots span:nth-child(3){animation-delay:.4s}
+    @keyframes cdot { 0%,80%,100%{transform:scale(.6);opacity:.5} 40%{transform:scale(1);opacity:1} }
+
+    .chat-attach-preview { display:none; align-items:center; gap:10px; padding:8px clamp(14px,3vw,24px); background:#fff; border-top:1px solid var(--border); font-size:13px; color:var(--text); }
+    .chat-attach-thumb { width:42px; height:42px; object-fit:cover; border-radius:8px; }
+    .chat-attach-file { display:flex; align-items:center; gap:6px; }
+    .chat-attach-x { margin-left:auto; background:var(--bg-light); border:1px solid var(--border); border-radius:50%; width:26px; height:26px; cursor:pointer; color:var(--text-light); }
+
+    .chat-input-bar { display:flex; align-items:flex-end; gap:8px; padding:12px clamp(14px,3vw,24px); border-top:1px solid var(--border); background:#fff; }
+    .chat-icon-btn { flex:none; width:42px; height:42px; border-radius:50%; border:1px solid var(--border); background:#fff; color:var(--text-light); cursor:pointer; display:grid; place-items:center; transition:var(--transition); }
+    .chat-icon-btn:hover { color:var(--accent); border-color:var(--accent-light); background:var(--accent-soft); }
+    .chat-icon-btn svg { width:20px; height:20px; }
+    .chat-icon-btn.on { background:#dc2626; color:#fff; border-color:#dc2626; animation:micPulse 1.2s infinite; }
+    @keyframes micPulse { 0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.4)} 50%{box-shadow:0 0 0 10px rgba(220,38,38,0)} }
+    #chat-input { flex:1; resize:none; border:1px solid var(--border); border-radius:22px; padding:11px 16px; font:inherit; font-size:14.5px; outline:none; max-height:140px; background:var(--bg-light); }
+    #chat-input:focus { border-color:var(--accent); background:#fff; }
+    .chat-send { flex:none; width:44px; height:44px; border-radius:50%; border:none; background:var(--primary); color:#fff; cursor:pointer; display:grid; place-items:center; transition:var(--transition); }
+    .chat-send:hover { background:var(--primary-light); }
+    .chat-send:disabled { opacity:.5; cursor:default; }
+    .chat-send svg { width:20px; height:20px; }
+
+    /* camera modal */
+    .cam-modal { position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:500; display:none; align-items:center; justify-content:center; flex-direction:column; gap:16px; padding:20px; }
+    .cam-modal.open { display:flex; }
+    .cam-modal video { width:100%; max-width:520px; border-radius:14px; background:#000; }
+    .cam-actions { display:flex; gap:12px; }
+    .cam-actions button { padding:12px 24px; border-radius:30px; border:none; font:700 14px var(--font-sans); cursor:pointer; }
+    #cam-capture { background:var(--accent); color:#fff; }
+    #cam-close { background:#fff; color:var(--text); }
+
+    @media (max-width:900px){ .chat-wrap { height:calc(100vh - 60px); } .chat-bubble { max-width:88%; } }
+  </style>
+</head>
+<body data-app="advisor">
+  <nav class="navbar">
+    <a href="index.html" class="nav-logo">Smart<span id="app-name">Zameen</span></a>
+    <div class="nav-center">
+      <a href="index.html" id="t-home">Home</a>
+      <a href="index.html#about" id="nav-about" class="nav-guest">About Us</a>
+      <a href="dashboard.html" id="t-dash" class="nav-auth on">Dashboard</a>
+      <button class="lang-btn" id="langToggle">Languages</button>
+      <div class="lang-menu" id="langMenu">
+        <button class="lang-option on" onclick="setLang('en', this)">English</button>
+        <button class="lang-option" onclick="setLang('ur', this)">اردو</button>
+        <button class="lang-option" onclick="setLang('pa', this)">پنجابی</button>
+        <button class="lang-option" onclick="setLang('sd', this)">سنڌي</button>
+        <button class="lang-option" onclick="setLang('ps', this)">پښتو</button>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div id="auth-buttons" style="display:flex;gap:10px;align-items:center;">
+        <a href="login.html" class="btn-login">Login</a>
+        <a href="signup.html" class="btn-signup">Sign Up</a>
+      </div>
+      <div class="user-pill" id="user-pill">
+        <span id="user-name-display">User</span>
+        <div class="user-dropdown">
+          <a href="dashboard.html">Dashboard</a>
+          <a href="ai-agent.html">Crop Advisor</a>
+          <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="app-layout">
+    <aside class="app-sidebar" id="sz-sidebar"></aside>
+    <main class="app-main">
+      <div class="chat-wrap">
+        <div class="chat-head">
+          <div>
+            <h1>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Crop Advisor
+            </h1>
+            <p>Type, talk, or send a photo of your crop / soil — powered by AI.</p>
+          </div>
+        </div>
+
+        <div class="chat-log" id="chat-log"></div>
+
+        <div class="chat-attach-preview" id="chat-attach-preview"></div>
+
+        <div class="chat-input-bar">
+          <button class="chat-icon-btn" id="chat-attach" title="Attach image or file">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.4 11.05 12.25 20.2a5 5 0 0 1-7.07-7.07l9.19-9.19a3 3 0 1 1 4.24 4.24l-9.2 9.19a1 1 0 0 1-1.41-1.41l8.49-8.49"/></svg>
+          </button>
+          <button class="chat-icon-btn" id="chat-camera-btn" title="Camera">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3l2-3h8l2 3h3a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          </button>
+          <button class="chat-icon-btn" id="chat-mic" title="Voice input">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3"/></svg>
+          </button>
+          <textarea id="chat-input" rows="1" placeholder="Message Crop Advisor…"></textarea>
+          <button class="chat-send" id="chat-send" title="Send">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <input type="file" id="chat-file-input" hidden>
+    </main>
+  </div>
+
+  <!-- camera modal -->
+  <div class="cam-modal" id="cam-modal">
+    <video id="cam-video" autoplay playsinline muted></video>
+    <div class="cam-actions">
+      <button id="cam-capture">📷 Capture</button>
+      <button id="cam-close">Close</button>
+    </div>
+  </div>
+
+  <script src="js/lang.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/sidebar.js"></script>
+  <script src="js/chat.js"></script>
+</body>
+</html>

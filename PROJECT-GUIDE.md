@@ -112,11 +112,15 @@ Open the app at the printed URL, e.g. `http://localhost:80` or `http://localhost
 
 | Page | Path |
 |------|------|
-| Home | `/` or `/index.html` |
-| Crop AI | `/predict.html` |
-| Dashboard | `/dashboard.html` |
-| IoT Node simulator | `/sensor-simulator.html` |
+| Home (portfolio) | `/` or `/index.html` |
+| Dashboard (app hub) | `/dashboard.html` |
+| Crop Advisor — Crop Prediction tab | `/crop-advisor.html` |
+| Crop Advisor — IoT Sensors tab | `/crop-advisor.html?tab=iot` |
 | Login / Sign up | `/login.html`, `/signup.html` |
+
+> **App structure:** the home page is a portfolio that funnels into the app via its
+> CTA buttons (which open the **Dashboard**). The Dashboard and **Crop Advisor**
+> (Crop AI + IoT sensors, merged into one tabbed page) are the actual application.
 
 ---
 
@@ -125,7 +129,7 @@ Open the app at the printed URL, e.g. `http://localhost:80` or `http://localhost
 Replace `BASE` below with your printed base URL (`http://localhost:80` or `:5000`).
 
 ### ✅ 5.1 Crop prediction (core ML)
-1. Open `BASE/predict.html`.
+1. Open `BASE/crop-advisor.html` (the **Crop Prediction** tab is default).
 2. Fill N=80, P=42, K=42, pH=6.5, Temp=18, Rainfall=70, Region=Punjab, Season=Rabi.
 3. Click **Get Best Crop Recommendation**.
 4. **Expect:** result card shows **Wheat** with ~94% confidence + top-3 list.
@@ -137,7 +141,7 @@ Invoke-RestMethod -Uri "http://localhost:80/api/predict-crop" -Method Post -Cont
 Expect `crop: wheat`, `confidence: ~94`.
 
 ### ✅ 5.2 IoT Soil Sensor Simulator (the highlight)
-1. Open `BASE/sensor-simulator.html`.
+1. Open `BASE/crop-advisor.html?tab=iot` (or the **IoT Sensors** tab).
 2. Click a preset (e.g. **🌾 Rice**) or drag the sliders.
 3. Watch the **radar chart**, **soil core**, and **wiring diagram values** update live.
 4. Click **Transmit Reading** → wires animate, and the **AI Crop Recommendation**
@@ -172,12 +176,12 @@ Then open `BASE/dashboard.html` → the **Connected Soil Node** tile shows the l
 3. **Expect:** temp/humidity/wind. (Mock data if `WEATHER_API_KEY` not set — still 200 OK.)
 
 ### ✅ 5.6 Soil image analysis *(needs `ANTHROPIC_API_KEY`)*
-1. `BASE/predict.html` → **Open Camera** or upload a soil photo.
+1. `BASE/crop-advisor.html` → **Open Camera** or upload a soil photo.
 2. **Expect:** detected soil type + estimated NPK/pH + Urdu description.
 3. Without the key it returns a clear "not configured / fallback" message (no crash).
 
 ### ✅ 5.7 Voice AI chat *(needs `ANTHROPIC_API_KEY`, Chrome recommended)*
-1. `BASE/predict.html?mode=voice` → toggle Voice Mode → tap the mic, speak.
+1. `BASE/crop-advisor.html?mode=voice` → toggle Voice Mode → tap the mic, speak.
 2. **Expect:** speech-to-text + a short spoken reply.
 
 ### ✅ 5.8 Auth (login / signup)
@@ -195,8 +199,7 @@ Invoke-RestMethod -Uri "http://localhost:80/signup" -Method Post -ContentType "a
 ```powershell
 $base = "http://localhost:80"
 "GET  /";              (Invoke-WebRequest "$base/").StatusCode
-"GET  predict.html";   (Invoke-WebRequest "$base/predict.html").StatusCode
-"GET  simulator";      (Invoke-WebRequest "$base/sensor-simulator.html").StatusCode
+"GET  crop-advisor";   (Invoke-WebRequest "$base/crop-advisor.html").StatusCode
 "GET  favicon";        (Invoke-WebRequest "$base/assets/favicon.svg").StatusCode
 "GET  weather";        (Invoke-RestMethod "$base/api/weather?city=multan").temperature
 "POST predict-crop";   (Invoke-RestMethod "$base/api/predict-crop" -Method Post -ContentType "application/json" -Body '{"nitrogen":80,"phosphorus":42,"potassium":42,"ph":6.5,"temperature":18,"rainfall":70,"region":"Punjab","season":"Rabi"}').crop
@@ -270,7 +273,7 @@ frontend is served by the same Flask app, **no URL changes are needed** in produ
 
 ```powershell
 cd model-training
-python crop_recommendation.py        # retrains crop model → writes backend/ml_models/*.pkl
+python train_model.py                # retrains crop model → writes backend/ml_models/*.pkl
 python train_soil_cnn.py             # (optional) soil-image classifier
 ```
 The crop script prints accuracy and saves `crop_model.pkl` + encoders into

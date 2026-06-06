@@ -2,6 +2,7 @@ const LANG = {
   en: {
     app: 'Zameen',
     home: 'Home',
+    nav_about: 'About Us',
     pred: 'Crop AI',
     dash: 'Dashboard',
     lang_btn: 'Languages',
@@ -126,6 +127,7 @@ const LANG = {
   ur: {
     app: 'زامین',
     home: 'گھر',
+    nav_about: 'ہمارے بارے میں',
     pred: 'فصل AI',
     dash: 'ڈیش بورڈ',
     lang_btn: 'زبانیں',
@@ -639,7 +641,7 @@ function setLang(lang, btn) {
   // ── Navbar (all pages) ──
   set('app-name', t.app);
   set('t-home',   t.home);
-  set('t-pred',   t.pred);
+  set('nav-about', t.nav_about);
   set('t-dash',   t.dash);
   // Update the Languages button text without touching the dropdown arrow CSS trick
   const langToggleEl = document.getElementById('langToggle');
@@ -664,7 +666,6 @@ function setLang(lang, btn) {
   set('f5-title', t.f5_title); set('f5-desc', t.f5_desc);
   set('f6-title', t.f6_title); set('f6-desc', t.f6_desc);
   set('footer-copy',  t.footer_copy);
-  set('footer-info',  t.footer_info);
 
   // ── Predict page ──
   set('pred-title',       t.pred_title);
@@ -703,8 +704,6 @@ function setLang(lang, btn) {
 
   // ── Dashboard page ──
   set('dash-title',        t.dash_title);
-  set('user-name',         t.user_name);
-  set('alert-msg',         t.alert_msg);
   set('current-crop',      t.current_crop);
   set('crop-wheat',        t.crop_wheat);
   set('crop-area',         t.crop_area);
@@ -712,7 +711,7 @@ function setLang(lang, btn) {
   set('predicted-yield',   t.predicted_yield);
   set('yield-value',       t.yield_value);
   set('yield-per',         t.yield_per);
-  set('today-weather',     t.today_weather);
+  // 'today-weather' is set by main.js loadWeather() to include the selected city
   set('weather-humidity',  t.weather_humidity);
   set('weather-rainfall',  t.weather_rainfall);
   set('weather-wind',      t.weather_wind);

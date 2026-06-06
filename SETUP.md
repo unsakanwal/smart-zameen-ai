@@ -77,8 +77,8 @@ The backend serves the frontend, so just open these in your browser:
 | Landing | http://localhost:80/ |
 | Login / Signup | http://localhost:80/login.html |
 | Dashboard | http://localhost:80/dashboard.html |
-| Crop Prediction | http://localhost:80/predict.html |
-| **IoT Soil Simulator** | http://localhost:80/sensor-simulator.html |
+| **Crop Advisor** (Crop AI + IoT) | http://localhost:80/crop-advisor.html |
+| Crop Advisor → IoT Sensors tab | http://localhost:80/crop-advisor.html?tab=iot |
 
 > Do **not** open the HTML files directly from disk (`file://`). Always go through
 > `http://localhost:80/...` so the frontend can reach the backend API.
@@ -116,7 +116,7 @@ goes *Live* and updates every 3 seconds with N/P/K/pH/temperature/moisture and t
 AI-suggested crop.
 
 > Prefer clicking over the command line? The **HTML simulator**
-> (`/sensor-simulator.html`) does the same thing with sliders and a
+> (`/crop-advisor.html?tab=iot`) does the same thing with sliders and a
 > "Start Auto-Stream" button. The virtual sensor and the HTML simulator are
 > interchangeable — both POST to the same endpoint.
 
@@ -155,7 +155,7 @@ used** (we moved to SQLite) — you can ignore or delete them.
 |---|---|
 | `PermissionError` / `OSError 10013` on start | Port 80 is busy/reserved — run terminal as Administrator, or close Skype/IIS. |
 | `ModuleNotFoundError: No module named 'flask'` (etc.) | Run `pip install -r requirements.txt` in the `backend` folder. |
-| `[WARNING] Model load fail ... rule-based prediction use hogi` | Harmless. The old model pickle didn't match the new scikit-learn; the app falls back to rule-based crop logic. To get the exact model back, retrain: `python model-training/crop_recommendation.py`. |
+| `[WARNING] Model load fail ... rule-based prediction use hogi` | Harmless. The old model pickle didn't match the new scikit-learn; the app falls back to rule-based crop logic. To get the exact model back, retrain: `python model-training/train_model.py`. |
 | Virtual sensor says `[OFFLINE] Cannot reach backend` | Start the backend first (`python app.py`), then run the sensor. |
 | Dashboard tile stays "Waiting for node…" | Make sure the virtual sensor (or HTML simulator) is transmitting, and that you opened the dashboard via `http://localhost:80/...`, not `file://`. |
 | Want a clean database | Stop the backend and delete `backend/database/smartzameen.db`. It's recreated on next start. |

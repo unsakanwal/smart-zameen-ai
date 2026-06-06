@@ -30,9 +30,9 @@ smart-zameen-ai/
 │       └── le_region.pkl
 ├── frontend/
 │   ├── index.html               ← Landing page
-│   ├── predict.html             ← Crop prediction + soil image page
-│   ├── dashboard.html           ← Dashboard with weather + live soil node
-│   ├── sensor-simulator.html    ← IoT soil sensor simulator
+│   ├── index.html               ← Portfolio / landing page
+│   ├── dashboard.html           ← App hub: real stats, weather, live soil node
+│   ├── crop-advisor.html        ← Crop AI + IoT sensors (merged, tabbed)
 │   ├── login.html / signup.html ← Auth pages
 │   ├── assets/
 │   │   ├── favicon.svg          ← App favicon
@@ -45,7 +45,7 @@ smart-zameen-ai/
 │       ├── camera.js            ← Camera / soil image upload
 │       └── voice.js             ← Voice chat (Web Speech API + Claude)
 ├── model-training/
-│   ├── crop_recommendation.py   ← Crop model training script
+│   ├── train_model.py           ← Crop model training script
 │   ├── train_soil_cnn.py        ← Soil image classifier training
 │   └── dataset/
 │       └── crops_pakistan.csv   ← Pakistan crops training dataset
@@ -240,9 +240,9 @@ http://localhost:80
 
 | Page | URL |
 |------|-----|
-| Home | http://localhost:80 |
-| Crop Prediction | http://localhost:80/predict.html |
-| Dashboard | http://localhost:80/dashboard.html |
+| Home (portfolio) | http://localhost:80 |
+| Dashboard (app hub) | http://localhost:80/dashboard.html |
+| Crop Advisor (Crop AI + IoT) | http://localhost:80/crop-advisor.html |
 | Login | http://localhost:80/login.html |
 | Sign Up | http://localhost:80/signup.html |
 
@@ -308,7 +308,7 @@ ngrok http 80
 
 ### ML model not found error
 - `backend/ml_models/` folder mein `.pkl` files honi chahiyein — yeh already zip mein hain
-- Agar nahin hain to: `python model-training/crop_recommendation.py`
+- Agar nahin hain to: `python model-training/train_model.py`
 
 ### Soil image / Voice chat kaam nahi kar raha
 - `ANTHROPIC_API_KEY` set hai? Check karein: `echo %ANTHROPIC_API_KEY%` (Windows) ya `echo $ANTHROPIC_API_KEY` (Linux/Mac)

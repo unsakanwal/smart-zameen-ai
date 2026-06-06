@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings — SmartZameen AI</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="css/theme.css">
+  <style>
+    .set-wrap { max-width: 720px; margin: 0 auto; padding: 30px clamp(16px,4vw,40px) 60px; }
+    .set-wrap h1 { font-family:var(--font-serif); font-size:clamp(24px,4vw,30px); font-weight:800; color:var(--dark); }
+    .set-wrap > p { color:var(--text-light); font-size:14px; margin:4px 0 24px; }
+    .set-card { margin-bottom:20px; }
+    .set-card h2 { font-size:16px; font-weight:700; color:var(--dark); margin-bottom:18px; display:flex; align-items:center; gap:8px; }
+    .set-card h2 svg { width:18px; height:18px; color:var(--accent); }
+    .field { display:flex; flex-direction:column; gap:6px; margin-bottom:16px; }
+    .field label { font-size:12.5px; font-weight:700; color:var(--dark); }
+    .field input, .field select {
+      padding:12px 14px; border:1.5px solid var(--border); border-radius:9px; font-size:14.5px;
+      font-family:inherit; background:var(--bg-light); outline:none; transition:var(--transition);
+    }
+    .field input:focus, .field select:focus { border-color:var(--accent); background:#fff; box-shadow:0 0 0 4px rgba(46,125,50,.1); }
+    .field input:disabled { color:var(--text-light); cursor:not-allowed; }
+    .field .hint { font-size:11.5px; color:var(--text-light); }
+    .set-toast { display:none; padding:10px 14px; border-radius:8px; font-size:13px; font-weight:600; margin-bottom:14px; }
+    .set-toast.ok { display:block; background:var(--accent-soft); color:var(--accent); }
+    .set-toast.err { display:block; background:#fee2e2; color:#b91c1c; }
+    .set-gate { text-align:center; padding:60px 20px; color:var(--text-light); }
+    .set-gate a { color:var(--accent); font-weight:700; }
+    .logout-row { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+    .logout-row p { font-size:13.5px; color:var(--text-light); }
+    .btn-danger { background:#fee2e2; color:#b91c1c; border:1px solid #fecaca; }
+    .btn-danger:hover { background:#fecaca; }
+  </style>
+</head>
+<body data-app="settings">
+  <nav class="navbar">
+    <a href="index.html" class="nav-logo">Smart<span id="app-name">Zameen</span></a>
+    <div class="nav-center">
+      <a href="index.html" id="t-home">Home</a>
+      <a href="index.html#about" id="nav-about" class="nav-guest">About Us</a>
+      <a href="dashboard.html" id="t-dash" class="nav-auth">Dashboard</a>
+      <button class="lang-btn" id="langToggle">Languages</button>
+      <div class="lang-menu" id="langMenu">
+        <button class="lang-option on" onclick="setLang('en', this)">English</button>
+        <button class="lang-option" onclick="setLang('ur', this)">اردو</button>
+        <button class="lang-option" onclick="setLang('pa', this)">پنجابی</button>
+        <button class="lang-option" onclick="setLang('sd', this)">سنڌي</button>
+        <button class="lang-option" onclick="setLang('ps', this)">پښتو</button>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div id="auth-buttons" style="display:flex;gap:10px;align-items:center;">
+        <a href="login.html" class="btn-login">Login</a>
+        <a href="signup.html" class="btn-signup">Sign Up</a>
+      </div>
+      <div class="user-pill" id="user-pill">
+        <span id="user-name-display">User</span>
+        <div class="user-dropdown">
+          <a href="dashboard.html">Dashboard</a>
+          <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="app-layout">
+    <aside class="app-sidebar" id="sz-sidebar"></aside>
+    <main class="app-main">
+      <div class="set-wrap">
+        <h1>Settings</h1>
+        <p>Manage your account and profile.</p>
+
+        <div id="set-gate" class="set-gate" style="display:none;">
+          Please <a href="login.html">log in</a> to manage your profile.
+        </div>
+
+        <div id="set-content" style="display:none;">
+          <div class="sz-card set-card">
+            <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/></svg> Profile</h2>
+            <div class="set-toast" id="toast"></div>
+            <form id="profile-form" onsubmit="return false;">
+              <div class="field">
+                <label for="pf-name">Full Name</label>
+                <input id="pf-name" placeholder="Your name">
+              </div>
+              <div class="field">
+                <label for="pf-email">Email</label>
+                <input id="pf-email" disabled>
+                <span class="hint">Email can't be changed.</span>
+              </div>
+              <div class="field">
+                <label for="pf-region">Region</label>
+                <select id="pf-region">
+                  <option value="">Select region</option>
+                  <option>Punjab</option><option>Sindh</option><option>KPK</option><option>Balochistan</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="pf-pass">New Password</label>
+                <input id="pf-pass" type="password" placeholder="Leave blank to keep current">
+                <span class="hint">Minimum 6 characters.</span>
+              </div>
+              <button class="btn btn-primary" id="save-btn" onclick="saveProfile()">Save Changes</button>
+            </form>
+          </div>
+
+          <div class="sz-card set-card">
+            <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg> Account</h2>
+            <div class="logout-row">
+              <p>Sign out of your account on this device.</p>
+              <button class="btn btn-danger" onclick="logout()">Logout</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/lang.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/sidebar.js"></script>
+  <script>
+  // Backend base: relative when served by Flask (normal). If you preview the page
+  // with file:// or a dev server, set window.SZ_BACKEND or it falls back to localhost.
+  const API = window.SZ_API || '';
+  (function () {
+    const loggedIn = localStorage.getItem('sz_loggedIn') === 'true';
+    const email = localStorage.getItem('sz_email') || '';
+    document.getElementById('set-gate').style.display = loggedIn ? 'none' : 'block';
+    document.getElementById('set-content').style.display = loggedIn ? 'block' : 'none';
+    if (!loggedIn) return;
+
+    document.getElementById('pf-email').value = email;
+    // prefill from cache, then refresh from server
+    document.getElementById('pf-name').value = localStorage.getItem('sz_name') || '';
+    document.getElementById('pf-region').value = localStorage.getItem('sz_region') || '';
+    fetch(API + '/api/profile?email=' + encodeURIComponent(email)).then(r => r.json()).then(d => {
+      if (d.success) {
+        if (d.name)   document.getElementById('pf-name').value = d.name;
+        if (d.region) document.getElementById('pf-region').value = d.region;
+      }
+    }).catch(() => {});
+  })();
+
+  function toast(msg, ok) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = 'set-toast ' + (ok ? 'ok' : 'err');
+    setTimeout(() => { t.className = 'set-toast'; }, 4000);
+  }
+
+  async function saveProfile() {
+    const email = localStorage.getItem('sz_email') || '';
+    const name = document.getElementById('pf-name').value.trim();
+    const region = document.getElementById('pf-region').value;
+    const password = document.getElementById('pf-pass').value;
+    if (!name) { toast('Name is required.', false); return; }
+    if (password && password.length < 6) { toast('Password must be at least 6 characters.', false); return; }
+
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    try {
+      const res = await fetch(API + '/api/update-profile', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name, region, password: password || undefined })
+      });
+      const d = await res.json();
+      if (res.ok && d.success) {
+        localStorage.setItem('sz_name', name);
+        localStorage.setItem('sz_region', region);
+        document.getElementById('pf-pass').value = '';
+        if (typeof checkAuth === 'function') checkAuth();
+        // live-sync the sidebar profile header
+        const uName = document.querySelector('.app-sidebar-uinfo b');
+        if (uName) uName.textContent = name;
+        const av = document.querySelector('.app-sidebar-avatar');
+        if (av) av.textContent = (name.trim()[0] || 'U').toUpperCase();
+        toast('Profile updated successfully.', true);
+      } else {
+        toast(d.error || 'Could not update profile.', false);
+      }
+    } catch (e) {
+      toast("Can't reach the backend. Open the app through Flask (e.g. http://localhost), not Live Server or the file directly, and make sure 'python app.py' is running.", false);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Save Changes';
+    }
+  }
+  </script>
+</body>
+</html>

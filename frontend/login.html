@@ -295,9 +295,8 @@
     <a href="index.html" class="nav-logo">Smart<span id="app-name">Zameen</span></a>
     <div class="nav-center">
       <a href="index.html" id="t-home" class="on">Home</a>
-      <a href="predict.html" id="t-pred">Crop AI</a>
-      <a href="dashboard.html" id="t-dash">Dashboard</a>
-      <a href="sensor-simulator.html" id="t-iot">IoT Node</a>
+      <a href="index.html#about" id="nav-about" class="nav-guest">About Us</a>
+      <a href="dashboard.html" id="t-dash" class="nav-auth">Dashboard</a>
       <button class="lang-btn" id="langToggle">Languages</button>
       <div class="lang-menu" id="langMenu">
         <button class="lang-option on" onclick="setLang('en', this)">English</button>
@@ -319,7 +318,7 @@
         <span style="font-size:10px;color:#666">▼</span>
         <div class="user-dropdown">
           <a href="dashboard.html">📊 Dashboard</a>
-          <a href="predict.html">🌱 Predict Crop</a>
+          <a href="ai-agent.html">Crop Advisor</a>
           <button class="logout-btn" onclick="logout()">🚪 Logout</button>
         </div>
       </div>
@@ -416,6 +415,7 @@
           localStorage.setItem('token', data.token);
           localStorage.setItem('sz_email', email.value);
           localStorage.setItem('sz_loggedIn', 'true');
+          if (data.user && data.user.name) localStorage.setItem('sz_name', data.user.name);
           showToast('Login successful! Redirecting…', 'success');
           setTimeout(() => window.location.href = 'dashboard.html', 1200);
         } else {

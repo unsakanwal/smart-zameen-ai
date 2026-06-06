@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather — SmartZameen AI</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="css/theme.css">
+  <style>
+    .wx-wrap { max-width: 1100px; margin: 0 auto; padding: 28px clamp(16px,4vw,40px) 60px; }
+    .wx-head { display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:14px; margin-bottom:24px; }
+    .wx-head h1 { font-family:var(--font-serif); font-size:clamp(24px,4vw,32px); font-weight:800; color:var(--dark); }
+    .wx-head p { color:var(--text-light); font-size:14px; margin-top:4px; }
+    .wx-select { padding:10px 14px; border:1.5px solid var(--border); border-radius:10px; font:600 14px var(--font-sans); color:var(--text); background:#fff; cursor:pointer; outline:none; }
+    .wx-select:focus { border-color:var(--accent); }
+
+    .wx-now { display:grid; grid-template-columns:auto 1fr; gap:28px; align-items:center; }
+    @media(max-width:620px){ .wx-now{ grid-template-columns:1fr; justify-items:center; text-align:center; } }
+    .wx-now .icon { width:120px; height:120px; color:var(--accent); }
+    .wx-temp { font-family:var(--font-serif); font-size:64px; font-weight:800; color:var(--dark); line-height:1; }
+    .wx-desc { font-size:16px; color:var(--text-light); font-weight:600; margin-top:6px; text-transform:capitalize; }
+    .wx-city { font-size:13px; color:var(--accent); font-weight:700; letter-spacing:.5px; text-transform:uppercase; }
+    .wx-pills { display:flex; flex-wrap:wrap; gap:12px; margin-top:16px; }
+    .wx-pill { display:flex; align-items:center; gap:8px; background:var(--bg-light); border:1px solid var(--border); border-radius:30px; padding:8px 16px; font-size:13.5px; font-weight:600; color:var(--text); }
+    .wx-pill svg { width:18px; height:18px; color:var(--accent); flex:none; }
+    .wx-pill b { color:var(--dark); }
+
+    .wx-forecast-title { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--text-light); margin:28px 0 14px; }
+    .wx-forecast { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; }
+    @media(max-width:680px){ .wx-forecast{ grid-template-columns:repeat(2,1fr);} }
+    @media(max-width:420px){ .wx-forecast{ grid-template-columns:1fr;} }
+    .fc-col { background:var(--bg-light); border:1px solid var(--border); border-radius:12px; padding:16px 8px; text-align:center; transition:var(--transition); }
+    .fc-col:hover { border-color:var(--accent-light); background:#fff; box-shadow:var(--shadow-sm); }
+    .fc-day { font-size:12px; font-weight:700; color:var(--text-light); text-transform:uppercase; }
+    .fc-col svg { width:30px; height:30px; color:var(--accent); margin:8px 0; }
+    .fc-temp { font-size:16px; font-weight:800; color:var(--dark); font-family:var(--font-serif); }
+    .fc-hum { font-size:11px; color:var(--text-light); margin-top:2px; }
+    .wx-note { font-size:12px; color:var(--text-light); margin-top:18px; }
+  </style>
+</head>
+<body data-app="weather">
+  <nav class="navbar">
+    <a href="index.html" class="nav-logo">Smart<span id="app-name">Zameen</span></a>
+    <div class="nav-center">
+      <a href="index.html" id="t-home">Home</a>
+      <a href="index.html#about" id="nav-about" class="nav-guest">About Us</a>
+      <a href="dashboard.html" id="t-dash" class="nav-auth on">Dashboard</a>
+      <button class="lang-btn" id="langToggle">Languages</button>
+      <div class="lang-menu" id="langMenu">
+        <button class="lang-option on" onclick="setLang('en', this)">English</button>
+        <button class="lang-option" onclick="setLang('ur', this)">اردو</button>
+        <button class="lang-option" onclick="setLang('pa', this)">پنجابی</button>
+        <button class="lang-option" onclick="setLang('sd', this)">سنڌي</button>
+        <button class="lang-option" onclick="setLang('ps', this)">پښتو</button>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div id="auth-buttons" style="display:flex;gap:10px;align-items:center;">
+        <a href="login.html" class="btn-login">Login</a>
+        <a href="signup.html" class="btn-signup">Sign Up</a>
+      </div>
+      <div class="user-pill" id="user-pill">
+        <span id="user-name-display">User</span>
+        <div class="user-dropdown">
+          <a href="dashboard.html">Dashboard</a>
+          <a href="ai-agent.html">Crop Advisor</a>
+          <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="app-layout">
+  <aside class="app-sidebar" id="sz-sidebar"></aside>
+  <main class="app-main">
+  <div class="wx-wrap">
+    <div class="wx-head">
+      <div>
+        <h1>Weather</h1>
+        <p>Live conditions and a short forecast for Pakistani cities.</p>
+      </div>
+      <select class="wx-select" id="wx-city">
+        <option value="lahore">Lahore</option>
+        <option value="karachi">Karachi</option>
+        <option value="multan" selected>Multan</option>
+        <option value="islamabad">Islamabad</option>
+        <option value="peshawar">Peshawar</option>
+        <option value="quetta">Quetta</option>
+        <option value="faisalabad">Faisalabad</option>
+        <option value="hyderabad">Hyderabad</option>
+      </select>
+    </div>
+
+    <div class="sz-card">
+      <div class="wx-now">
+        <div id="wx-icon" class="icon"></div>
+        <div>
+          <div class="wx-city" id="wx-cityname">—</div>
+          <div class="wx-temp"><span id="wx-temp">—</span>°C</div>
+          <div class="wx-desc" id="wx-desc">Loading…</div>
+          <div class="wx-pills">
+            <div class="wx-pill" id="p-hum"></div>
+            <div class="wx-pill" id="p-wind"></div>
+            <div class="wx-pill" id="p-feels"></div>
+            <div class="wx-pill" id="p-rain"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wx-forecast-title">Short Forecast</div>
+      <div class="wx-forecast" id="wx-forecast"></div>
+      <div class="wx-note" id="wx-note"></div>
+    </div>
+  </div>
+  </main>
+  </div>
+
+  <a href="https://wa.me/14155238886?text=hello" target="_blank" class="whatsapp-float" title="Chat with WhatsApp AI Bot">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="whatsapp-icon-svg"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.717-1.458L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.42 9.864-9.858.002-2.634-1.01-5.11-2.85-6.953C16.646 1.952 14.177.95 11.545.95 6.11.95 1.687 5.37 1.683 10.81c-.001 1.73.454 3.42 1.316 4.925l-.994 3.635 3.72-.975zm12.353-7.25c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
+    <span class="whatsapp-text">WhatsApp Bot</span>
+  </a>
+
+  <script src="js/lang.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/sidebar.js"></script>
+  <script>
+  (function(){
+    const ICONS = {
+      sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>',
+      cloud:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.5 2A4 4 0 0 0 6 19z"/></svg>',
+      rain:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 16a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.5 2A4 4 0 0 0 6 16"/><path d="M8 19l-1 2M12 19l-1 2M16 19l-1 2"/></svg>',
+      drop:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5S5 10 5 14a7 7 0 0 0 14 0c0-4-7-11.5-7-11.5z"/></svg>',
+      wind:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h11a2.5 2.5 0 1 0-2.5-2.5M3 16h15a2.5 2.5 0 1 1-2.5 2.5M3 12h9"/></svg>',
+      thermo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.76V5a2 2 0 1 0-4 0v9.76a4 4 0 1 0 4 0z"/></svg>',
+    };
+    const pick = d => /rain|baar|بارش|drizzle|storm/i.test(d) ? ICONS.rain : /cloud|abr|بادل|overcast|mist|fog|haze/i.test(d) ? ICONS.cloud : ICONS.sun;
+    const pill = (icon,label,val) => `${ICONS[icon]}<span>${label} <b>${val}</b></span>`;
+
+    function load(city){
+      fetch('/api/weather?city='+city).then(r=>r.json()).then(d=>{
+        document.getElementById('wx-icon').innerHTML = pick(d.description||'');
+        document.getElementById('wx-cityname').textContent = (d.urdu_city||city);
+        document.getElementById('wx-temp').textContent = d.temperature ?? '—';
+        document.getElementById('wx-desc').textContent = d.description || '—';
+        document.getElementById('p-hum').innerHTML  = pill('drop','Humidity', (d.humidity ?? '—')+'%');
+        document.getElementById('p-wind').innerHTML = pill('wind','Wind', (d.wind_speed ?? '—')+' km/h');
+        document.getElementById('p-feels').innerHTML= pill('thermo','Feels', (d.feels_like ?? d.temperature ?? '—')+'°C');
+        document.getElementById('p-rain').innerHTML = pill('rain','Rain', (d.rainfall ?? 0)+' mm');
+        document.getElementById('wx-note').textContent = d.note ? '⚠ '+d.note : '';
+      }).catch(()=>{ document.getElementById('wx-desc').textContent='Backend offline'; });
+
+      fetch('/api/weather/forecast?city='+city).then(r=>r.json()).then(d=>{
+        const el = document.getElementById('wx-forecast');
+        if(!d.forecast){ el.innerHTML=''; return; }
+        el.innerHTML = d.forecast.map(f=>{
+          let label=f.time;
+          if(/\d{4}-\d{2}-\d{2}/.test(f.time)) label=new Date(f.time.replace(' ','T')).toLocaleDateString('en-GB',{weekday:'short',hour:'2-digit'});
+          return `<div class="fc-col"><div class="fc-day">${label}</div>${pick(f.description||'')}<div class="fc-temp">${f.temperature}°</div><div class="fc-hum">${f.humidity}% hum</div></div>`;
+        }).join('');
+      }).catch(()=>{});
+    }
+    const sel=document.getElementById('wx-city');
+    load(sel.value);
+    sel.addEventListener('change',()=>load(sel.value));
+  })();
+  </script>
+</body>
+</html>

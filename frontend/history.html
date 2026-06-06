@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>History — SmartZameen AI</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="css/theme.css">
+  <style>
+    .hs-wrap { max-width: 1100px; margin: 0 auto; padding: 28px clamp(16px,4vw,40px) 60px; }
+    .hs-head h1 { font-family:var(--font-serif); font-size:clamp(24px,4vw,32px); font-weight:800; color:var(--dark); }
+    .hs-head p { color:var(--text-light); font-size:14px; margin:4px 0 24px; }
+    .hs-tabs { display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap; }
+    .hs-tab { font:700 14px var(--font-sans); cursor:pointer; color:var(--text-light); background:#fff; border:1px solid var(--border); padding:10px 18px; border-radius:10px; display:inline-flex; align-items:center; gap:8px; transition:var(--transition); }
+    .hs-tab svg { width:16px; height:16px; }
+    .hs-tab:hover { color:var(--accent); border-color:var(--accent-light); }
+    .hs-tab.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+    .hs-panel { display:none; } .hs-panel.active { display:block; }
+    .hs-card-h { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--text-light); margin-bottom:14px; }
+    .tbl-scroll { overflow-x:auto; }
+    table.hs { width:100%; border-collapse:collapse; text-align:left; min-width:560px; }
+    table.hs th { font-size:12px; color:var(--text-light); text-transform:uppercase; font-weight:700; letter-spacing:.5px; padding:12px 14px; border-bottom:1px solid var(--border); white-space:nowrap; }
+    table.hs td { padding:14px; border-bottom:1px solid var(--border); font-size:14px; color:var(--text); white-space:nowrap; }
+    table.hs tr:last-child td { border-bottom:none; }
+    .crop-cell { font-weight:700; color:var(--primary); text-transform:capitalize; }
+    .season-pill { font-size:11px; font-weight:700; padding:4px 10px; border-radius:4px; text-transform:uppercase; }
+    .season-pill.rabi { background:var(--accent-soft); color:var(--accent); }
+    .season-pill.kharif { background:#fff3e0; color:#e65100; }
+    .src-tag { font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; }
+    .src-tag.hw { background:var(--accent-soft); color:var(--accent); }
+    .src-tag.sim { background:#eef2f7; color:#475569; }
+    .conf { display:flex; align-items:center; gap:8px; }
+    .conf .bar { width:80px; height:6px; background:var(--bg-light); border:1px solid var(--border); border-radius:5px; overflow:hidden; }
+    .conf .bar i { display:block; height:100%; background:var(--accent); }
+    .hs-empty { text-align:center; color:var(--text-light); padding:40px 16px; font-size:14px; }
+    .hs-empty a { color:var(--accent); font-weight:700; }
+  </style>
+</head>
+<body data-app="history">
+  <nav class="navbar">
+    <a href="index.html" class="nav-logo">Smart<span id="app-name">Zameen</span></a>
+    <div class="nav-center">
+      <a href="index.html" id="t-home">Home</a>
+      <a href="index.html#about" id="nav-about" class="nav-guest">About Us</a>
+      <a href="dashboard.html" id="t-dash" class="nav-auth on">Dashboard</a>
+      <button class="lang-btn" id="langToggle">Languages</button>
+      <div class="lang-menu" id="langMenu">
+        <button class="lang-option on" onclick="setLang('en', this)">English</button>
+        <button class="lang-option" onclick="setLang('ur', this)">اردو</button>
+        <button class="lang-option" onclick="setLang('pa', this)">پنجابی</button>
+        <button class="lang-option" onclick="setLang('sd', this)">سنڌي</button>
+        <button class="lang-option" onclick="setLang('ps', this)">پښتو</button>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div id="auth-buttons" style="display:flex;gap:10px;align-items:center;">
+        <a href="login.html" class="btn-login">Login</a>
+        <a href="signup.html" class="btn-signup">Sign Up</a>
+      </div>
+      <div class="user-pill" id="user-pill">
+        <span id="user-name-display">User</span>
+        <div class="user-dropdown">
+          <a href="dashboard.html">Dashboard</a>
+          <a href="ai-agent.html">Crop Advisor</a>
+          <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="app-layout">
+  <aside class="app-sidebar" id="sz-sidebar"></aside>
+  <main class="app-main">
+  <div class="hs-wrap">
+    <div class="hs-head">
+      <h1>History</h1>
+      <p>Every crop prediction and IoT sensor reading you've recorded.</p>
+    </div>
+
+    <div class="hs-tabs">
+      <button class="hs-tab active" data-tab="preds" onclick="showHsTab('preds')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg> Crop Predictions
+      </button>
+      <button class="hs-tab" data-tab="sensors" onclick="showHsTab('sensors')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/><circle cx="12" cy="12" r="2"/></svg> IoT Sensor Readings
+      </button>
+    </div>
+
+    <div id="hs-preds" class="hs-panel active">
+      <div class="sz-card">
+        <div class="hs-card-h">Crop Predictions</div>
+        <div class="tbl-scroll">
+          <table class="hs">
+            <thead><tr><th>Date</th><th>Region</th><th>Season</th><th>Crop</th><th>NPK</th><th>pH</th><th>Confidence</th></tr></thead>
+            <tbody id="preds-body"><tr><td colspan="7" class="hs-empty">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="hs-sensors" class="hs-panel">
+      <div class="sz-card">
+        <div class="hs-card-h">IoT Sensor Readings</div>
+        <div class="tbl-scroll">
+          <table class="hs">
+            <thead><tr><th>Received</th><th>Node</th><th>Source</th><th>N/P/K</th><th>pH</th><th>Temp</th><th>Moist</th><th>Crop</th></tr></thead>
+            <tbody id="sensors-body"><tr><td colspan="8" class="hs-empty">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </main>
+  </div>
+
+  <a href="https://wa.me/14155238886?text=hello" target="_blank" class="whatsapp-float" title="Chat with WhatsApp AI Bot">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="whatsapp-icon-svg"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.717-1.458L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.42 9.864-9.858.002-2.634-1.01-5.11-2.85-6.953C16.646 1.952 14.177.95 11.545.95 6.11.95 1.687 5.37 1.683 10.81c-.001 1.73.454 3.42 1.316 4.925l-.994 3.635 3.72-.975zm12.353-7.25c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
+    <span class="whatsapp-text">WhatsApp Bot</span>
+  </a>
+
+  <script src="js/lang.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/sidebar.js"></script>
+  <script>
+    function showHsTab(t){
+      document.querySelectorAll('.hs-panel').forEach(p=>p.classList.remove('active'));
+      document.querySelectorAll('.hs-tab').forEach(b=>b.classList.remove('active'));
+      document.getElementById('hs-'+t).classList.add('active');
+      document.querySelector('.hs-tab[data-tab="'+t+'"]').classList.add('active');
+    }
+    (function(){
+      const cap = s => s ? s.charAt(0).toUpperCase()+s.slice(1) : (s||'—');
+      const fdate = s => s ? new Date(s.replace(' ','T')+(s.includes('T')?'':'Z')).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '—';
+      const num = (v,d=0) => (v==null||v===-1)?'—':Number(v).toFixed(d);
+
+      fetch('/api/history').then(r=>r.json()).then(d=>{
+        // predictions
+        const pb=document.getElementById('preds-body');
+        if(!d.predictions || !d.predictions.length){
+          pb.innerHTML='<tr><td colspan="7" class="hs-empty">No predictions yet — make one in <a href="crop-advisor.html">IoT Node</a>.</td></tr>';
+        } else {
+          pb.innerHTML=d.predictions.map(r=>{
+            const sc=(r.season||'').toLowerCase()==='kharif'?'kharif':'rabi';
+            const c=r.confidence||0;
+            return `<tr><td>${fdate(r.created_at)}</td><td>${r.region||'—'}</td>`
+              +`<td><span class="season-pill ${sc}">${cap(r.season)}</span></td>`
+              +`<td class="crop-cell">${cap(r.predicted_crop)}${r.urdu?' ('+r.urdu+')':''}</td>`
+              +`<td>${num(r.nitrogen)}/${num(r.phosphorus)}/${num(r.potassium)}</td>`
+              +`<td>${num(r.ph,1)}</td>`
+              +`<td><div class="conf"><div class="bar"><i style="width:${c}%"></i></div>${c}%</div></td></tr>`;
+          }).join('');
+        }
+        // sensors
+        const sb=document.getElementById('sensors-body');
+        if(!d.sensors || !d.sensors.length){
+          sb.innerHTML='<tr><td colspan="8" class="hs-empty">No sensor readings yet — transmit from <a href="crop-advisor.html">IoT Node</a>.</td></tr>';
+        } else {
+          sb.innerHTML=d.sensors.map(r=>{
+            const hw=(r.source||'')==='hardware';
+            return `<tr><td>${fdate(r.received_at)}</td><td>${r.node_id||'—'}</td>`
+              +`<td><span class="src-tag ${hw?'hw':'sim'}">${hw?'Hardware':'Simulator'}</span></td>`
+              +`<td>${num(r.nitrogen)}/${num(r.phosphorus)}/${num(r.potassium)}</td>`
+              +`<td>${num(r.ph,1)}</td><td>${num(r.temperature,1)}°</td><td>${num(r.moisture)}%</td>`
+              +`<td class="crop-cell">${cap(r.predicted_crop)}</td></tr>`;
+          }).join('');
+        }
+      }).catch(()=>{
+        document.getElementById('preds-body').innerHTML='<tr><td colspan="7" class="hs-empty">Backend offline — start the server.</td></tr>';
+        document.getElementById('sensors-body').innerHTML='<tr><td colspan="8" class="hs-empty">Backend offline.</td></tr>';
+      });
+    })();
+  </script>
+</body>
+</html>

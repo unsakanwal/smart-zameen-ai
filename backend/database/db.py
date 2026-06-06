@@ -127,6 +127,16 @@ def create_database():
             )
         """)
 
+        # Migration: older databases may not have the users.region column.
+        # Add it so profile updates (name/region/password) never fail.
+        try:
+            cols = [r['name'] for r in cursor.execute("PRAGMA table_info(users)").fetchall()]
+            if 'region' not in cols:
+                cursor.execute("ALTER TABLE users ADD COLUMN region TEXT")
+                print("[migration] added users.region")
+        except Exception as _e:
+            print(f"[migration] users.region skipped: {_e}")
+
         conn.commit()
         insert_sample_crops(cursor)
         conn.commit()
@@ -230,4 +240,88 @@ def get_all_crops():
         return crops
     except Exception as e:
         print(f"Get crops error: {e}")
+        return []
+
+
+def get_prediction_stats():
+    """Real dashboard stats computed from the predictions table.
+
+    Returns zeros / None when there are no predictions yet (clean empty state).
+    """
+    empty = {'total': 0, 'this_month': 0, 'avg_confidence': 0, 'top_crop': None}
+    conn = get_connection()
+    if not conn:
+        return empty
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT COUNT(*) AS c FROM predictions")
+        total = cur.fetchone()['c']
+
+        cur.execute("""
+            SELECT COUNT(*) AS c FROM predictions
+            WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')
+        """)
+        this_month = cur.fetchone()['c']
+
+        cur.execute("SELECT AVG(confidence) AS a FROM predictions")
+        avg = cur.fetchone()['a']
+
+        cur.execute("""
+            SELECT predicted_crop, COUNT(*) AS c
+            FROM predictions
+            WHERE predicted_crop IS NOT NULL
+            GROUP BY predicted_crop ORDER BY c DESC LIMIT 1
+        """)
+        row = cur.fetchone()
+        top_crop = row['predicted_crop'] if row else None
+
+        cur.close(); conn.close()
+        return {
+            'total': total,
+            'this_month': this_month,
+            'avg_confidence': round(avg, 1) if avg is not None else 0,
+            'top_crop': top_crop,
+        }
+    except Exception as e:
+        print(f"Get prediction stats error: {e}")
+        return empty
+
+
+def get_recent_predictions(limit=5):
+    """Most recent predictions for the dashboard table (newest first)."""
+    conn = get_connection()
+    if not conn:
+        return []
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT created_at, region, season, predicted_crop, confidence,
+                   nitrogen, phosphorus, potassium, ph, temperature, rainfall
+            FROM predictions ORDER BY id DESC LIMIT %s
+        """, (limit,))
+        rows = [dict(r) for r in cur.fetchall()]
+        cur.close(); conn.close()
+        return rows
+    except Exception as e:
+        print(f"Get recent predictions error: {e}")
+        return []
+
+
+def get_sensor_readings(limit=50):
+    """Recent IoT sensor readings for the History page (newest first)."""
+    conn = get_connection()
+    if not conn:
+        return []
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT received_at, node_id, source, nitrogen, phosphorus, potassium,
+                   ph, temperature, rainfall, moisture, region, season, predicted_crop
+            FROM sensor_readings ORDER BY id DESC LIMIT %s
+        """, (limit,))
+        rows = [dict(r) for r in cur.fetchall()]
+        cur.close(); conn.close()
+        return rows
+    except Exception as e:
+        print(f"Get sensor readings error: {e}")
         return []

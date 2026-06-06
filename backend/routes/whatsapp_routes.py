@@ -7,10 +7,14 @@ import os
 whatsapp_bp = Blueprint('whatsapp', __name__)
 
 MODEL_DIR = os.path.join(os.path.dirname(__file__), '..', 'ml_models')
-model     = joblib.load(os.path.join(MODEL_DIR, 'crop_model.pkl'))
-le_crop   = joblib.load(os.path.join(MODEL_DIR, 'le_crop.pkl'))
-le_season = joblib.load(os.path.join(MODEL_DIR, 'le_season.pkl'))
-le_region = joblib.load(os.path.join(MODEL_DIR, 'le_region.pkl'))
+try:
+    model     = joblib.load(os.path.join(MODEL_DIR, 'crop_model.pkl'))
+    le_crop   = joblib.load(os.path.join(MODEL_DIR, 'le_crop.pkl'))
+    le_season = joblib.load(os.path.join(MODEL_DIR, 'le_season.pkl'))
+    le_region = joblib.load(os.path.join(MODEL_DIR, 'le_region.pkl'))
+except Exception as e:
+    print(f"[WARNING] WhatsApp model load failed ({type(e).__name__}: {e}) — rule-based only.")
+    model = le_crop = le_season = le_region = None
 
 sessions = {}
 
@@ -83,7 +87,7 @@ STRINGS = {
         'result_best': "💡 *{crop}* آپ کے لیے سب سے موزوں ہے!\n\n",
         'result_top': "*بہترین فصلیں:*\n",
         'result_footer': "\n\n↩️ دوبارہ: *menu*",
-        'result_detail': "مزید تفصیل:\n🌐 http://localhost:5000/predict.html\n\n",
+        'result_detail': "مزید تفصیل:\n🌐 http://localhost:5000/crop-advisor.html\n\n",
         'error': "❌ خرابی آئی: {e}\nدوبارہ کوشش کریں: *menu*",
         'lang_changed': "✅ زبان اردو میں تبدیل ہو گئی!\n\nشروع کریں: *menu*",
         'questions': [
@@ -127,7 +131,7 @@ STRINGS = {
         'result_best': "💡 *{crop}* is the best choice for you!\n\n",
         'result_top': "*Best Crops:*\n",
         'result_footer': "\n\n↩️ Again: *menu*",
-        'result_detail': "More details:\n🌐 http://localhost:5000/predict.html\n\n",
+        'result_detail': "More details:\n🌐 http://localhost:5000/crop-advisor.html\n\n",
         'error': "❌ Error: {e}\nTry again: *menu*",
         'lang_changed': "✅ Language changed to English!\n\nType *menu* to start.",
         'questions': [
@@ -171,7 +175,7 @@ STRINGS = {
         'result_best': "💡 *{crop}* تیرے لئی سب توں ودیا اے!\n\n",
         'result_top': "*سب توں ودیاں فصلاں:*\n",
         'result_footer': "\n\n↩️ فیر: *menu*",
-        'result_detail': "ہور تفصیل:\n🌐 http://localhost:5000/predict.html\n\n",
+        'result_detail': "ہور تفصیل:\n🌐 http://localhost:5000/crop-advisor.html\n\n",
         'error': "❌ غلطی آئی: {e}\nفیر کوشش کرو: *menu*",
         'lang_changed': "✅ زبان پنجابی وچ بدل گئی!\n\nشروع کرو: *menu*",
         'questions': [
@@ -215,7 +219,7 @@ STRINGS = {
         'result_best': "💡 *{crop}* توهان لاءِ سڀ کان بهتر آهي!\n\n",
         'result_top': "*بهترين فصل:*\n",
         'result_footer': "\n\n↩️ ٻيهر: *menu*",
-        'result_detail': "وڌيڪ تفصيل:\n🌐 http://localhost:5000/predict.html\n\n",
+        'result_detail': "وڌيڪ تفصيل:\n🌐 http://localhost:5000/crop-advisor.html\n\n",
         'error': "❌ غلطي آئي: {e}\nٻيهر ڪوشش ڪريو: *menu*",
         'lang_changed': "✅ ٻولي سنڌي ۾ بدلجي وئي!\n\nشروع ڪريو: *menu*",
         'questions': [
@@ -259,7 +263,7 @@ STRINGS = {
         'result_best': "💡 *{crop}* ستاسو لپاره غوره انتخاب دی!\n\n",
         'result_top': "*غوره فصلونه:*\n",
         'result_footer': "\n\n↩️ بیا: *menu*",
-        'result_detail': "نور تفصیل:\n🌐 http://localhost:5000/predict.html\n\n",
+        'result_detail': "نور تفصیل:\n🌐 http://localhost:5000/crop-advisor.html\n\n",
         'error': "❌ تیروتنه: {e}\nبیا هڅه وکړئ: *menu*",
         'lang_changed': "✅ ژبه پښتو ته بدله شوه!\n\nپیل کړئ: *menu*",
         'questions': [

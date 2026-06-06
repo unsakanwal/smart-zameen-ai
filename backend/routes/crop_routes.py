@@ -2,7 +2,9 @@ from flask import Blueprint, request, jsonify
 import numpy as np
 import joblib
 import os
-from database.db import save_prediction, get_all_crops
+from database.db import (save_prediction, get_all_crops,
+                         get_prediction_stats, get_recent_predictions,
+                         get_sensor_readings)
 
 crop_bp = Blueprint('crop', __name__)
 
@@ -12,13 +14,20 @@ ENCODER_PATH   = os.path.join(os.path.dirname(__file__), '..', 'ml_models', 'le_
 LE_SEASON_PATH = os.path.join(os.path.dirname(__file__), '..', 'ml_models', 'le_season.pkl')
 LE_REGION_PATH = os.path.join(os.path.dirname(__file__), '..', 'ml_models', 'le_region.pkl')
 
+# Higher-accuracy Kaggle Crop Recommendation model (22 crops).
+# Inputs: [N, P, K, temperature, humidity, pH, rainfall]. Used when humidity is provided.
+NEW_MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', 'ml_models', 'crop-reccomendation-modal', 'soil.pkl')
+NEW_LE_PATH    = os.path.join(os.path.dirname(__file__), '..', 'ml_models', 'crop-reccomendation-modal', 'label_encoder.pkl')
+
 model     = None
 encoder   = None
 le_season = None
 le_region = None
+new_model = None
+new_le    = None
 
 def load_ml_model():
-    global model, encoder, le_season, le_region    # ← FIXED
+    global model, encoder, le_season, le_region, new_model, new_le
     try:
         model     = joblib.load(MODEL_PATH)
         encoder   = joblib.load(ENCODER_PATH)
@@ -28,11 +37,17 @@ def load_ml_model():
     except FileNotFoundError as e:
         print(f"[WARNING] Model nahi mila: {e}")
     except Exception as e:
-        # e.g. scikit-learn / numpy version mismatch when unpickling an older
-        # model on a newer Python. Don't crash — fall back to rule_based_predict.
         print(f"[WARNING] Model load fail ({type(e).__name__}: {e}) — "
               f"rule-based prediction use hogi.")
         model = None
+    # higher-accuracy model (optional)
+    try:
+        new_model = joblib.load(NEW_MODEL_PATH)
+        new_le    = joblib.load(NEW_LE_PATH)
+        print(f"[OK] Crop Recommendation model loaded ({len(new_le.classes_)} crops; uses humidity).")
+    except Exception as e:
+        print(f"[INFO] High-accuracy crop model not loaded ({type(e).__name__}) — using base model.")
+        new_model = None; new_le = None
 
 CROP_INFO = {
     'wheat':     {'urdu': 'گندم',   'season': 'Rabi',   'time': 'Nov–Mar', 'water': '4–5 dafa',    'yield': '25–30 mann'},
@@ -48,6 +63,30 @@ CROP_INFO = {
     'potato':    {'urdu': 'آلو',    'season': 'Rabi',   'time': 'Oct–Jan', 'water': '4–5 dafa',    'yield': '200–300 mann'},
     'kino':      {'urdu': 'کینو',   'season': 'Rabi',   'time': 'Nov–Feb', 'water': '2–3 dafa',    'yield': 'Per tree alag'},
 }
+
+# Urdu names for the high-accuracy (Kaggle) model's 22 crops — used for display.
+CROP_URDU = {
+    'apple': 'سیب', 'banana': 'کیلا', 'blackgram': 'ماش', 'chickpea': 'چنے', 'coconut': 'ناریل',
+    'coffee': 'کافی', 'cotton': 'کپاس', 'grapes': 'انگور', 'jute': 'پٹ سن', 'kidneybeans': 'لوبیا',
+    'lentil': 'مسور', 'maize': 'مکئی', 'mango': 'آم', 'mothbeans': 'مونگ', 'mungbean': 'مونگ',
+    'muskmelon': 'خربوزہ', 'orange': 'مالٹا', 'papaya': 'پپیتا', 'pigeonpeas': 'ارہر',
+    'pomegranate': 'انار', 'rice': 'چاول', 'watermelon': 'تربوز',
+}
+
+def crop_urdu(name):
+    return CROP_INFO.get(name, {}).get('urdu') or CROP_URDU.get(name, '')
+
+def predict_new(n, p, k, temperature, humidity, ph, rainfall):
+    """Predict with the high-accuracy Kaggle model. Returns (crop, confidence, top3)."""
+    feats = np.array([[n, p, k, temperature, humidity, ph, rainfall]])
+    probs = new_model.predict_proba(feats)[0]
+    order = np.argsort(probs)[::-1][:3]
+    top3 = [{
+        'crop':       new_le.inverse_transform([int(i)])[0],
+        'confidence': round(float(probs[int(i)]) * 100, 1),
+        'urdu':       crop_urdu(new_le.inverse_transform([int(i)])[0]),
+    } for i in order]
+    return top3[0]['crop'], top3[0]['confidence'], top3
 
 @crop_bp.route('/api/predict-crop', methods=['POST'])
 def predict_crop():
@@ -66,8 +105,13 @@ def predict_crop():
         rainfall    = float(data['rainfall'])
         region      = data.get('region', 'Punjab').strip().title()
         season      = data.get('season', 'rabi').strip().lower()
+        humidity    = data.get('humidity', None)
 
-        if model is not None and encoder is not None:
+        # Prefer the high-accuracy Kaggle model when humidity is available.
+        if new_model is not None and humidity not in (None, ''):
+            crop_name, confidence, top3 = predict_new(
+                nitrogen, phosphorus, potassium, temperature, float(humidity), ph, rainfall)
+        elif model is not None and encoder is not None:
             season_enc = le_season.transform([season])[0] if season in le_season.classes_ else 0
             region_enc = le_region.transform([region])[0] if region in le_region.classes_ else 0
             features   = np.array([[nitrogen, phosphorus, potassium, ph,
@@ -96,7 +140,7 @@ def predict_crop():
         return jsonify({
             'success':   True,
             'crop':      crop_name,
-            'urdu':      info.get('urdu', ''),
+            'urdu':      crop_urdu(crop_name),
             'confidence':confidence,
             'season':    info.get('season', ''),
             'best_time': info.get('time', ''),
@@ -109,6 +153,30 @@ def predict_crop():
         return jsonify({'error': f'Ghalat value: {str(e)}'}), 400
     except Exception as e:
         return jsonify({'error': f'Server error: {str(e)}'}), 500
+
+
+@crop_bp.route('/api/dashboard-summary', methods=['GET'])
+def dashboard_summary():
+    """Real dashboard data (stats + recent predictions) from the DB."""
+    stats = get_prediction_stats()
+    if stats.get('top_crop'):
+        stats['top_crop_urdu'] = CROP_INFO.get(stats['top_crop'], {}).get('urdu', '')
+    recent = get_recent_predictions(5)
+    for r in recent:
+        r['urdu'] = CROP_INFO.get(r.get('predicted_crop'), {}).get('urdu', '')
+    return jsonify({'success': True, 'stats': stats, 'recent': recent})
+
+
+@crop_bp.route('/api/history', methods=['GET'])
+def history():
+    """Full activity history: crop predictions + IoT sensor readings."""
+    preds = get_recent_predictions(50)
+    for r in preds:
+        r['urdu'] = CROP_INFO.get(r.get('predicted_crop'), {}).get('urdu', '')
+    sensors = get_sensor_readings(50)
+    for r in sensors:
+        r['urdu'] = CROP_INFO.get(r.get('predicted_crop'), {}).get('urdu', '')
+    return jsonify({'success': True, 'predictions': preds, 'sensors': sensors})
 
 
 @crop_bp.route('/api/crops', methods=['GET'])

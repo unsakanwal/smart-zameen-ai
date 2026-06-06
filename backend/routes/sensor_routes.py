@@ -5,7 +5,7 @@ Location:  backend/routes/sensor_routes.py
 
 Accepts soil-sensor readings from EITHER source through the SAME endpoint and
 SAME JSON shape:
-    1. The UI simulator panel (sensor-simulator.html)
+    1. The UI simulator panel (crop-advisor.html → IoT Sensors tab)
     2. A physical ESP8266 POSTing over Wi-Fi (added later)
 
 That shared path is the architectural point: the system is hardware-agnostic
@@ -60,11 +60,20 @@ def _try_predict(reading):
     try:
         region = str(reading.get("region", "Punjab")).strip().title()
         season = str(reading.get("season", "Rabi")).strip().lower()
+        humidity = reading.get("humidity", None)
 
         model     = crop_routes.model
         encoder   = crop_routes.encoder
         le_season = crop_routes.le_season
         le_region = crop_routes.le_region
+
+        # Prefer the high-accuracy Kaggle model when humidity is present.
+        if crop_routes.new_model is not None and humidity not in (None, -1, ""):
+            crop_name, conf, top3 = crop_routes.predict_new(
+                reading["nitrogen"], reading["phosphorus"], reading["potassium"],
+                reading["temperature"], float(humidity), reading["ph"], reading["rainfall"])
+            return {"crop": crop_name, "confidence": conf, "urdu": crop_routes.crop_urdu(crop_name),
+                    "top3": top3, "source": "model"}
 
         if model is not None and encoder is not None:
             season_enc = le_season.transform([season])[0] if season in le_season.classes_ else 0
@@ -132,6 +141,7 @@ def sensor_ingest():
             "temperature": float(data["temperature"]),
             "rainfall":    float(data["rainfall"]),
             "moisture":    float(data.get("moisture", -1)),
+            "humidity":    float(data["humidity"]) if data.get("humidity") not in (None, "") else None,
             "region":      str(data.get("region", "Punjab")),
             "season":      str(data.get("season", "Rabi")),
             "received_at": datetime.now(timezone.utc).isoformat(),

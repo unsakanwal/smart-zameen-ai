@@ -8,6 +8,7 @@ from routes.sms_routes import sms_bp
 from routes.image_routes import image_bp
 from routes.voice_routes import voice_bp
 from routes.sensor_routes import sensor_bp
+from routes.chat_routes import chat_bp
 import os
 import hashlib
 
@@ -25,6 +26,7 @@ app.register_blueprint(sms_bp)
 app.register_blueprint(image_bp)
 app.register_blueprint(voice_bp)
 app.register_blueprint(sensor_bp)
+app.register_blueprint(chat_bp)
 
 
 # ===== HELPERS =====
@@ -95,6 +97,59 @@ def login():
             }), 200
         else:
             return jsonify({'error': 'Email ya password galat hai!'}), 401
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+# ===== PROFILE ROUTES =====
+@app.route('/api/profile', methods=['GET'])
+def get_profile():
+    email = request.args.get('email', '').strip()
+    if not email:
+        return jsonify({'error': 'Email zaroori hai!'}), 400
+    conn = get_connection()
+    if not conn:
+        return jsonify({'error': 'Database error!'}), 500
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT name, email, region FROM users WHERE email = %s", (email,))
+        row = cursor.fetchone()
+        cursor.close(); conn.close()
+        if not row:
+            return jsonify({'success': False, 'error': 'User not found'}), 404
+        return jsonify({'success': True, 'name': row['name'], 'email': row['email'],
+                        'region': row['region'] or ''})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/update-profile', methods=['POST'])
+def update_profile():
+    data     = request.get_json() or {}
+    email    = data.get('email', '').strip()
+    name     = data.get('name', '').strip()
+    region   = data.get('region', '').strip()
+    password = data.get('password')
+
+    if not email or not name:
+        return jsonify({'error': 'Email aur name zaroori hai!'}), 400
+    if password is not None and len(str(password)) < 6:
+        return jsonify({'error': 'Password kam az kam 6 characters ka ho!'}), 400
+
+    conn = get_connection()
+    if not conn:
+        return jsonify({'error': 'Database error!'}), 500
+    try:
+        cursor = conn.cursor()
+        if password:
+            cursor.execute("UPDATE users SET name = %s, region = %s, password = %s WHERE email = %s",
+                           (name, region, hash_password(password), email))
+        else:
+            cursor.execute("UPDATE users SET name = %s, region = %s WHERE email = %s",
+                           (name, region, email))
+        conn.commit()
+        cursor.close(); conn.close()
+        return jsonify({'success': True, 'message': 'Profile updated!'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

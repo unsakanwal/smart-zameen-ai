@@ -1,8 +1,19 @@
 if (typeof API_URL === 'undefined') {
-    var API_URL = (window.location.protocol === 'file:' || (window.location.port !== '' && window.location.port !== '80')) 
-      ? 'http://localhost' 
+    var API_URL = (window.location.protocol === 'file:' || (window.location.port !== '' && window.location.port !== '80'))
+      ? 'http://localhost'
       : window.location.origin;
 }
+
+// Shared backend base used by all fetches. Relative ('') when the page is served
+// by Flask (normal). If you preview via file:// or a dev server (Live Server 5500,
+// etc.), it points at the Flask fallback port; override with window.SZ_BACKEND.
+window.SZ_API = (function () {
+    if (window.SZ_BACKEND) return window.SZ_BACKEND;
+    var dev = ['5500', '5501', '5502', '3000', '4200', '8080'];
+    if (location.protocol === 'file:') return 'http://localhost:5000';
+    if (dev.indexOf(location.port) !== -1) return 'http://' + location.hostname + ':5000';
+    return ''; // same-origin (served by Flask)
+})();
 
 
 // =============
@@ -300,12 +311,13 @@ async function loadWeather(city = 'multan') {
         const data     = await response.json();
 
         if (data.success) {
-            setEl('weather-temp',  data.temperature + '°C');
-            setEl('weather-humid', data.humidity    + '%');
-            setEl('weather-rain',  data.rainfall    + 'mm');
-            setEl('weather-wind',  data.wind_speed  + 'km/h');
-            setEl('weather-desc',  data.description || '');
-            setEl('weather-city',  data.urdu_city   || city);
+            setEl('weather-temp',       data.temperature + '°C');
+            setEl('weather-humid',      data.humidity    + '%');
+            setEl('weather-wind-speed', data.wind_speed  + ' km/h');
+            setEl('weather-desc',       data.description || '');
+            // keep the card title in sync with the chosen city
+            const cityLabel = data.urdu_city || (city.charAt(0).toUpperCase() + city.slice(1));
+            setEl('today-weather', "Today's Weather – " + cityLabel);
         }
     } catch (error) {
         console.log('Weather load nahi hua:', error.message);
@@ -398,13 +410,18 @@ function checkAuth() {
     if (isLoggedIn) {
         if (authButtons) authButtons.style.display = 'none';
         if (userPill) userPill.style.display = 'flex';
+        const stored = localStorage.getItem('sz_name');
         const email = localStorage.getItem('sz_email') || 'User';
-        const name = email.split('@')[0];
+        const name = stored && stored.trim() ? stored.trim() : email.split('@')[0];
         if (userNameDisplay) userNameDisplay.textContent = name.charAt(0).toUpperCase() + name.slice(1);
     } else {
         if (authButtons) authButtons.style.display = 'flex';
         if (userPill) userPill.style.display = 'none';
     }
+
+    // Dashboard nav link is only shown when logged in (hidden after logout).
+    // Home + About Us stay visible for everyone.
+    document.querySelectorAll('.nav-auth').forEach(el => { el.style.display = isLoggedIn ? '' : 'none'; });
 }
 
 // Global logout function
@@ -412,7 +429,9 @@ function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('sz_email');
     localStorage.removeItem('sz_loggedIn');
-    window.location.href = 'login.html';
+    localStorage.removeItem('sz_name');
+    localStorage.removeItem('sz_region');
+    window.location.href = 'index.html';
 }
 
 // =============================================
@@ -426,13 +445,37 @@ document.addEventListener('DOMContentLoaded', function () {
     // Run auth check to update navbar buttons
     checkAuth();
 
+    // Mobile hamburger: toggles the nav dropdown (portfolio pages) OR the
+    // off-canvas dashboard sidebar drawer (app pages). Navbar stays sticky.
+    (function () {
+        const nav = document.querySelector('.navbar');
+        if (!nav || nav.querySelector('.nav-toggle')) return;
+
+        const btn = document.createElement('button');
+        btn.className = 'nav-toggle';
+        btn.setAttribute('aria-label', 'Toggle menu');
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>';
+        nav.appendChild(btn);
+
+        // dim overlay behind the drawer
+        let overlay = document.querySelector('.sz-overlay');
+        if (!overlay) { overlay = document.createElement('div'); overlay.className = 'sz-overlay'; document.body.appendChild(overlay); }
+
+        const close = () => document.body.classList.remove('sz-menu-open');
+        btn.addEventListener('click', e => { e.stopPropagation(); document.body.classList.toggle('sz-menu-open'); });
+        overlay.addEventListener('click', close);
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+        // close after tapping any nav/sidebar link (language buttons keep it open)
+        document.querySelectorAll('.nav-center a, .app-sidebar a, .app-sidebar-logout').forEach(el => el.addEventListener('click', close));
+    })();
+
     // Dashboard page pe ho to weather load karo
     if (page.includes('dashboard')) {
-        loadWeather('multan');
+        const citySelect = document.getElementById('city-select');
+        loadWeather(citySelect ? citySelect.value : 'lahore');
         loadRecommendations();
 
         // Shahar change karne ka button
-        const citySelect = document.getElementById('city-select');
         if (citySelect) {
             citySelect.addEventListener('change', function () {
                 loadWeather(this.value);
@@ -441,7 +484,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Predict page pe ho to form ready karo
-    if (page.includes('predict')) {
+    if (page.includes('predict') || page.includes('crop-advisor')) {
         const form = document.getElementById('predict-form');
         if (form) {
             // Enter dabane se bhi predict ho
