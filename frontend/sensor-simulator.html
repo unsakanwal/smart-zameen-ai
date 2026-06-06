@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IoT Soil Sensor Simulator — SmartZameen AI</title>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="stylesheet" href="css/theme.css">
+<style>
+  /* ===== page-specific styles (built on theme.css tokens) ===== */
+  .sim-wrap { max-width: 1180px; margin: 0 auto; padding: 28px clamp(16px, 4vw, 40px) 60px; }
+
+  /* header */
+  .sim-head {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    flex-wrap: wrap; gap: 14px; margin-bottom: 22px;
+  }
+  .sim-head h1 {
+    font-family: var(--font-serif); font-size: clamp(24px, 4vw, 34px);
+    font-weight: 800; color: var(--dark); letter-spacing: -0.01em;
+  }
+  .sim-head h1 span { color: var(--accent); }
+  .sim-head .sub { color: var(--text-light); font-size: 14px; margin-top: 4px; max-width: 560px; }
+  .state-pill {
+    display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-light);
+    background: var(--bg); border: 1px solid var(--border); border-radius: 30px; padding: 8px 16px;
+  }
+  .state-pill .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--text-light); }
+  .state-pill.on { color: var(--accent); }
+  .state-pill.on .dot {
+    background: var(--accent-light);
+    box-shadow: 0 0 0 0 rgba(102,187,106,0.6); animation: simPulse 1.8s infinite;
+  }
+  .state-pill.err { color: var(--danger); }
+  .state-pill.err .dot { background: var(--danger); }
+  @keyframes simPulse {
+    0% { box-shadow: 0 0 0 0 rgba(102,187,106,0.5); }
+    70% { box-shadow: 0 0 0 8px rgba(102,187,106,0); }
+    100% { box-shadow: 0 0 0 0 rgba(102,187,106,0); }
+  }
+
+  /* endpoint bar */
+  .endpoint-bar {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
+    padding: 12px 16px; margin-bottom: 20px;
+  }
+  .endpoint-bar label { font-size: 12px; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
+  .endpoint-bar input {
+    flex: 1; min-width: 220px; background: var(--bg-light); border: 1px solid var(--border);
+    color: var(--accent); font-family: ui-monospace, monospace; font-size: 13px;
+    padding: 9px 12px; border-radius: 8px; outline: none;
+  }
+  .endpoint-bar input:focus { border-color: var(--accent); }
+
+  .card-h {
+    font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text-light); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+  }
+  .card-h .hint { margin-left: auto; text-transform: none; letter-spacing: 0; font-weight: 500; font-size: 12px; color: var(--text-light); }
+
+  .sim-grid { display: grid; grid-template-columns: 1.25fr 1fr; gap: 18px; margin-bottom: 18px; }
+  @media (max-width: 860px) { .sim-grid { grid-template-columns: 1fr; } }
+
+  /* sliders */
+  .sensor { margin-bottom: 16px; }
+  .sensor:last-child { margin-bottom: 0; }
+  .sensor-top { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
+  .ic {
+    width: 28px; height: 28px; flex: none; border-radius: 8px; display: grid; place-items: center;
+    font-size: 12px; font-weight: 800; color: #fff; font-family: ui-monospace, monospace;
+  }
+  .ic.emoji { background: var(--accent-soft); font-size: 15px; }
+  .sensor-name { font-size: 14px; font-weight: 700; color: var(--dark); flex: 1; }
+  .sensor-name small { color: var(--text-light); font-weight: 500; font-size: 11px; margin-left: 5px; }
+  .sensor-val { font-family: ui-monospace, monospace; font-size: 15px; color: var(--accent); font-weight: 700; }
+  .sensor-val u { color: var(--text-light); text-decoration: none; font-size: 11px; margin-left: 2px; }
+  input[type=range] {
+    -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 4px;
+    background: var(--bg-light); border: 1px solid var(--border); outline: none; cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--accent); border: 3px solid #fff; box-shadow: 0 0 0 1px var(--accent); cursor: pointer;
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 15px; height: 15px; border-radius: 50%; background: var(--accent); border: 3px solid #fff; cursor: pointer;
+  }
+
+  /* profile */
+  .profile-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  #radar { width: 100%; max-width: 300px; height: auto; }
+  .core { width: 100%; display: flex; gap: 16px; align-items: stretch; }
+  .jar {
+    width: 70px; flex: none; border: 1px solid var(--border); border-radius: 10px;
+    background: #f0efe9; position: relative; overflow: hidden; min-height: 120px;
+  }
+  .jar .soil { position: absolute; left: 0; right: 0; bottom: 0; transition: height .35s, background .35s; }
+  .jar .water { position: absolute; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(79,150,209,0.55), rgba(79,150,209,0.2)); transition: height .35s; }
+  .jar .lbl { position: absolute; top: 6px; left: 0; right: 0; text-align: center; font-size: 10px; font-weight: 700; color: var(--text-light); z-index: 2; }
+  .core-meta { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 9px; }
+  .core-meta .row { display: flex; justify-content: space-between; font-size: 13px; }
+  .core-meta .row span { color: var(--text-light); }
+  .core-meta .row b { color: var(--dark); font-weight: 700; }
+
+  /* presets */
+  .presets { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .preset {
+    font-size: 12.5px; font-weight: 600; color: var(--text); background: var(--bg-light);
+    border: 1px solid var(--border); padding: 7px 12px; border-radius: 8px; cursor: pointer; transition: .15s;
+  }
+  .preset:hover { color: var(--accent); border-color: var(--accent-light); background: var(--accent-soft); }
+
+  /* wiring diagram */
+  #wiring { width: 100%; height: auto; display: block; }
+  .wire { fill: none; stroke-linecap: round; }
+  .wire-vcc  { stroke: #e0533f; stroke-width: 3; }
+  .wire-gnd  { stroke: #374151; stroke-width: 3; }
+  .wire-sig  { stroke: #2e7d32; stroke-width: 3; }
+  .wire-rs   { stroke: #2563eb; stroke-width: 3; }
+  .flow {
+    fill: none; stroke: #66bb6a; stroke-width: 3.4; stroke-linecap: round;
+    stroke-dasharray: 7 13; opacity: 0; pointer-events: none;
+  }
+  #wiring.transmitting .flow { opacity: 1; animation: flow .7s linear infinite; }
+  @keyframes flow { to { stroke-dashoffset: -40; } }
+  .dev-label { font: 700 12px var(--font-sans); fill: var(--dark); }
+  .dev-sub   { font: 500 10px ui-monospace, monospace; fill: var(--text-light); }
+  .dev-val   { font: 700 12px ui-monospace, monospace; fill: var(--accent); }
+  .pin-label { font: 600 9px ui-monospace, monospace; fill: var(--text-light); }
+  .board-label { font: 800 13px var(--font-sans); fill: #cde7d0; }
+  .board-sub   { font: 500 9px ui-monospace, monospace; fill: #8fb596; }
+  .legend-txt { font: 600 11px var(--font-sans); fill: var(--text-light); }
+
+  .wire-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .wire-legend .lg { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-light); }
+  .wire-legend .lg i { width: 18px; height: 3px; border-radius: 2px; display: inline-block; }
+
+  /* AI result */
+  .ai { display: grid; grid-template-columns: auto 1fr; gap: 24px; align-items: center; }
+  @media (max-width: 560px) { .ai { grid-template-columns: 1fr; justify-items: center; text-align: center; } }
+  .ring { position: relative; width: 132px; height: 132px; flex: none; }
+  .ring svg { transform: rotate(-90deg); }
+  .ring .pct { position: absolute; inset: 0; display: grid; place-items: center; }
+  .ring .pct b { font-size: 1.7rem; font-weight: 800; color: var(--accent); font-family: var(--font-serif); display: block; line-height: 1; }
+  .ring .pct small { font-size: 10px; color: var(--text-light); font-weight: 700; letter-spacing: 0.5px; }
+  .ai-main .crop { font-size: 1.9rem; font-weight: 800; color: var(--dark); font-family: var(--font-serif); text-transform: capitalize; }
+  .ai-main .crop .urdu { color: var(--accent); margin-left: 10px; font-family: var(--font-urdu); }
+  .ai-main .src { font-size: 12px; color: var(--text-light); margin: 4px 0 14px; }
+  .ai-main .src .tag { background: var(--accent-soft); color: var(--accent); padding: 2px 8px; border-radius: 5px; font-weight: 700; }
+  .ai-main .src .tag.rule { background: #fff3e0; color: #e65100; }
+  .top3 { display: flex; flex-direction: column; gap: 8px; }
+  .t3 { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .t3 .nm { width: 86px; flex: none; font-weight: 600; text-transform: capitalize; }
+  .t3 .bar { flex: 1; height: 8px; background: var(--bg-light); border: 1px solid var(--border); border-radius: 5px; overflow: hidden; }
+  .t3 .bar i { display: block; height: 100%; background: var(--accent); border-radius: 5px; transition: width .5s; }
+  .t3 .pc { width: 46px; text-align: right; font-family: ui-monospace, monospace; color: var(--text-light); }
+  .ai-empty { text-align: center; padding: 28px 0; color: var(--text-light); font-size: 14px; }
+
+  /* controls */
+  .controls { display: flex; flex-wrap: wrap; gap: 10px; }
+  .meta-row { display: flex; gap: 10px; flex: 1; min-width: 240px; }
+  .meta-row select {
+    flex: 1; background: var(--bg-light); border: 1px solid var(--border); color: var(--text);
+    font-size: 13px; font-weight: 600; padding: 11px 10px; border-radius: 8px; outline: none; cursor: pointer; font-family: inherit;
+  }
+  .btn-stream.on { background: var(--warning); color: #fff; }
+
+  /* log */
+  .log {
+    background: #0f2818; border: 1px solid var(--border); border-radius: 10px;
+    font-family: ui-monospace, monospace; font-size: 12px; padding: 12px 14px;
+    height: 150px; overflow-y: auto; line-height: 1.7; color: #cde7d0;
+  }
+  .log-line { display: flex; gap: 9px; }
+  .log-line .t { color: #6f8f76; flex: none; }
+  .log-line.ok .m { color: #66bb6a; }
+  .log-line.err .m { color: #f87171; }
+  .log-line.info .m { color: #cde7d0; }
+  .log:empty::before { content: "Waiting for first transmission…"; color: #6f8f76; }
+  .src-tag { font-size: 10px; background: #2e7d32; color: #fff; padding: 1px 6px; border-radius: 4px; font-weight: 700; }
+
+  .note { font-size: 12px; color: var(--text-light); margin-top: 22px; text-align: center; line-height: 1.7; }
+  .note b { color: var(--accent); }
+  .stack > * + * { margin-top: 18px; }
+</style>
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar">
+  <a href="index.html" class="nav-logo">Smart<span id="app-name">Zameen</span></a>
+  <div class="nav-center">
+    <a href="index.html" id="t-home">Home</a>
+    <a href="predict.html" id="t-pred">Crop AI</a>
+    <a href="dashboard.html" id="t-dash">Dashboard</a>
+    <a href="sensor-simulator.html" class="on">IoT Node</a>
+    <button class="lang-btn" id="langToggle">Languages</button>
+    <div class="lang-menu" id="langMenu">
+      <button class="lang-option on" onclick="setLang('en', this)">English</button>
+      <button class="lang-option" onclick="setLang('ur', this)">اردو</button>
+      <button class="lang-option" onclick="setLang('pa', this)">پنجابی</button>
+      <button class="lang-option" onclick="setLang('sd', this)">سنڌي</button>
+      <button class="lang-option" onclick="setLang('ps', this)">پښتو</button>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div id="auth-buttons" style="display:flex;gap:10px;align-items:center;">
+      <a href="login.html" class="btn-login">Login</a>
+      <a href="signup.html" class="btn-signup">Sign Up</a>
+    </div>
+    <div class="user-pill" id="user-pill">
+      <span>👤</span><span id="user-name-display">User</span>
+      <span style="font-size:10px;color:#666">▼</span>
+      <div class="user-dropdown">
+        <a href="dashboard.html">📊 Dashboard</a>
+        <a href="predict.html">🌱 Predict Crop</a>
+        <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="sim-wrap">
+
+  <div class="sim-head">
+    <div>
+      <h1>IoT Soil <span>Sensor Node</span></h1>
+      <div class="sub">A virtual field node. Craft a soil sample, watch the sensors wire into the ESP32, and the reading is scored live by your trained crop model.</div>
+    </div>
+    <div class="state-pill" id="state"><span class="dot"></span><span id="stateText">Idle</span></div>
+  </div>
+
+  <div class="endpoint-bar">
+    <label>Ingest URL</label>
+    <input id="endpoint" value="/api/sensor-ingest" spellcheck="false">
+  </div>
+
+  <!-- ROW 1: composer + profile -->
+  <div class="sim-grid">
+    <div class="sz-card">
+      <div class="card-h">Soil Sample Composer <span class="hint">drag to craft a sample</span></div>
+      <div id="sensors"></div>
+      <div class="presets" id="presets"></div>
+    </div>
+
+    <div class="sz-card">
+      <div class="card-h">Sample Profile</div>
+      <div class="profile-wrap">
+        <canvas id="radar" width="300" height="300"></canvas>
+        <div class="core">
+          <div class="jar">
+            <div class="lbl">CORE</div>
+            <div class="soil" id="jarSoil"></div>
+            <div class="water" id="jarWater"></div>
+          </div>
+          <div class="core-meta">
+            <div class="row"><span>Soil reaction</span><b id="mPh">—</b></div>
+            <div class="row"><span>Moisture</span><b id="mMoist">—</b></div>
+            <div class="row"><span>Fertility (NPK)</span><b id="mNpk">—</b></div>
+            <div class="row"><span>Climate</span><b id="mClim">—</b></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 2: wiring -->
+  <div class="sz-card" style="margin-bottom:18px">
+    <div class="card-h">Field Wiring Diagram <span class="hint">4 sensors → ESP32 (NPK via MAX485) → cloud model</span></div>
+    <svg id="wiring" viewBox="0 0 1000 620" role="img" aria-label="ESP32 sensor wiring diagram"></svg>
+    <div class="wire-legend">
+      <div class="lg"><i style="background:#e0533f"></i> VCC / 3.3V</div>
+      <div class="lg"><i style="background:#374151"></i> GND</div>
+      <div class="lg"><i style="background:#2e7d32"></i> Signal / Data</div>
+      <div class="lg"><i style="background:#2563eb"></i> RS485 A/B</div>
+    </div>
+  </div>
+
+  <!-- ROW 3: AI result -->
+  <div class="sz-card" style="margin-bottom:18px">
+    <div class="card-h">AI Crop Recommendation <span class="hint">live inference · Random Forest (crop_model.pkl)</span></div>
+    <div id="aiResult"><div class="ai-empty">Transmit a reading to run the model…</div></div>
+  </div>
+
+  <!-- controls + log -->
+  <div class="stack">
+    <div class="sz-card">
+      <div class="card-h">Node Control</div>
+      <div class="controls">
+        <div class="meta-row">
+          <select id="region"><option>Punjab</option><option>Sindh</option><option>KPK</option><option>Balochistan</option></select>
+          <select id="season"><option value="Rabi">Rabi (سردی)</option><option value="Kharif">Kharif (گرمی)</option></select>
+          <select id="nodeId"><option value="SIM-NODE-01">SIM-NODE-01 (simulator)</option><option value="ESP32-A0">ESP32-A0 (hardware)</option></select>
+        </div>
+        <button class="btn btn-primary" id="send">▲&nbsp; Transmit Reading</button>
+        <button class="btn btn-ghost btn-stream" id="stream">◷&nbsp; Auto-Stream (5s)</button>
+        <button class="btn btn-ghost" id="rand">⟳&nbsp; Randomize Sample</button>
+      </div>
+    </div>
+
+    <div class="sz-card">
+      <div class="card-h">Transmission Log</div>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+
+  <div class="note">
+    This panel POSTs the <b>identical JSON payload</b> to the <b>identical endpoint</b> a physical ESP32 uses — the
+    crop is scored by your real trained model. Swapping the simulator for hardware is a transport change, not an architecture change.
+  </div>
+</div>
+
+<a href="https://wa.me/14155238886?text=hello" target="_blank" class="whatsapp-float" title="Chat with WhatsApp AI Bot">
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="whatsapp-icon-svg" style="flex-shrink:0;"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.717-1.458L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.42 9.864-9.858.002-2.634-1.01-5.11-2.85-6.953C16.646 1.952 14.177.95 11.545.95 6.11.95 1.687 5.37 1.683 10.81c-.001 1.73.454 3.42 1.316 4.925l-.994 3.635 3.72-.975zm12.353-7.25c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
+  <span class="whatsapp-text">WhatsApp Bot</span>
+</a>
+
+<script src="js/lang.js"></script>
+<script>
+// ===== nav: lang menu + active link =====
+(function(){
+  var lt = document.getElementById('langToggle');
+  if (lt) lt.addEventListener('click', function(e){ e.stopPropagation(); document.getElementById('langMenu').classList.toggle('active'); });
+  document.addEventListener('click', function(e){
+    var m = document.getElementById('langMenu');
+    if (m && !e.target.closest('#langToggle') && !e.target.closest('#langMenu')) m.classList.remove('active');
+  });
+})();
+
+// ===== sensor definitions: [key,label,sym,unit,min,max,default,step,icon,color] =====
+const SENSORS = [
+  ["nitrogen",   "Nitrogen",    "N", "mg/kg", 0,  140, 80,  1,   "N",  "#2e7d32"],
+  ["phosphorus", "Phosphorus",  "P", "mg/kg", 0,  145, 45,  1,   "P",  "#558b2f"],
+  ["potassium",  "Potassium",   "K", "mg/kg", 0,  205, 45,  1,   "K",  "#9e7d0a"],
+  ["ph",         "pH Value",    "",  "",      3,  10,  6.5, 0.1, "⚗️", null],
+  ["temperature","Temperature", "",  "°C",    5,  48,  22,  0.5, "🌡️", null],
+  ["rainfall",   "Rainfall",    "",  "mm",    0,  300, 80,  1,   "🌧️", null],
+  ["moisture",   "Moisture",    "",  "%",     0,  100, 45,  1,   "💧", null],
+];
+const state = {}, META = {};
+SENSORS.forEach(s => { state[s[0]] = s[6]; META[s[0]] = s; });
+
+// ===== build composer sliders =====
+const sensorsEl = document.getElementById("sensors");
+SENSORS.forEach(([key,label,sym,unit,min,max,def,step,icon,color]) => {
+  const row = document.createElement("div");
+  row.className = "sensor";
+  const ic = color ? `<div class="ic" style="background:${color}">${icon}</div>` : `<div class="ic emoji">${icon}</div>`;
+  row.innerHTML = `
+    <div class="sensor-top">${ic}
+      <div class="sensor-name">${label}${sym?`<small>${sym}</small>`:""}</div>
+      <div class="sensor-val"><span id="v-${key}">${def}</span><u>${unit}</u></div>
+    </div>
+    <input type="range" id="s-${key}" min="${min}" max="${max}" step="${step}" value="${def}">`;
+  sensorsEl.appendChild(row);
+  row.querySelector(`#s-${key}`).addEventListener("input", e => {
+    state[key] = parseFloat(e.target.value);
+    document.getElementById(`v-${key}`).textContent = e.target.value;
+    syncVisuals();
+  });
+});
+function setSensor(key, val){
+  state[key] = val;
+  const sl = document.getElementById(`s-${key}`);
+  if (sl){ sl.value = val; document.getElementById(`v-${key}`).textContent = val; }
+}
+
+// ===== presets =====
+const PRESETS = [
+  ["🌾 Wheat",     {nitrogen:80,phosphorus:42,potassium:42,ph:6.5,temperature:18,rainfall:70,moisture:45}, "Punjab","Rabi"],
+  ["🌾 Rice",      {nitrogen:95,phosphorus:55,potassium:45,ph:6.2,temperature:28,rainfall:210,moisture:85},"Sindh","Kharif"],
+  ["🪶 Cotton",    {nitrogen:60,phosphorus:35,potassium:30,ph:7.2,temperature:33,rainfall:60,moisture:35}, "Punjab","Kharif"],
+  ["🎋 Sugarcane", {nitrogen:100,phosphorus:50,potassium:50,ph:6.8,temperature:28,rainfall:150,moisture:70},"Punjab","Kharif"],
+  ["🫘 Chickpea",  {nitrogen:40,phosphorus:35,potassium:35,ph:7.0,temperature:15,rainfall:30,moisture:30}, "Balochistan","Rabi"],
+];
+const presetsEl = document.getElementById("presets");
+PRESETS.forEach(([name,vals,region,season]) => {
+  const b = document.createElement("button");
+  b.className = "preset"; b.textContent = name;
+  b.addEventListener("click", () => {
+    Object.entries(vals).forEach(([k,v]) => setSensor(k,v));
+    document.getElementById("region").value = region;
+    document.getElementById("season").value = season;
+    syncVisuals();
+    log(`Loaded "${name.replace(/^\S+\s/,'')}" sample (${region}/${season})`, "info");
+  });
+  presetsEl.appendChild(b);
+});
+
+// ===== wiring diagram (realistic SVG devices + color-coded wires) =====
+const SVGNS = "http://www.w3.org/2000/svg";
+const wiring = document.getElementById("wiring");
+function n(tag, attrs, txt){
+  const e = document.createElementNS(SVGNS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (txt != null) e.textContent = txt;
+  return e;
+}
+function wirePath(x1,y1,x2,y2,cls){
+  const mx = (x1+x2)/2;
+  const d = `M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`;
+  wiring.appendChild(n("path",{class:"wire "+cls, d}));
+  wiring.appendChild(n("path",{class:"flow", d}));
+}
+function buildWiring(){
+  // defs: gradients for board + steel probe
+  const defs = n("defs",{});
+  defs.innerHTML = `
+    <linearGradient id="board" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1f4d2a"/><stop offset="1" stop-color="#12331b"/>
+    </linearGradient>
+    <linearGradient id="steel" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#cfd6da"/><stop offset="0.5" stop-color="#9aa6ad"/><stop offset="1" stop-color="#c2cace"/>
+    </linearGradient>
+    <linearGradient id="shield" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d9dde0"/><stop offset="1" stop-color="#a7afb5"/>
+    </linearGradient>`;
+  wiring.appendChild(defs);
+
+  // ---- ESP32 board (center) ----
+  const BX=415, BY=205, BW=200, BH=250;
+  wiring.appendChild(n("rect",{x:BX,y:BY,width:BW,height:BH,rx:12,fill:"url(#board)",stroke:"#0c2614","stroke-width":1.5}));
+  // RF shield (wifi module)
+  wiring.appendChild(n("rect",{x:BX+50,y:BY+18,width:100,height:54,rx:5,fill:"url(#shield)",stroke:"#7c878d","stroke-width":1}));
+  wiring.appendChild(n("text",{x:BX+100,y:BY+42,"text-anchor":"middle",style:"font:700 11px ui-monospace,monospace",fill:"#3a4248"},"ESP32"));
+  wiring.appendChild(n("text",{x:BX+100,y:BY+56,"text-anchor":"middle",style:"font:500 8px ui-monospace,monospace",fill:"#5a636a"},"WROOM-32"));
+  // USB connector (bottom)
+  wiring.appendChild(n("rect",{x:BX+78,y:BY+BH-10,width:44,height:16,rx:3,fill:"#c2cace",stroke:"#7c878d"}));
+  // board labels
+  wiring.appendChild(n("text",{x:BX+100,y:BY+150,"text-anchor":"middle",class:"board-label"},"ESP32 NODE"));
+  wiring.appendChild(n("text",{x:BX+100,y:BY+166,"text-anchor":"middle",class:"board-sub"},"WiFi · HTTP POST"));
+  wiring.appendChild(n("text",{x:BX+100,y:BY+180,"text-anchor":"middle",class:"board-sub"},"/api/sensor-ingest"));
+
+  // pin helper (gold pad + label). side: 'L' or 'R'
+  function pin(y, label, side){
+    const x = side==='L' ? BX : BX+BW;
+    wiring.appendChild(n("circle",{cx:x,cy:y,r:4,fill:"#e9c46a",stroke:"#b8941f"}));
+    const lx = side==='L' ? x+9 : x-9;
+    wiring.appendChild(n("text",{x:lx,y:y+3,"text-anchor":side==='L'?"start":"end",class:"pin-label"},label));
+    return {x,y};
+  }
+  // left-side pins
+  const pGPIO4  = pin(BY+40,  "G4",  'L');
+  const pGPIO34 = pin(BY+95,  "G34", 'L');
+  const pGPIO35 = pin(BY+150, "G35", 'L');
+  const pV3L    = pin(BY+200, "3V3", 'L');
+  const pGNDL   = pin(BY+230, "GND", 'L');
+  // right-side pins (to MAX485)
+  const pGPIO16 = pin(BY+50,  "G16", 'R');
+  const pGPIO17 = pin(BY+85,  "G17", 'R');
+  const pGPIO5  = pin(BY+120, "G5",  'R');
+  const pV3R    = pin(BY+170, "3V3", 'R');
+  const pGNDR   = pin(BY+205, "GND", 'R');
+
+  // ---- device: DHT22 (top-left) → G4 ----
+  (function(){
+    const x=40,y=40,w=120,h=84;
+    wiring.appendChild(n("rect",{x,y,width:w,height:h,rx:8,fill:"#fbfbf7",stroke:"#c9cdc3","stroke-width":1.5}));
+    // vent grid
+    for(let r=0;r<4;r++) for(let c=0;c<7;c++)
+      wiring.appendChild(n("circle",{cx:x+18+c*13,cy:y+16+r*13,r:2.4,fill:"#d8dcd2"}));
+    wiring.appendChild(n("text",{x:x+w/2,y:y+h+16,"text-anchor":"middle",class:"dev-label"},"DHT22"));
+    wiring.appendChild(n("text",{x:x+w/2,y:y+h+29,"text-anchor":"middle",class:"dev-sub"},"air temp/humidity"));
+    wiring.appendChild(n("text",{x:x+w/2,y:y+h+44,"text-anchor":"middle",class:"dev-val",id:"dht-temp"},"22 °C"));
+    // pin stubs
+    const px=x+w, vY=y+24, sY=y+42, gY=y+60;
+    wirePath(px, vY, pV3L.x, pV3L.y, "wire-vcc");
+    wirePath(px, sY, pGPIO4.x, pGPIO4.y, "wire-sig");
+    wirePath(px, gY, pGNDL.x, pGNDL.y, "wire-gnd");
+  })();
+
+  // ---- device: Capacitive moisture (mid-left) → G34 ----
+  (function(){
+    const x=58,y=175,w=46,h=150;
+    // probe body (rounded bottom)
+    wiring.appendChild(n("path",{d:`M ${x} ${y} h ${w} v ${h-w/2} a ${w/2} ${w/2} 0 0 1 -${w} 0 Z`,fill:"#d9c98a",stroke:"#b7a45f","stroke-width":1.5}));
+    wiring.appendChild(n("rect",{x:x+w/2-3,y:y+14,width:6,height:h-30,rx:3,fill:"#b7a45f"}));
+    wiring.appendChild(n("rect",{x:x+8,y:y-8,width:w-16,height:12,rx:2,fill:"#2b2b2b"}));
+    wiring.appendChild(n("text",{x:x+w/2,y:y+h+18,"text-anchor":"middle",class:"dev-label"},"Capacitive"));
+    wiring.appendChild(n("text",{x:x+w/2,y:y+h+31,"text-anchor":"middle",class:"dev-sub"},"soil moisture"));
+    wiring.appendChild(n("text",{x:x+w/2,y:y+h+46,"text-anchor":"middle",class:"dev-val",id:"moist-val"},"45 %"));
+    const px=x+w, top=y-2;
+    wirePath(px, top, pV3L.x, pV3L.y, "wire-vcc");
+    wirePath(px, top+8, pGPIO34.x, pGPIO34.y, "wire-sig");
+    wirePath(px, top+16, pGNDL.x, pGNDL.y, "wire-gnd");
+  })();
+
+  // ---- device: Rain sensor (bottom-left) → G35 ----
+  (function(){
+    const x=40,y=505,w=120,h=70;
+    wiring.appendChild(n("rect",{x,y,width:w,height:h,rx:6,fill:"#1f6f4a",stroke:"#15573a","stroke-width":1.5}));
+    // copper serpentine traces
+    let d=`M ${x+12} ${y+12}`;
+    for(let i=0;i<5;i++){ d+=` h ${w-24} m -${w-24} ${10}`; }
+    for(let i=0;i<5;i++) wiring.appendChild(n("line",{x1:x+12,y1:y+14+i*11,x2:x+w-12,y2:y+14+i*11,stroke:"#e0a04a","stroke-width":2}));
+    wiring.appendChild(n("text",{x:x+w/2,y:y+h+16,"text-anchor":"middle",class:"dev-label"},"Rain Sensor"));
+    wiring.appendChild(n("text",{x:x+w/2,y:y+h+29,"text-anchor":"middle",class:"dev-val",id:"rain-val"},"80 mm"));
+    const px=x+w, vY=y+16, sY=y+34, gY=y+52;
+    wirePath(px, vY, pV3L.x, pV3L.y, "wire-vcc");
+    wirePath(px, sY, pGPIO35.x, pGPIO35.y, "wire-sig");
+    wirePath(px, gY, pGNDL.x, pGNDL.y, "wire-gnd");
+  })();
+
+  // ---- device: NPK 7-in-1 probe (far right) ----
+  const NPK = (function(){
+    const x=900,y=120,w=42,h=300;
+    wiring.appendChild(n("rect",{x,y:y+12,width:w,height:h-40,fill:"url(#steel)",stroke:"#7c868c","stroke-width":1}));
+    // pointed tip
+    wiring.appendChild(n("path",{d:`M ${x} ${y+h-28} L ${x+w/2} ${y+h} L ${x+w} ${y+h-28} Z`,fill:"url(#steel)",stroke:"#7c868c"}));
+    // sensing holes
+    for(let i=0;i<4;i++) wiring.appendChild(n("ellipse",{cx:x+w/2,cy:y+60+i*45,rx:8,ry:4,fill:"#5a636a"}));
+    // cap + cable gland
+    wiring.appendChild(n("rect",{x:x-4,y,width:w+8,height:16,rx:3,fill:"#37414a"}));
+    wiring.appendChild(n("text",{x:x+w/2,y:y-26,"text-anchor":"middle",class:"dev-label"},"NPK 7-in-1"));
+    wiring.appendChild(n("text",{x:x+w/2,y:y-14,"text-anchor":"middle",class:"dev-sub"},"RS485 probe"));
+    // live values block (left of probe)
+    wiring.appendChild(n("text",{x:x-14,y:y+70,"text-anchor":"end",class:"dev-val",id:"npk-n"},"N 80"));
+    wiring.appendChild(n("text",{x:x-14,y:y+88,"text-anchor":"end",class:"dev-val",id:"npk-p"},"P 45"));
+    wiring.appendChild(n("text",{x:x-14,y:y+106,"text-anchor":"end",class:"dev-val",id:"npk-k"},"K 45"));
+    wiring.appendChild(n("text",{x:x-14,y:y+124,"text-anchor":"end",class:"dev-val",id:"npk-ph"},"pH 6.5"));
+    return {x, capY:y+8};
+  })();
+
+  // ---- MAX485 module (between NPK and ESP32 right pins) ----
+  (function(){
+    const x=680,y=250,w=120,h=92;
+    wiring.appendChild(n("rect",{x,y,width:w,height:h,rx:7,fill:"#1f4f8f",stroke:"#16386a","stroke-width":1.5}));
+    wiring.appendChild(n("rect",{x:x+30,y:y+26,width:60,height:30,rx:3,fill:"#111827"}));   // IC chip
+    wiring.appendChild(n("text",{x:x+60,y:y+45,"text-anchor":"middle",style:"font:700 9px ui-monospace,monospace",fill:"#cbd5e1"},"MAX485"));
+    wiring.appendChild(n("text",{x:x+w/2,y:y+h+16,"text-anchor":"middle",class:"dev-label"},"MAX485"));
+    wiring.appendChild(n("text",{x:x+w/2,y:y+h+29,"text-anchor":"middle",class:"dev-sub"},"RS485 ↔ TTL"));
+    // RS485 A/B from NPK cap → MAX485 (right edge of module)
+    wirePath(NPK.x, NPK.capY, x+w, y+30, "wire-rs");
+    wirePath(NPK.x, NPK.capY+6, x+w, y+50, "wire-rs");
+    // MAX485 (left edge) → ESP32 right pins: RO→G16, DI→G17, DE/RE→G5, + 3V3 + GND
+    wirePath(x, y+22, pGPIO16.x, pGPIO16.y, "wire-sig");
+    wirePath(x, y+40, pGPIO17.x, pGPIO17.y, "wire-sig");
+    wirePath(x, y+58, pGPIO5.x,  pGPIO5.y,  "wire-sig");
+    wirePath(x, y+74, pV3R.x,    pV3R.y,    "wire-vcc");
+    wirePath(x, y+86, pGNDR.x,   pGNDR.y,   "wire-gnd");
+  })();
+
+  // ---- cloud / ML model node (bottom-center, from USB/WiFi) ----
+  (function(){
+    const x=410,y=520,w=210,h=70;
+    wiring.appendChild(n("rect",{x,y,width:w,height:h,rx:12,fill:"#e8f5e9",stroke:"#66bb6a","stroke-width":1.4}));
+    wiring.appendChild(n("text",{x:x+w/2,y:y+28,"text-anchor":"middle",style:"font:800 13px 'Plus Jakarta Sans',sans-serif",fill:"#2e7d32"},"🧠 ML MODEL"));
+    wiring.appendChild(n("text",{x:x+w/2,y:y+44,"text-anchor":"middle",class:"dev-sub"},"Random Forest · crop_model.pkl"));
+    wiring.appendChild(n("text",{x:x+w/2,y:y+60,"text-anchor":"middle",class:"dev-val",id:"wireCrop"},"— awaiting —"));
+    // wire from board bottom (USB) down to model
+    wirePath(BX+100, BY+BH+6, x+w/2, y, "wire-sig");
+  })();
+}
+buildWiring();
+
+// ===== radar =====
+const radar = document.getElementById("radar"), rctx = radar.getContext("2d");
+function drawRadar(){
+  const W=radar.width,H=radar.height,cx=W/2,cy=H/2,R=104;
+  const keys=SENSORS.map(s=>s[0]), N=keys.length;
+  rctx.clearRect(0,0,W,H);
+  rctx.lineWidth=1;
+  for(let ring=1;ring<=4;ring++){
+    rctx.strokeStyle="#d7e3d7"; rctx.beginPath();
+    for(let i=0;i<=N;i++){ const a=-Math.PI/2+(i%N)*(2*Math.PI/N), r=R*ring/4; const x=cx+r*Math.cos(a),y=cy+r*Math.sin(a); i?rctx.lineTo(x,y):rctx.moveTo(x,y);}
+    rctx.stroke();
+  }
+  rctx.font="11px ui-monospace, monospace";
+  keys.forEach((k,i)=>{
+    const a=-Math.PI/2+i*(2*Math.PI/N), x=cx+R*Math.cos(a),y=cy+R*Math.sin(a);
+    rctx.strokeStyle="#d7e3d7"; rctx.beginPath(); rctx.moveTo(cx,cy); rctx.lineTo(x,y); rctx.stroke();
+    const lx=cx+(R+18)*Math.cos(a),ly=cy+(R+18)*Math.sin(a);
+    rctx.fillStyle="#6b7280"; rctx.textAlign="center"; rctx.textBaseline="middle";
+    rctx.fillText(META[k][2]||META[k][1].slice(0,4), lx, ly);
+  });
+  rctx.beginPath();
+  keys.forEach((k,i)=>{ const[,,,,mn,mx]=META[k]; const v=Math.max(0,Math.min(1,(state[k]-mn)/(mx-mn))); const a=-Math.PI/2+i*(2*Math.PI/N),r=R*v; const x=cx+r*Math.cos(a),y=cy+r*Math.sin(a); i?rctx.lineTo(x,y):rctx.moveTo(x,y);});
+  rctx.closePath();
+  rctx.fillStyle="rgba(46,125,50,0.16)"; rctx.strokeStyle="#2e7d32"; rctx.lineWidth=2; rctx.fill(); rctx.stroke();
+  keys.forEach((k,i)=>{ const[,,,,mn,mx]=META[k]; const v=Math.max(0,Math.min(1,(state[k]-mn)/(mx-mn))); const a=-Math.PI/2+i*(2*Math.PI/N),r=R*v; const x=cx+r*Math.cos(a),y=cy+r*Math.sin(a); rctx.beginPath(); rctx.arc(x,y,3.2,0,2*Math.PI); rctx.fillStyle="#2e7d32"; rctx.fill();});
+}
+
+// ===== soil core + meta =====
+function updateCore(){
+  const ph=state.ph, moist=state.moisture;
+  let soilColor = ph<6.0?"#9c5a28": ph<=7.5?"#7a5230":"#9c8a5a";
+  const js=document.getElementById("jarSoil");
+  js.style.height="70%"; js.style.background=`linear-gradient(180deg, ${soilColor}, #3a2716)`;
+  document.getElementById("jarWater").style.height=(moist*0.7)+"%";
+  document.getElementById("mPh").textContent   = `${ph.toFixed(1)} ${ph<6?'(acidic)':ph>7.5?'(alkaline)':'(neutral)'}`;
+  document.getElementById("mMoist").textContent= `${moist}% ${moist<25?'(dry)':moist>70?'(wet)':'(moist)'}`;
+  const npk=state.nitrogen+state.phosphorus+state.potassium;
+  document.getElementById("mNpk").textContent  = npk>200?'High':npk>120?'Medium':'Low';
+  document.getElementById("mClim").textContent = `${state.temperature}°C · ${state.rainfall}mm`;
+}
+
+// ===== sync all visuals =====
+function setT(id,v){ const e=document.getElementById(id); if(e) e.textContent=v; }
+function syncVisuals(){
+  setT("npk-n",`N ${state.nitrogen}`); setT("npk-p",`P ${state.phosphorus}`);
+  setT("npk-k",`K ${state.potassium}`); setT("npk-ph",`pH ${state.ph}`);
+  setT("dht-temp",`${state.temperature} °C`);
+  setT("moist-val",`${state.moisture} %`);
+  setT("rain-val",`${state.rainfall} mm`);
+  drawRadar(); updateCore();
+}
+
+// ===== log + state =====
+const logEl=document.getElementById("log");
+function log(msg,type="info",src){
+  const line=document.createElement("div"); line.className="log-line "+type;
+  const t=new Date().toLocaleTimeString("en-GB");
+  line.innerHTML=`<span class="t">${t}</span><span class="m">${msg}</span>`+(src?` <span class="src-tag">${src}</span>`:"");
+  logEl.appendChild(line); logEl.scrollTop=logEl.scrollHeight;
+}
+const stateEl=document.getElementById("state"), stateText=document.getElementById("stateText");
+function setState(txt,kind){ stateText.textContent=txt; stateEl.className="state-pill"+(kind?" "+kind:""); }
+
+// ===== AI render =====
+const URDU={chickpea:'چنے',cotton:'کپاس',kino:'کینو',maize:'مکئی',mango:'آم',mustard:'سرسوں',onion:'پیاز',potato:'آلو',rice:'چاول',sugarcane:'گنا',tomato:'ٹماٹر',wheat:'گندم'};
+function cap(s){ return s? s[0].toUpperCase()+s.slice(1):s; }
+function renderAI(pred){
+  setT("wireCrop", `${cap(pred.crop)} ${pred.confidence?pred.confidence+'%':''}`);
+  const conf=pred.confidence||0, C=2*Math.PI*54, off=C*(1-conf/100);
+  const top3=(pred.top3&&pred.top3.length)?pred.top3:[{crop:pred.crop,confidence:conf,urdu:pred.urdu}];
+  const src = pred.source==="rule-based"
+    ? `<span class="tag rule">RULE-BASED</span> model fallback`
+    : `<span class="tag">RANDOM FOREST</span> 8 features · live inference`;
+  document.getElementById("aiResult").innerHTML = `
+    <div class="ai">
+      <div class="ring">
+        <svg width="132" height="132">
+          <circle cx="66" cy="66" r="54" fill="none" stroke="#e5e7eb" stroke-width="12"/>
+          <circle cx="66" cy="66" r="54" fill="none" stroke="#2e7d32" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${off}"/>
+        </svg>
+        <div class="pct"><div><b>${conf}%</b><small>CONFIDENCE</small></div></div>
+      </div>
+      <div class="ai-main">
+        <div class="crop">${cap(pred.crop)}<span class="urdu">${pred.urdu||URDU[pred.crop]||''}</span></div>
+        <div class="src">${src}</div>
+        <div class="top3">${top3.map(t=>`
+          <div class="t3"><span class="nm">${cap(t.crop)}</span>
+            <span class="bar"><i style="width:${t.confidence}%"></i></span>
+            <span class="pc">${t.confidence}%</span></div>`).join("")}
+        </div>
+      </div>
+    </div>`;
+}
+
+// ===== transmit =====
+function buildPayload(){
+  const id=document.getElementById("nodeId").value;
+  return { node_id:id, source:id.startsWith("ESP")?"hardware":"simulator",
+    nitrogen:state.nitrogen, phosphorus:state.phosphorus, potassium:state.potassium,
+    ph:state.ph, temperature:state.temperature, rainfall:state.rainfall, moisture:state.moisture,
+    region:document.getElementById("region").value, season:document.getElementById("season").value,
+    timestamp:new Date().toISOString() };
+}
+function pulseWires(){ wiring.classList.add("transmitting"); setTimeout(()=>wiring.classList.remove("transmitting"),1400); }
+async function transmit(){
+  const url=document.getElementById("endpoint").value.trim(), p=buildPayload();
+  const tag=p.source==="hardware"?"HW":"SIM";
+  setState("Transmitting…","on"); pulseWires();
+  try{
+    const res=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)});
+    if(res.ok){
+      const d=await res.json().catch(()=>({}));
+      const pred=d.prediction||(d.predicted_crop?{crop:d.predicted_crop,confidence:0,top3:[]}:null);
+      if(pred){ renderAI(pred); log(`200 OK · N${p.nitrogen} P${p.phosphorus} K${p.potassium} pH${p.ph} → ${pred.crop} ${pred.confidence?`(${pred.confidence}%)`:''}`,"ok",tag); }
+      else log("200 OK · stored (no prediction)","ok",tag);
+      setState("Online","on");
+    } else { log(`HTTP ${res.status} from ingest endpoint`,"err",tag); setState("Error "+res.status,"err"); }
+  }catch(err){ log(`Connection failed — backend running at that URL? (${err.message})`,"err",tag); setState("Offline","err"); }
+}
+document.getElementById("send").addEventListener("click", transmit);
+
+// ===== randomize =====
+document.getElementById("rand").addEventListener("click",()=>{
+  SENSORS.forEach(([key,,,,min,max,,step])=>{ let v=min+Math.random()*(max-min); v=step<1?Math.round(v*10)/10:Math.round(v); setSensor(key,v); });
+  syncVisuals(); log("Randomized field sample loaded into sensor array","info");
+});
+
+// ===== auto-stream =====
+let streamTimer=null; const streamBtn=document.getElementById("stream");
+streamBtn.addEventListener("click",()=>{
+  if(streamTimer){ clearInterval(streamTimer); streamTimer=null; streamBtn.classList.remove("on"); streamBtn.innerHTML="◷&nbsp; Auto-Stream (5s)"; setState("Idle"); log("Auto-stream stopped","info"); }
+  else{
+    streamBtn.classList.add("on"); streamBtn.innerHTML="■&nbsp; Stop Stream"; log("Auto-stream started — every 5s","info"); transmit();
+    streamTimer=setInterval(()=>{
+      SENSORS.forEach(([key,,,,min,max,,step])=>{ const drift=(Math.random()-0.5)*(max-min)*0.04; let v=Math.min(max,Math.max(min,state[key]+drift)); v=step<1?Math.round(v*10)/10:Math.round(v); setSensor(key,v); });
+      syncVisuals(); transmit();
+    },5000);
+  }
+});
+
+// ===== init =====
+syncVisuals();
+</script>
+</body>
+</html>

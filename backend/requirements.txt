@@ -1,0 +1,27 @@
+# SmartZameen AI — Python 3.14 dependencies
+# Database is now SQLite (Python stdlib `sqlite3`) — NO MySQL package needed.
+# Version floors chosen to have Python 3.14 wheels; pip picks the newest match.
+
+# --- Web backend ---
+flask>=3.0
+flask-cors>=4.0
+python-dotenv>=1.0
+requests>=2.32
+
+# --- Machine learning (crop model + soil image classifier) ---
+scikit-learn>=1.7
+numpy>=2.2
+joblib>=1.4
+scipy>=1.15
+Pillow>=11.0
+
+# --- External services ---
+anthropic>=0.40        # soil-image AI fallback
+twilio>=9.3            # WhatsApp + SMS routes
+
+# --- Model training scripts in model-training/ (optional at runtime) ---
+pandas>=2.2
+
+# --- Production server (deployment only) ---
+# gunicorn>=22.0      # uncomment for Linux deploys: `gunicorn app:app`
+# waitress>=3.0       # cross-platform alternative: `waitress-serve --port=8000 app:app`

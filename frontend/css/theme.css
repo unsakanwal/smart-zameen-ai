@@ -1,0 +1,217 @@
+/* ============================================================
+   SmartZameen AI — Shared Design System (theme.css)
+   Single source of truth for colors, typography, and the
+   components reused across every page (nav, buttons, cards,
+   forms, badges, footer, WhatsApp button). Pulled from the
+   dashboard's palette so the whole app is visually consistent.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Nastaliq+Urdu:wght@400;700&family=Playfair+Display:wght@600;700;800&display=swap');
+
+:root {
+  /* Brand greens */
+  --primary:        #1e4620;
+  --primary-dark:   #123014;
+  --primary-light:  #2d5a32;
+  --accent:         #2e7d32;
+  --accent-light:   #66bb6a;
+  --accent-soft:    #e8f5e9;
+
+  /* Support */
+  --warning:        #f59e0b;
+  --warning-hover:  #d97706;
+  --danger:         #dc2626;
+  --soil:           #7e4e04;
+
+  /* Neutrals */
+  --dark:           #0f2818;
+  --text:           #1f2937;
+  --text-light:     #6b7280;
+  --bg:             #ffffff;
+  --bg-light:       #f4f8f4;
+  --border:         #e5e7eb;
+
+  /* Elevation */
+  --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.05);
+  --shadow:    0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+  --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+  --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+
+  --radius:    16px;
+  --radius-sm: 10px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Fonts */
+  --font-sans:  'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-urdu:  'Noto Nastaliq Urdu', 'Plus Jakarta Sans', serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-light);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+[dir="rtl"] { font-family: var(--font-urdu); }
+
+/* ---------------- Navbar ---------------- */
+.navbar {
+  display: flex; align-items: center;
+  padding: 16px clamp(16px, 4vw, 48px);
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100; gap: 40px;
+}
+.nav-logo {
+  font-size: clamp(20px, 3vw, 28px); font-weight: 800;
+  color: var(--primary); font-family: var(--font-serif);
+  white-space: nowrap; flex-shrink: 0; text-decoration: none; flex: 1 1 0%;
+}
+.nav-logo span { color: var(--accent); }
+.nav-center {
+  display: flex; gap: clamp(20px, 4vw, 50px); list-style: none;
+  align-items: center; justify-content: center;
+}
+.nav-center a {
+  font-size: 15px; font-weight: 500; color: var(--text);
+  text-decoration: none; transition: color 0.3s; position: relative;
+}
+.nav-center a:hover, .nav-center a.on { color: var(--accent); font-weight: 600; }
+.nav-center a::after {
+  content: ''; position: absolute; bottom: -4px; left: 0; width: 0;
+  height: 2px; background: var(--accent); transition: width 0.3s;
+}
+.nav-center a:hover::after, .nav-center a.on::after { width: 100%; }
+.nav-right {
+  position: relative; display: flex; align-items: center; gap: 20px;
+  flex: 1 1 0%; justify-content: flex-end;
+}
+
+/* ---------------- Auth buttons / pills ---------------- */
+.btn-login {
+  font-size: 14px; font-weight: 600; color: var(--primary);
+  background: transparent; border: 1.5px solid var(--primary);
+  padding: 8px 20px; border-radius: 8px; cursor: pointer;
+  font-family: inherit; text-decoration: none; transition: var(--transition);
+}
+.btn-login:hover { background: var(--primary); color: #fff; }
+.btn-signup {
+  font-size: 14px; font-weight: 600; color: #fff;
+  background: var(--primary); border: 1.5px solid var(--primary);
+  padding: 8px 20px; border-radius: 8px; cursor: pointer;
+  font-family: inherit; text-decoration: none; transition: var(--transition);
+}
+.btn-signup:hover { background: var(--primary-light); transform: translateY(-1px); }
+
+.user-pill {
+  display: none; align-items: center; gap: 8px;
+  background: #f0f8f0; border-radius: 20px; padding: 6px 16px;
+  font-size: 13px; font-weight: 600; color: var(--primary); cursor: pointer;
+  border: 1px solid #c8e6c9; position: relative;
+}
+.user-pill:hover .user-dropdown { display: block; }
+.user-dropdown {
+  display: none; position: absolute; top: 110%; right: 0;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  min-width: 160px; z-index: 300; overflow: hidden;
+}
+.user-dropdown a {
+  display: block; padding: 12px 18px; font-size: 14px; color: var(--text);
+  text-decoration: none; transition: background 0.2s; font-weight: 500;
+}
+.user-dropdown a:hover { background: var(--bg-light); color: var(--accent); }
+.user-dropdown .logout-btn {
+  width: 100%; text-align: left; background: none; border: none;
+  padding: 12px 18px; font-size: 14px; color: #e53e3e;
+  cursor: pointer; font-family: inherit; font-weight: 500; transition: background 0.2s;
+}
+.user-dropdown .logout-btn:hover { background: #fff5f5; }
+
+/* ---------------- Language menu ---------------- */
+.lang-btn {
+  font-size: 15px; font-weight: 500; color: var(--text);
+  background: transparent; border: none; cursor: pointer;
+  font-family: inherit; display: flex; align-items: center; gap: 8px;
+  padding: 0; transition: color 0.3s;
+}
+.lang-btn:hover { color: var(--accent); }
+.lang-btn::after { content: '▼'; font-size: 10px; transition: transform 0.3s; }
+.lang-menu.active .lang-btn::after { transform: rotate(180deg); }
+.lang-menu {
+  display: none; position: absolute; top: 100%; left: 50%;
+  transform: translateX(-50%); background: var(--bg);
+  border: 1px solid var(--border); border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1); min-width: 160px;
+  margin-top: 12px; z-index: 200;
+}
+.lang-menu.active { display: block; }
+.lang-option {
+  display: block; width: 100%; padding: 12px 18px; background: none;
+  border: none; text-align: left; font-size: 14px; font-weight: 500;
+  color: var(--text); cursor: pointer; font-family: inherit; transition: all 0.2s;
+}
+.lang-option:hover { background: var(--bg-light); color: var(--accent); }
+.lang-option.on { background: #f0f8f0; color: var(--accent); font-weight: 600; }
+
+/* ---------------- Generic card / buttons ---------------- */
+.sz-card {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow-sm);
+}
+.btn {
+  font-family: var(--font-sans); font-weight: 700; font-size: 14px;
+  border: none; border-radius: var(--radius-sm); padding: 12px 20px;
+  cursor: pointer; transition: var(--transition); text-decoration: none;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-primary { background: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(30,70,32,0.25); }
+.btn-primary:hover { background: var(--primary-light); transform: translateY(-1px); }
+.btn-accent { background: var(--accent); color: #fff; }
+.btn-accent:hover { background: var(--primary); transform: translateY(-1px); }
+.btn-warning { background: var(--warning); color: #fff; }
+.btn-warning:hover { background: var(--warning-hover); }
+.btn-ghost { background: transparent; color: var(--text-light); border: 1px solid var(--border); }
+.btn-ghost:hover { color: var(--text); border-color: var(--accent-light); }
+
+/* ---------------- Badges ---------------- */
+.badge { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
+.badge.green  { background: var(--accent-soft); color: var(--accent); }
+.badge.orange { background: #fff3e0; color: #e65100; }
+
+/* ---------------- Footer ---------------- */
+.footer {
+  text-align: center; padding: 28px; font-size: 13px; color: var(--text-light);
+  border-top: 1px solid var(--border); background: var(--bg); margin-top: 48px;
+}
+
+/* ---------------- WhatsApp float ---------------- */
+.whatsapp-float {
+  position: fixed; bottom: 30px; right: 30px; background: #25d366; color: #fff;
+  border-radius: 50px; padding: 12px 24px; font-size: 15px; font-weight: 700;
+  display: flex; align-items: center; gap: 8px; text-decoration: none;
+  box-shadow: 0 8px 30px rgba(37,211,102,0.4); transition: var(--transition);
+  z-index: 9999; border: 1px solid rgba(255,255,255,0.2);
+}
+.whatsapp-float:hover {
+  background: #20ba5a; transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 12px 35px rgba(37,211,102,0.5);
+}
+.whatsapp-float .whatsapp-icon-svg { width: 20px; height: 20px; }
+
+/* ---------------- Responsive nav (shared) ---------------- */
+@media (max-width: 768px) {
+  .navbar { padding: 12px 18px; flex-wrap: wrap; gap: 16px; }
+  .nav-logo { flex: none; }
+  .nav-center { flex-basis: 100%; justify-content: center; gap: 18px; font-size: 13px; order: 3; }
+  .nav-right { flex: none; margin-left: auto; }
+  .whatsapp-float { bottom: 16px; right: 16px; padding: 10px 18px; font-size: 13px; }
+}
+@media (max-width: 480px) {
+  .whatsapp-float .whatsapp-text { display: none; }
+  .whatsapp-float { padding: 14px; border-radius: 50%; }
+}

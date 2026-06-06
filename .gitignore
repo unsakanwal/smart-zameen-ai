@@ -1,0 +1,60 @@
+# ============================================================
+#  SmartZameen AI — .gitignore
+# ============================================================
+
+# ---------- Secrets / config (NEVER commit) ----------
+.env
+.env.*
+!.env.example
+backend/.env
+
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# ---------- Virtual environments ----------
+venv/
+.venv/
+env/
+ENV/
+backend/venv/
+
+# ---------- Database (runtime data, regenerated on first run) ----------
+*.db
+*.sqlite
+*.sqlite3
+backend/database/*.db
+
+# ---------- Logs / temp ----------
+*.log
+*.tmp
+*.bak
+
+# ---------- OS junk ----------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------- Editors / IDE ----------
+.vscode/
+.idea/
+*.swp
+*~
+
+# ---------- Build / packaging ----------
+build/
+dist/
+*.spec
+
+# ---------- Notes ----------
+# Kept ON PURPOSE (needed to run / retrain):
+#   backend/ml_models/*.pkl          trained model artifacts
+#   model-training/dataset/**        training data (CSV + soil images)
+#   frontend/assets/**               images + favicon

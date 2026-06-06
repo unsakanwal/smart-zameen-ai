@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - SmartZameen</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="css/theme.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary: #1e4620;
+      --primary-light: #2d5c2f;
+      --accent: #66bb6a;
+      --dark: #0f2818;
+      --text: #1a1a1a;
+      --text-light: #666;
+      --bg: #ffffff;
+      --bg-light: #f8faf7;
+      --border: #e8e8e8;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* ──────────────── NAVBAR ──────────────── */
+    .navbar {
+      display: flex;
+      align-items: center;
+      padding: 16px 48px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      gap: 40px;
+    }
+
+    .nav-logo {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--primary);
+      font-family: 'Playfair Display', serif;
+      white-space: nowrap;
+      flex-shrink: 0;
+      text-decoration: none;
+      flex: 1 1 0%;
+    }
+
+    .nav-logo span {
+      color: var(--accent);
+    }
+
+    /* Floating WhatsApp Button */
+    .whatsapp-float {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: #25d366;
+      color: white;
+      border-radius: 50px;
+      padding: 12px 24px;
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      box-shadow: 0 8px 30px rgba(37, 211, 102, 0.4);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 9999;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .whatsapp-float:hover {
+      background: #20ba5a;
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 12px 35px rgba(37, 211, 102, 0.5);
+    }
+    .whatsapp-float .whatsapp-icon-svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .nav-center {
+      display: flex;
+      gap: 50px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-center a {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+      text-decoration: none;
+      transition: color 0.3s;
+      position: relative;
+    }
+
+    .nav-center a:hover,
+    .nav-center a.on {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .nav-center a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--accent);
+      transition: width 0.3s;
+    }
+
+    .nav-center a:hover::after,
+    .nav-center a.on::after {
+      width: 100%;
+    }
+
+    .nav-right {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex: 1 1 0%;
+      justify-content: flex-end;
+    }
+    /* Auth Buttons */
+    .btn-login {
+      font-size: 14px; font-weight: 600; color: var(--primary);
+      background: transparent; border: 1.5px solid var(--primary);
+      padding: 8px 20px; border-radius: 8px; cursor: pointer;
+      font-family: inherit; text-decoration: none; transition: all 0.3s;
+    }
+    .btn-login:hover { background: var(--primary); color: #fff; }
+ 
+    .btn-signup {
+      font-size: 14px; font-weight: 600; color: #fff;
+      background: var(--primary); border: 1.5px solid var(--primary);
+      padding: 8px 20px; border-radius: 8px; cursor: pointer;
+      font-family: inherit; text-decoration: none; transition: all 0.3s;
+    }
+    .btn-signup:hover { background: var(--primary-light); transform: translateY(-1px); }
+ 
+    /* User pill when logged in */
+    .user-pill {
+      display: none; align-items: center; gap: 8px;
+      background: #f0f8f0; border-radius: 20px; padding: 6px 16px;
+      font-size: 13px; font-weight: 600; color: var(--primary); cursor: pointer;
+      border: 1px solid #c8e6c9; position: relative;
+    }
+    .user-pill:hover .user-dropdown { display: block; }
+    .user-dropdown {
+      display: none; position: absolute; top: 110%; right: 0;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      min-width: 160px; z-index: 300; overflow: hidden;
+    }
+    .user-dropdown a {
+      display: block; padding: 12px 18px; font-size: 14px; color: var(--text);
+      text-decoration: none; transition: background 0.2s; font-weight: 500;
+    }
+    .user-dropdown a:hover { background: var(--bg-light); color: var(--accent); }
+    .user-dropdown .logout-btn {
+      width: 100%; text-align: left; background: none; border: none;
+      padding: 12px 18px; font-size: 14px; color: #e53e3e;
+      cursor: pointer; font-family: inherit; font-weight: 500; transition: background 0.2s;
+    }
+    .user-dropdown .logout-btn:hover { background: #fff5f5; }
+
+    .lang-btn {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0;
+      transition: color 0.3s;
+    }
+
+    .lang-btn:hover {
+      color: var(--accent);
+    }
+
+    .lang-btn::after {
+      content: '▼';
+      font-size: 10px;
+      transition: transform 0.3s;
+    }
+
+    .lang-menu.active .lang-btn::after {
+      transform: rotate(180deg);
+    }
+
+    .lang-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 50%; 
+      transform: translateX(-50%);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      min-width: 160px;
+      margin-top: 12px;
+      z-index: 200;
+    }
+
+    .lang-menu.active {
+      display: block;
+    }
+
+    .lang-option {
+      display: block;
+      width: 100%;
+      padding: 12px 18px;
+      background: none;
+      border: none;
+      text-align: left;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .lang-option:hover {
+      background: var(--bg-light);
+      color: var(--accent);
+    }
+
+    .lang-option.on {
+      background: #f0f8f0;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* ── LOGIN CARD ── */
+    .page-wrap { display: flex; justify-content: center; align-items: center; min-height: calc(100vh - 70px); padding: 40px 24px; background: var(--bg-light); }
+    .card { display: flex; width: 100%; max-width: 860px; min-height: 480px; background: #fff; border-radius: 16px; box-shadow: 0 12px 40px rgba(0,0,0,0.1); overflow: hidden; }
+    .card-left { flex: 1.2; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 48px 40px; }
+    .card-left h2 { font-size: 28px; font-weight: 700; color: var(--primary); font-family: 'Playfair Display', serif; margin-bottom: 8px; }
+    .card-left p { font-size: 14px; color: var(--text-light); margin-bottom: 28px; text-align: center; }
+    .form { width: 100%; display: flex; flex-direction: column; gap: 14px; }
+    .form input { width: 100%; padding: 12px 16px; border-radius: 8px; border: 1.5px solid var(--border); font-size: 14px; font-family: inherit; transition: border-color 0.2s; background: var(--bg-light); }
+    .form input:focus { outline: none; border-color: var(--accent); background: #fff; }
+    .forgot-link { font-size: 13px; text-decoration: none; color: var(--primary); text-align: right; display: block; }
+    .submit-btn { padding: 13px; border-radius: 25px; border: none; background: var(--primary); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.3s; margin-top: 4px; }
+    .submit-btn:hover { background: var(--primary-light); transform: translateY(-1px); }
+    .error { font-size: 12px; color: #e53e3e; margin-top: -8px; }
+    /* toast */
+    .toast { display: none; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 12px; text-align: center; }
+    .toast.success { background: #e8f5e9; color: #1b5e20; display: block; }
+    .toast.error-toast { background: #fde8e8; color: #c53030; display: block; }
+
+    /* Green panel */
+    .card-right { flex: 1; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px 32px; text-align: center; }
+    .card-right h2 { font-size: 28px; font-weight: 700; font-family: 'Playfair Display', serif; margin-bottom: 14px; }
+    .card-right p { color: rgba(255,255,255,0.88); font-size: 14px; line-height: 1.7; margin-bottom: 28px; }
+    .outline-btn { text-decoration: none; padding: 11px 32px; border: 2px solid #fff; border-radius: 25px; background: transparent; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.3s; }
+    .outline-btn:hover { background: #fff; color: var(--primary); }
+
+    @media (max-width: 768px) {
+      .navbar { padding: 12px 24px; flex-wrap: wrap; gap: 20px; }
+      .nav-logo { font-size: 20px; flex: none; }
+      .nav-center { flex-basis: 100%; justify-content: center; gap: 20px; font-size: 13px; display: flex; }
+      .nav-right { flex: none; margin-left: auto; }
+      .card { flex-direction: column; }
+      .card-right { padding: 32px 24px; }
+      .card-left { padding: 32px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-logo">Smart<span id="app-name">Zameen</span></a>
+    <div class="nav-center">
+      <a href="index.html" id="t-home" class="on">Home</a>
+      <a href="predict.html" id="t-pred">Crop AI</a>
+      <a href="dashboard.html" id="t-dash">Dashboard</a>
+      <a href="sensor-simulator.html" id="t-iot">IoT Node</a>
+      <button class="lang-btn" id="langToggle">Languages</button>
+      <div class="lang-menu" id="langMenu">
+        <button class="lang-option on" onclick="setLang('en', this)">English</button>
+        <button class="lang-option" onclick="setLang('ur', this)">اردو</button>
+        <button class="lang-option" onclick="setLang('pa', this)">پنجابی</button>
+        <button class="lang-option" onclick="setLang('sd', this)">سنڌي</button>
+        <button class="lang-option" onclick="setLang('ps', this)">پښتو</button>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div id="auth-buttons" style="display:flex;gap:10px;align-items:center;">
+        <a href="login.html" class="btn-login">Login</a>
+        <a href="signup.html" class="btn-signup">Sign Up</a>
+      </div>
+      <!-- User pill (shown when logged in) -->
+      <div class="user-pill" id="user-pill">
+        <span>👤</span>
+        <span id="user-name-display">User</span>
+        <span style="font-size:10px;color:#666">▼</span>
+        <div class="user-dropdown">
+          <a href="dashboard.html">📊 Dashboard</a>
+          <a href="predict.html">🌱 Predict Crop</a>
+          <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- LOGIN CARD -->
+  <div class="page-wrap">
+    <div class="card">
+
+      <!-- Left: form -->
+      <div class="card-left">
+        <h2 id="login-title">Sign In</h2>
+        <p id="login-desc">Use your email account!</p>
+        <div class="toast" id="toast"></div>
+        <form class="form" id="loginForm">
+          <input type="email"    id="email"    placeholder="Email">
+          <span id="emailError"    class="error"></span>
+          <input type="password" id="password" placeholder="Password">
+          <span id="passwordError" class="error"></span>
+          <a href="#" class="forgot-link" id="forgot-password">Forgot your password?</a>
+          <button type="submit" class="submit-btn" id="signin-btn">SIGN IN</button>
+        </form>
+      </div>
+
+      <!-- Right: welcome panel -->
+      <div class="card-right">
+        <h2 id="welcome-title">Hello, Friend!</h2>
+        <p id="welcome-desc">Enter your details and grow smarter farming decisions.</p>
+        <a href="signup.html" class="outline-btn" id="signup-link">SIGN UP</a>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // ── Navbar dropdown ──
+    document.getElementById('langToggle').addEventListener('click', function(e) {
+      e.stopPropagation();
+      document.getElementById('langMenu').classList.toggle('active');
+    });
+    document.addEventListener('click', function(e) {
+      const menu = document.getElementById('langMenu');
+      if (!e.target.closest('[id="langToggle"]') && !e.target.closest('#langMenu')) {
+        menu.classList.remove('active');
+      }
+    });
+
+    // ── Toast helper ──
+    function showToast(msg, type) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast ' + (type === 'success' ? 'success' : 'error-toast');
+      setTimeout(() => { t.className = 'toast'; }, 4000);
+    }
+
+    // ── Login form ──
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const email    = document.getElementById('email');
+      const password = document.getElementById('password');
+      const emailErr = document.getElementById('emailError');
+      const passErr  = document.getElementById('passwordError');
+      emailErr.textContent = '';
+      passErr.textContent  = '';
+
+      let valid = true;
+      const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
+      if (!email.value.trim()) { emailErr.textContent = 'Email is required'; valid = false; }
+      else if (!email.value.match(emailPattern)) { emailErr.textContent = 'Enter a valid email'; valid = false; }
+      if (!password.value.trim()) { passErr.textContent = 'Password is required'; valid = false; }
+      else if (password.value.length < 6) { passErr.textContent = 'Minimum 6 characters'; valid = false; }
+
+      if (!valid) return;
+
+      const btn = document.getElementById('signin-btn');
+      btn.textContent = '...';
+      btn.disabled = true;
+
+      const API_URL = (window.location.protocol === 'file:' || (window.location.port !== '' && window.location.port !== '80')) 
+        ? 'http://localhost' 
+        : window.location.origin;
+
+      try {
+        const res = await fetch(`${API_URL}/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email.value, password: password.value })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.token) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('sz_email', email.value);
+          localStorage.setItem('sz_loggedIn', 'true');
+          showToast('Login successful! Redirecting…', 'success');
+          setTimeout(() => window.location.href = 'dashboard.html', 1200);
+        } else {
+          showToast(data.error || data.msg || 'Login failed', 'error');
+        }
+      } catch (err) {
+        showToast('Cannot reach server. Make sure backend is running on port 5000.', 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  </script>
+
+  <!-- Load lang AFTER inline script so setLang is defined when DOMContentLoaded fires -->
+  <script src="js/lang.js"></script>
+
+  <!-- Floating WhatsApp Bot Button -->
+  <a href="https://wa.me/14155238886?text=hello" target="_blank" class="whatsapp-float" title="Chat with WhatsApp AI Bot">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="whatsapp-icon-svg" style="flex-shrink:0;"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.717-1.458L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.42 9.864-9.858.002-2.634-1.01-5.11-2.85-6.953C16.646 1.952 14.177.95 11.545.95 6.11.95 1.687 5.37 1.683 10.81c-.001 1.73.454 3.42 1.316 4.925l-.994 3.635 3.72-.975zm12.353-7.25c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
+    <span class="whatsapp-text">WhatsApp Bot</span>
+  </a>
+</body>
+</html>

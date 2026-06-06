@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2e7d32"/>
+      <stop offset="1" stop-color="#1e4620"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <!-- central stem -->
+  <path d="M32 50 V26" stroke="#bfe9c6" stroke-width="3.4" stroke-linecap="round" fill="none"/>
+  <!-- leaves / sprout -->
+  <path d="M32 30 C22 28 17 20 18 13 C26 13 32 18 32 27 Z" fill="#66bb6a"/>
+  <path d="M32 30 C42 28 47 20 46 13 C38 13 32 18 32 27 Z" fill="#9ccc65"/>
+  <!-- soil mound -->
+  <path d="M16 50 C22 45 42 45 48 50 Z" fill="#c98a3f"/>
+  <circle cx="32" cy="50" r="2.4" fill="#e0b341"/>
+</svg>
