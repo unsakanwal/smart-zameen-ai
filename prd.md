@@ -1,16 +1,5 @@
 # SmartZameen AI — Product Requirements Document (PRD)
 
-**Status:** Production-bound (frontend on Vercel · backend on Render · database on Neon)
-**Last updated:** 2026-06-07
-**Owner:** Faizan (omizzy786@gmail.com)
-
-> This is the **single source of truth** for the project: product spec **and** the
-> local-run / testing / deployment runbook. (It replaces the old separate
-> `project-prd.md`, `PROJECT-GUIDE.md`, and `SETUP.md`.) For a quick public overview
-> see `README.md`.
-
----
-
 ## 1. Summary
 
 **SmartZameen AI** is a precision-agriculture web platform for Pakistani farmers. It turns

@@ -1,3 +1,12 @@
+import os
+import sys
+
+# Make local packages (database/, routes/) importable no matter where the
+# process is launched from. Render/gunicorn can start with the repo root as the
+# CWD (not backend/), which otherwise breaks `from database.db import ...` with
+# ModuleNotFoundError. Putting this dir first on sys.path fixes it everywhere.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 from flask import Flask, jsonify, send_from_directory, request
 from flask_cors import CORS
 from database.db import create_database, get_connection
@@ -9,7 +18,6 @@ from routes.image_routes import image_bp
 from routes.voice_routes import voice_bp
 from routes.sensor_routes import sensor_bp
 from routes.chat_routes import chat_bp
-import os
 import hashlib
 
 BASE_DIR     = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

@@ -1301,14 +1301,9 @@
       <div class="sim-head">
         <div>
           <h1>IoT Soil <span>Sensor Node</span></h1>
-          <div class="sub">A virtual field node. Craft a soil sample, watch the sensors wire into the ESP32, and the reading is scored live by your trained crop model.</div>
+          <div class="sub">A front-end simulation of a field node. Craft a soil sample with the sliders and see a likely crop — this demo runs entirely in your browser and is not connected to the live system.</div>
         </div>
         <div class="state-pill" id="state"><span class="dot"></span><span id="stateText">Idle</span></div>
-      </div>
-
-      <div class="endpoint-bar">
-        <label>Ingest URL</label>
-        <input id="endpoint" value="/api/sensor-ingest" spellcheck="false">
       </div>
 
       <div class="sim-grid">
@@ -1350,7 +1345,7 @@
       </div>
 
       <div class="sz-card" style="margin-bottom:18px">
-        <div class="card-h">AI Crop Recommendation <span class="hint">live inference · model auto-selected (shown on result)</span></div>
+        <div class="card-h">AI Crop Recommendation <span class="hint">offline simulation · runs in your browser</span></div>
         <div id="aiResult"><div class="ai-empty">Transmit a reading to run the model…</div></div>
       </div>
 
@@ -1361,22 +1356,17 @@
             <div class="meta-row">
               <select id="region"><option>Punjab</option><option>Sindh</option><option>KPK</option><option>Balochistan</option></select>
               <select id="season"><option value="Rabi">Rabi (سردی)</option><option value="Kharif">Kharif (گرمی)</option></select>
-              <select id="nodeId"><option value="SIM-NODE-01">SIM-NODE-01 (simulator)</option><option value="ESP32-A0">ESP32-A0 (hardware)</option></select>
             </div>
-            <button class="btn btn-primary" id="send">▲&nbsp; Transmit Reading</button>
-            <button class="btn btn-ghost btn-stream" id="stream">◷&nbsp; Auto-Stream (5s)</button>
+            <button class="btn btn-primary" id="send">▶&nbsp; Run Simulation</button>
             <button class="btn btn-ghost" id="rand">⟳&nbsp; Randomize Sample</button>
           </div>
-        </div>
-        <div class="sz-card">
-          <div class="card-h">Transmission Log</div>
-          <div class="log" id="log"></div>
         </div>
       </div>
 
       <div class="note">
-        This panel POSTs the <b>identical JSON payload</b> to the <b>identical endpoint</b> a physical ESP32 uses —
-        the crop is scored by your real trained model. Swapping the simulator for hardware is a transport change, not an architecture change.
+        This is a <b>front-end only simulation</b> — craft a soil sample with the sliders and the
+        demo scores a likely crop right here in your browser. It does <b>not</b> connect to the
+        backend or store anything; it just illustrates how a real ESP32 field node would feed a model.
       </div>
     </div>
 
@@ -1660,7 +1650,7 @@
       (function(){ const x=410,y=520,w=210,h=70;
         wiring.appendChild(n("rect",{x,y,width:w,height:h,rx:12,fill:"#e8f5e9",stroke:"#66bb6a","stroke-width":1.4}));
         wiring.appendChild(n("text",{x:x+w/2,y:y+28,"text-anchor":"middle",style:"font:800 13px 'Plus Jakarta Sans',sans-serif",fill:"#2e7d32"},"🧠 ML MODEL"));
-        wiring.appendChild(n("text",{x:x+w/2,y:y+44,"text-anchor":"middle",class:"dev-sub"},"Random Forest · crop_model.pkl"));
+        wiring.appendChild(n("text",{x:x+w/2,y:y+44,"text-anchor":"middle",class:"dev-sub"},"crop model · simulated"));
         wiring.appendChild(n("text",{x:x+w/2,y:y+60,"text-anchor":"middle",class:"dev-val",id:"wireCrop"},"— awaiting —"));
         wirePath(BX+100,BY+BH+6,x+w/2,y,"wire-sig");
       })();
@@ -1704,6 +1694,7 @@
     }
     const logEl=document.getElementById("log");
     function log(msg,type="info",src){
+      if(!logEl) return;   // transmission log removed — the node is UI-only now
       const line=document.createElement("div"); line.className="log-line "+type;
       const t=new Date().toLocaleTimeString("en-GB");
       line.innerHTML=`<span class="t">${t}</span><span class="m">${msg}</span>`+(src?` <span class="src-tag">${src}</span>`:"");
@@ -1720,7 +1711,8 @@
       // Show WHICH model produced this result (overlaid on the result as a badge).
       const modelKey=pred.model_key||(pred.source==="rule-based"?"rule-based":"random-forest");
       const modelLabel=pred.model||(pred.source==="rule-based"?"Rule-based fallback":"Local RandomForest");
-      const src = `<span class="tag${modelKey==='rule-based'?' rule':''}">${modelLabel}</span> · live inference`;
+      const suffix=modelKey==='simulation' ? ' · runs in your browser' : ' · live inference';
+      const src = `<span class="tag${modelKey==='rule-based'?' rule':''}">${modelLabel}</span>${suffix}`;
       document.getElementById("aiResult").innerHTML = `
         <div class="ai">
           <div class="ring">
@@ -1737,47 +1729,54 @@
           </div>
         </div>`;
     }
-    function buildPayload(){
-      const id=document.getElementById("nodeId").value;
-      return { node_id:id, source:id.startsWith("ESP")?"hardware":"simulator",
-        nitrogen:state.nitrogen, phosphorus:state.phosphorus, potassium:state.potassium,
-        ph:state.ph, temperature:state.temperature, rainfall:state.rainfall, moisture:state.moisture,
-        humidity:state.humidity,
-        region:document.getElementById("region").value, season:document.getElementById("season").value,
-        timestamp:new Date().toISOString() };
-    }
     function pulseWires(){ wiring.classList.add("transmitting"); setTimeout(()=>wiring.classList.remove("transmitting"),1400); }
-    async function transmit(){
-      let url=document.getElementById("endpoint").value.trim();
-      if(url.startsWith("/")) url=(window.SZ_API||"")+url;   // resolve against the Render backend in prod
-      const p=buildPayload();
-      const tag=p.source==="hardware"?"HW":"SIM"; setState("Transmitting…","on"); pulseWires();
-      try{
-        const res=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)});
-        if(res.ok){
-          const d=await res.json().catch(()=>({}));
-          const pred=d.prediction||(d.predicted_crop?{crop:d.predicted_crop,confidence:0,top3:[]}:null);
-          if(pred){ renderAI(pred); log(`200 OK · N${p.nitrogen} P${p.phosphorus} K${p.potassium} pH${p.ph} → ${pred.crop} ${pred.confidence?`(${pred.confidence}%)`:''}`,"ok",tag); }
-          else log("200 OK · stored (no prediction)","ok",tag);
-          setState("Online","on");
-        } else { log(`HTTP ${res.status} from ingest endpoint`,"err",tag); setState("Error "+res.status,"err"); }
-      }catch(err){ log(`Connection failed — backend running at that URL? (${err.message})`,"err",tag); setState("Offline","err"); }
+
+    // ── Pure front-end crop simulation (no backend, no database, no network) ──
+    // Scores the crafted soil sample against simple agronomic profiles and shows a
+    // believable recommendation. This is a DEMO only — it never POSTs anywhere and
+    // is deterministic (same sample → same result).
+    const CROP_PROFILES=[
+      {crop:'wheat',     season:'rabi',   temp:18, rain:75,  ph:6.6, n:80, p:42, k:42},
+      {crop:'rice',      season:'kharif', temp:28, rain:210, ph:6.2, n:95, p:55, k:45},
+      {crop:'maize',     season:'kharif', temp:24, rain:90,  ph:6.5, n:80, p:45, k:40},
+      {crop:'cotton',    season:'kharif', temp:33, rain:60,  ph:7.2, n:60, p:35, k:30},
+      {crop:'sugarcane', season:'kharif', temp:30, rain:150, ph:6.8, n:100,p:50, k:50},
+      {crop:'mustard',   season:'rabi',   temp:16, rain:40,  ph:6.8, n:55, p:30, k:30},
+      {crop:'chickpea',  season:'rabi',   temp:15, rain:30,  ph:7.2, n:40, p:35, k:35},
+      {crop:'potato',    season:'rabi',   temp:18, rain:60,  ph:5.8, n:90, p:55, k:80},
+    ];
+    function localPredict(s, season){
+      const near=(x,ideal,span)=>Math.max(0,1-Math.abs(x-ideal)/span);
+      const scored=CROP_PROFILES.map(c=>{
+        let sc=0;
+        sc+=near(s.temperature,c.temp,18)*1.4;
+        sc+=near(s.rainfall,   c.rain,140)*1.2;
+        sc+=near(s.ph,         c.ph, 2.2)*1.0;
+        sc+=near(s.nitrogen,   c.n,  90)*0.7;
+        sc+=near(s.phosphorus, c.p,  90)*0.5;
+        sc+=near(s.potassium,  c.k,  120)*0.5;
+        if(season && c.season===String(season).toLowerCase()) sc+=1.1;   // season-match bonus
+        return {crop:c.crop, score:sc};
+      }).sort((a,b)=>b.score-a.score);
+      const total=scored.reduce((t,c)=>t+c.score,0)||1;
+      const top3=scored.slice(0,3).map(c=>({
+        crop:c.crop,
+        confidence:Math.max(35,Math.min(96,Math.round(c.score/total*160))),
+        urdu:URDU[c.crop]||''
+      }));
+      return {crop:top3[0].crop, confidence:top3[0].confidence, urdu:top3[0].urdu, top3,
+              model:'Front-end simulation (offline)', model_key:'simulation'};
     }
-    document.getElementById("send").addEventListener("click", transmit);
+    function runSimulation(){
+      const season=document.getElementById("season").value;
+      setState("Simulating…","on"); pulseWires();
+      const pred=localPredict(state, season);
+      setTimeout(()=>{ renderAI(pred); setState("Simulation ready","on"); }, 350);
+    }
+    document.getElementById("send").addEventListener("click", runSimulation);
     document.getElementById("rand").addEventListener("click",()=>{
       SENSORS.forEach(([key,,,,min,max,,step])=>{ let v=min+Math.random()*(max-min); v=step<1?Math.round(v*10)/10:Math.round(v); setSensor(key,v); });
-      syncVisuals(); log("Randomized field sample loaded into sensor array","info");
-    });
-    let streamTimer=null; const streamBtn=document.getElementById("stream");
-    streamBtn.addEventListener("click",()=>{
-      if(streamTimer){ clearInterval(streamTimer); streamTimer=null; streamBtn.classList.remove("on"); streamBtn.innerHTML="◷&nbsp; Auto-Stream (5s)"; setState("Idle"); log("Auto-stream stopped","info"); }
-      else{
-        streamBtn.classList.add("on"); streamBtn.innerHTML="■&nbsp; Stop Stream"; log("Auto-stream started — every 5s","info"); transmit();
-        streamTimer=setInterval(()=>{
-          SENSORS.forEach(([key,,,,min,max,,step])=>{ const drift=(Math.random()-0.5)*(max-min)*0.04; let v=Math.min(max,Math.max(min,state[key]+drift)); v=step<1?Math.round(v*10)/10:Math.round(v); setSensor(key,v); });
-          syncVisuals(); transmit();
-        },5000);
-      }
+      syncVisuals();
     });
     syncVisuals();
   })();
