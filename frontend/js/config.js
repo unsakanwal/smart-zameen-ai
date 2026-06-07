@@ -10,7 +10,7 @@
  */
 (function () {
   // 👇 CHANGE THIS to your Render backend URL after deploying the backend.
-  var BACKEND_URL = 'https://smartzameen-ai.onrender.com';
+  var BACKEND_URL = 'https://smart-zameen-ai.onrender.com';
 
   var host = location.hostname;
   var isLocal =
