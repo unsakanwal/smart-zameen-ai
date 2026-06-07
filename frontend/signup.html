@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="stylesheet" href="css/theme.css">
+  <script src="js/config.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -277,6 +278,13 @@
     .toast.success { background: #e8f5e9; color: #1b5e20; display: block; }
     .toast.error-toast { background: #fde8e8; color: #c53030; display: block; }
 
+    /* Mobile: stack the split card vertically (matches login.html) */
+    @media (max-width: 768px) {
+      .page-wrap { padding: 24px 16px; }
+      .card { flex-direction: column; min-height: 0; max-width: 460px; }
+      .card-left { padding: 32px 24px; }
+      .card-right { padding: 32px 24px; }
+    }
   </style>
 </head>
 <body>
@@ -347,17 +355,7 @@
   </div>
 
   <script>
-    // ── Navbar dropdown ──
-    document.getElementById('langToggle').addEventListener('click', function(e) {
-      e.stopPropagation();
-      document.getElementById('langMenu').classList.toggle('active');
-    });
-    document.addEventListener('click', function(e) {
-      const menu = document.getElementById('langMenu');
-      if (!e.target.closest('[id="langToggle"]') && !e.target.closest('#langMenu')) {
-        menu.classList.remove('active');
-      }
-    });
+    // Language switcher toggle is wired centrally in js/lang.js (delegated).
 
     // ── Toast helper ──
     function showToast(msg, type) {
@@ -393,9 +391,8 @@
       btn.textContent = '...';
       btn.disabled = true;
 
-      const API_URL = (window.location.protocol === 'file:' || (window.location.port !== '' && window.location.port !== '80')) 
-        ? 'http://localhost' 
-        : window.location.origin;
+      // Backend base resolved in js/config.js (Render in prod, local Flask in dev).
+      const API_URL = window.API_URL || '';
 
       try {
         const res = await fetch(`${API_URL}/signup`, {

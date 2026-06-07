@@ -6,7 +6,16 @@ import os
 
 whatsapp_bp = Blueprint('whatsapp', __name__)
 
-MODEL_DIR = os.path.join(os.path.dirname(__file__), '..', 'ml_models')
+# Reorganised layout: models/local-trained-modal/ (fallback to legacy ml_models/).
+_BACKEND_DIR = os.path.join(os.path.dirname(__file__), '..')
+MODEL_DIR = next(
+    (d for d in (
+        os.path.join(_BACKEND_DIR, 'models', 'local-trained-modal'),
+        os.path.join(_BACKEND_DIR, 'models'),
+        os.path.join(_BACKEND_DIR, 'ml_models'),
+    ) if os.path.exists(os.path.join(d, 'crop_model.pkl'))),
+    os.path.join(_BACKEND_DIR, 'models', 'local-trained-modal'),
+)
 try:
     model     = joblib.load(os.path.join(MODEL_DIR, 'crop_model.pkl'))
     le_crop   = joblib.load(os.path.join(MODEL_DIR, 'le_crop.pkl'))

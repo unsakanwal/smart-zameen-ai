@@ -109,10 +109,60 @@
   document.getElementById('cam-capture')?.addEventListener('click', capture);
   document.getElementById('cam-close')?.addEventListener('click', closeCamera);
 
-  // ---------- voice input (speech-to-text) ----------
-  function setupRecog() {
+  // ---------- voice input (OpenAI Whisper speech-to-text) ----------
+  // Records the mic with MediaRecorder, uploads the clip to /api/transcribe
+  // (OpenAI Whisper — far better at Urdu/regional languages than the browser),
+  // then drops the text into the chat. Falls back to the browser recognizer
+  // when MediaRecorder/getUserMedia isn't available.
+  let mediaRecorder = null, audioChunks = [], recordStream = null;
+
+  function stopStream() { if (recordStream) { recordStream.getTracks().forEach(t => t.stop()); recordStream = null; } }
+
+  async function startRecording() {
+    if (!navigator.mediaDevices || !window.MediaRecorder) return browserSTTFallback();
+    try { recordStream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+    catch (e) { bubble('assistant', { text: '⚠️ Mic permission needed for voice input.' }); return; }
+    audioChunks = [];
+    mediaRecorder = new MediaRecorder(recordStream);
+    mediaRecorder.ondataavailable = e => { if (e.data && e.data.size) audioChunks.push(e.data); };
+    mediaRecorder.onstop = handleRecordingStop;
+    mediaRecorder.start();
+    listening = true; micBtn.classList.add('on');
+  }
+
+  function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+    listening = false; micBtn.classList.remove('on');
+  }
+
+  async function handleRecordingStop() {
+    stopStream();
+    const blob = new Blob(audioChunks, { type: 'audio/webm' });
+    if (!blob.size) return;
+    const prevPh = input.placeholder; input.placeholder = '…'; micBtn.disabled = true;
+    try {
+      const fd = new FormData();
+      fd.append('audio', blob, 'voice.webm');
+      fd.append('lang', LANG);
+      const res = await fetch(API + '/api/transcribe', { method: 'POST', body: fd });
+      const d = await res.json();
+      if (res.ok && d.ok && d.text) {
+        input.value = (input.value ? input.value + ' ' : '') + d.text; autosize();
+        sendChat();
+      } else {
+        bubble('assistant', { text: '⚠️ ' + (d.error || 'Could not transcribe audio.') });
+      }
+    } catch (e) {
+      bubble('assistant', { text: "⚠️ Can't reach the backend for transcription." });
+    } finally {
+      input.placeholder = prevPh; micBtn.disabled = false;
+    }
+  }
+
+  // Fallback: on-device browser speech recognition.
+  function browserSTTFallback() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) { alert('Voice input needs Chrome/Edge.'); return null; }
+    if (!SR) { alert('Voice input not supported on this browser.'); return; }
     const r = new SR(); r.lang = SPEECH[LANG] || 'en-US'; r.interimResults = true; r.continuous = false;
     r.onstart = () => { listening = true; micBtn.classList.add('on'); };
     r.onend = () => { listening = false; micBtn.classList.remove('on'); };
@@ -123,15 +173,15 @@
         const t = e.results[i][0].transcript;
         if (e.results[i].isFinal) final += t; else interim += t;
       }
-      input.value = (final || interim);
-      autosize();
-      if (final.trim()) { setTimeout(() => sendChat(), 300); }
+      input.value = (final || interim); autosize();
+      if (final.trim()) setTimeout(() => sendChat(), 300);
     };
-    return r;
+    recog = r; try { r.start(); } catch (e) {}
   }
+
   if (micBtn) micBtn.addEventListener('click', () => {
-    if (listening) { recog && recog.stop(); return; }
-    recog = setupRecog(); if (recog) try { recog.start(); } catch (e) {}
+    if (listening) { if (mediaRecorder) stopRecording(); else if (recog) recog.stop(); return; }
+    startRecording();
   });
 
   // ---------- voice output (TTS) ----------

@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Nastaliq+Urdu:wght@400;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="stylesheet" href="css/theme.css">
+  <script src="js/config.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -835,17 +836,7 @@
   </footer>
 
   <script>
-    document.getElementById('langToggle').addEventListener('click', function(e) {
-      e.stopPropagation();
-      document.getElementById('langMenu').classList.toggle('active');
-    });
-
-    document.addEventListener('click', function(e) {
-      const menu = document.getElementById('langMenu');
-      if (menu && !e.target.closest('[id="langToggle"]') && !e.target.closest('#langMenu')) {
-        menu.classList.remove('active');
-      }
-    });
+    // Language switcher toggle is wired centrally in js/lang.js (delegated).
 
     // Get Started → dashboard if logged in, else login/signup screen
     (function () {

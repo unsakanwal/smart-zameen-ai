@@ -643,9 +643,13 @@ function setLang(lang, btn) {
   set('t-home',   t.home);
   set('nav-about', t.nav_about);
   set('t-dash',   t.dash);
-  // Update the Languages button text without touching the dropdown arrow CSS trick
+  // The header switcher is a globe icon (built below) — don't overwrite its SVG,
+  // just keep an accessible label in sync with the chosen language.
   const langToggleEl = document.getElementById('langToggle');
-  if (langToggleEl) langToggleEl.textContent = t.lang_btn;
+  if (langToggleEl) {
+    langToggleEl.title = t.lang_btn;
+    langToggleEl.setAttribute('aria-label', t.lang_btn);
+  }
 
   // ── Home page ──
   const heroTitleEl = document.getElementById('hero-title');
@@ -764,8 +768,42 @@ function setLang(lang, btn) {
   }
 }
 
+// ─── HEADER LANGUAGE SWITCHER (globe icon, top-right, every page) ───
+// Relocates the existing #langToggle / #langMenu into .nav-right and restyles
+// the toggle as a compact globe so the switcher is visible on all devices
+// (it never hides inside the mobile hamburger). Same pattern as sidebar.js.
+function buildHeaderLang() {
+  const navRight = document.querySelector('.navbar .nav-right');
+  const toggle   = document.getElementById('langToggle');
+  const menu     = document.getElementById('langMenu');
+  if (!navRight || !toggle || !menu) return;
+  if (navRight.querySelector('.lang-switch')) return;   // already built
+
+  const GLOBE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20"/></svg>';
+  toggle.type = 'button';
+  toggle.className = 'lang-globe';
+  toggle.innerHTML = GLOBE + '<span class="lang-caret">▾</span>';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'lang-switch';
+  navRight.insertBefore(wrap, navRight.firstChild);
+  wrap.appendChild(toggle);
+  wrap.appendChild(menu);
+}
+
+// One delegated handler (works no matter when the switcher is (re)built, and
+// replaces the per-page inline toggle scripts).
+document.addEventListener('click', function (e) {
+  const menu = document.getElementById('langMenu');
+  if (!menu) return;
+  if (e.target.closest('#langToggle')) { e.stopPropagation(); menu.classList.toggle('active'); return; }
+  if (e.target.closest('.lang-option')) { menu.classList.remove('active'); return; }  // picked a language
+  if (!e.target.closest('#langMenu')) menu.classList.remove('active');
+});
+
 // ─── AUTO-APPLY SAVED LANGUAGE ON EVERY PAGE LOAD ───
 window.addEventListener('DOMContentLoaded', () => {
+  buildHeaderLang();
   const saved = localStorage.getItem('sz_lang') || 'en';
   setLang(saved, null);
 });

@@ -9,15 +9,32 @@ from database.db import (save_prediction, get_all_crops,
 crop_bp = Blueprint('crop', __name__)
 
 # ===== MODEL PATHS =====
-MODEL_PATH     = os.path.join(os.path.dirname(__file__), '..', 'ml_models', 'crop_model.pkl')
-ENCODER_PATH   = os.path.join(os.path.dirname(__file__), '..', 'ml_models', 'le_crop.pkl')
-LE_SEASON_PATH = os.path.join(os.path.dirname(__file__), '..', 'ml_models', 'le_season.pkl')
-LE_REGION_PATH = os.path.join(os.path.dirname(__file__), '..', 'ml_models', 'le_region.pkl')
+# The model folder was reorganised: ml_models/ -> models/{local-trained-modal,
+# crop-reccomendation-modal}. _model() resolves against whichever layout is on
+# disk so the backend keeps working either way (and after deploy).
+BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+def _model(*parts):
+    roots = [
+        os.path.join(BACKEND_DIR, 'models', 'local-trained-modal'),
+        os.path.join(BACKEND_DIR, 'models'),
+        os.path.join(BACKEND_DIR, 'ml_models'),
+    ]
+    for r in roots:
+        p = os.path.join(r, *parts)
+        if os.path.exists(p):
+            return p
+    return os.path.join(roots[0], *parts)
+
+MODEL_PATH     = _model('crop_model.pkl')
+ENCODER_PATH   = _model('le_crop.pkl')
+LE_SEASON_PATH = _model('le_season.pkl')
+LE_REGION_PATH = _model('le_region.pkl')
 
 # Higher-accuracy Kaggle Crop Recommendation model (22 crops).
 # Inputs: [N, P, K, temperature, humidity, pH, rainfall]. Used when humidity is provided.
-NEW_MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', 'ml_models', 'crop-reccomendation-modal', 'soil.pkl')
-NEW_LE_PATH    = os.path.join(os.path.dirname(__file__), '..', 'ml_models', 'crop-reccomendation-modal', 'label_encoder.pkl')
+NEW_MODEL_PATH = _model('crop-reccomendation-modal', 'soil.pkl')
+NEW_LE_PATH    = _model('crop-reccomendation-modal', 'label_encoder.pkl')
 
 model     = None
 encoder   = None

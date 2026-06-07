@@ -1,7 +1,9 @@
 # 🌾 SmartZameen AI — Project Guide (Testing & Deployment)
 
-A complete, step-by-step guide to **run, test every feature, and deploy** SmartZameen AI.
-Read this end-to-end before deploying.
+A step-by-step guide to **run, test, and deploy** SmartZameen AI to production
+(**frontend on Vercel · backend on Render · database on Neon Postgres**).
+
+For a feature/architecture overview see **`project-prd.md`**. For a quick local run see **`SETUP.md`**.
 
 ---
 
@@ -9,304 +11,180 @@ Read this end-to-end before deploying.
 
 | Layer | Tech | Notes |
 |-------|------|-------|
-| Frontend | HTML + CSS + vanilla JS | Served by Flask; shared design system in `frontend/css/theme.css` |
-| Backend | Python + Flask | Single entry point `backend/app.py` |
-| Database | SQLite | Zero-config; file auto-created at `backend/database/smartzameen.db` |
-| ML model | scikit-learn Random Forest | Trained artifacts in `backend/ml_models/*.pkl` |
-| AI services | Anthropic Claude | Soil image analysis + voice chat (needs API key) |
-| Messaging | Twilio | WhatsApp + SMS (needs Twilio creds + public URL) |
-| Weather | OpenWeatherMap | Falls back to mock data without a key |
-| IoT | Virtual sensor + simulator | No hardware required |
+| Frontend | HTML + CSS + vanilla JS | Static site on **Vercel**; shared design system in `frontend/css/theme.css` |
+| Backend | Python + Flask (gunicorn) | Single app `backend/app.py` on **Render** |
+| Database | **Neon Postgres** (prod) / SQLite (local) | Auto-selected by `DATABASE_URL`; `psycopg` driver |
+| ML models | scikit-learn | `backend/models/local-trained-modal/` + `backend/models/crop-reccomendation-modal/` |
+| AI assistant | **OpenAI** (`gpt-4o-mini` + `whisper-1`) | Chat (text/vision/file) + voice. **No Anthropic.** |
+| Messaging | Twilio | WhatsApp + SMS (needs creds + public URL) |
+| Weather | OpenWeatherMap | **Real data only** — no mock fallback |
+| IoT | Virtual sensor + HTML simulator | No hardware required |
 
-### Final folder structure
+### Folder structure
 
 ```
 smart-zameen-ai/
 ├── backend/
-│   ├── app.py                  # Flask app (entry point)
+│   ├── app.py                       # Flask app (serves API + frontend locally)
 │   ├── requirements.txt
-│   ├── .env                    # API keys (you create this)
-│   ├── database/db.py          # SQLite layer
-│   ├── routes/                 # crop, weather, whatsapp, sms, image, voice, sensor
-│   ├── virtual_sensor.py       # CLI virtual IoT node
-│   └── ml_models/              # trained .pkl artifacts  (renamed from models/)
+│   ├── Procfile                     # gunicorn app:app
+│   ├── .env / .env.example          # secrets (gitignored)
+│   ├── database/db.py               # dual-mode: Neon Postgres OR SQLite
+│   ├── routes/                      # crop, weather, whatsapp, sms, image, voice, sensor, chat
+│   ├── virtual_sensor.py            # CLI virtual IoT node
+│   └── models/
+│       ├── local-trained-modal/     # crop_model.pkl, le_*.pkl, soil_classifier.pkl, soil_classes.json
+│       └── crop-reccomendation-modal/  # soil.pkl, label_encoder.pkl (higher-accuracy Kaggle model)
 ├── frontend/
 │   ├── *.html
-│   ├── assets/
-│   │   ├── favicon.svg
-│   │   └── images/             # all images live here
-│   ├── css/theme.css           # shared design tokens + components
-│   └── js/
-├── model-training/             # training scripts + dataset (renamed from ml_training/)
-├── README.md
-└── PROJECT-GUIDE.md            # this file
+│   ├── css/theme.css
+│   └── js/                          # config.js (backend URL), lang, main, chat, camera, sidebar
+├── render.yaml                      # Render blueprint (backend)
+├── project-prd.md · PROJECT-GUIDE.md · SETUP.md · README.md
 ```
 
-> ⚠️ **Cleanup note:** there is a leftover nested folder `backend/ml_models/models/`
-> (an accidental duplicate of two `.pkl` files from earlier). Nothing references it.
-> It is safe to delete: `Remove-Item -Recurse backend/ml_models/models`.
-
 ---
 
-## 2. Prerequisites
+## 2. Local setup & run
 
-| Tool | Version | Check |
-|------|---------|-------|
-| Python | 3.10+ (tested on 3.14) | `python --version` |
-| pip | latest | `pip --version` |
-
-No MySQL, no Node.js required.
-
----
-
-## 3. Local setup
+See **`SETUP.md`** for full detail. Short version:
 
 ```powershell
-# from the project root
 cd backend
-
-# create + activate a virtual environment
-python -m venv venv
-venv\Scripts\activate          # Windows
-# source venv/bin/activate     # macOS/Linux
-
-# install dependencies
+python -m venv venv ; venv\Scripts\activate
 pip install -r requirements.txt
+copy .env.example .env          # then fill in OPENAI_API_KEY, WEATHER_API_KEY, (DATABASE_URL)
+python app.py                   # http://localhost:80  (or :5000)
 ```
 
-### Create `backend/.env` (optional but recommended)
-
-```
-ANTHROPIC_API_KEY=your_anthropic_key_here     # soil image + voice AI
-WEATHER_API_KEY=your_openweather_key_here      # real weather (else mock data)
-TWILIO_ACCOUNT_SID=your_twilio_sid_here         # WhatsApp + SMS
-TWILIO_AUTH_TOKEN=your_twilio_token_here
-TWILIO_PHONE=+14155238886
-```
-
-> Without keys the **core app still runs** — crop prediction, the IoT simulator,
-> weather (mock), and auth all work. Only the AI image/voice and messaging
-> features need their respective keys.
+Locally the backend serves the frontend too, so open `http://localhost:80/`.
 
 ---
 
-## 4. Run it
+## 3. Feature test checklist
 
+Replace `BASE` with your local URL (`http://localhost:80` or `:5000`) or your Render URL.
+
+### 3.1 Crop prediction (core ML)
+`POST BASE/api/predict-crop`
 ```powershell
-cd backend
-python app.py
+Invoke-RestMethod -Uri "$BASE/api/predict-crop" -Method Post -ContentType "application/json" `
+  -Body '{"nitrogen":80,"phosphorus":40,"potassium":30,"ph":6.8,"temperature":24,"rainfall":150,"region":"Punjab","season":"rabi","humidity":60}'
 ```
+**Expect:** a crop + confidence + `top3`. The prediction is saved to the DB.
 
-You'll see:
+### 3.2 IoT simulator + virtual sensor
+- HTML: `BASE/crop-advisor.html` → IoT tab → adjust sliders → **Transmit** → AI card fills in.
+- CLI: `python virtual_sensor.py --once`
+- `POST BASE/api/sensor-ingest` stores the reading; `BASE/dashboard.html` shows it **Live**.
 
-```
-SmartZameen Backend
-[OK] Database ready!
-Server: http://localhost:80      (or :5000 if port 80 is busy)
-```
+### 3.3 Dashboard (real data)
+Open `BASE/dashboard.html` → stats, recent predictions, weather card and forecast all load
+from the API. Empty states show "—" (no fake numbers).
 
-> **Port note:** the app tries **port 80** first and automatically **falls back to
-> port 5000** if 80 needs admin / is taken. Use whichever URL it prints.
+### 3.4 Weather (real only)
+`Invoke-RestMethod "$BASE/api/weather?city=lahore"` → real temp/humidity/wind.
+Without `WEATHER_API_KEY` it returns `success:false` (UI shows a neutral state).
 
-Open the app at the printed URL, e.g. `http://localhost:80` or `http://localhost:5000`.
+### 3.5 Soil image analysis
+`BASE/crop-advisor.html` → camera/upload a soil photo → soil type + estimated N/P/K/pH
+(auto-fills only soil fields; you enter temperature/rainfall).
 
-| Page | Path |
-|------|------|
-| Home (portfolio) | `/` or `/index.html` |
-| Dashboard (app hub) | `/dashboard.html` |
-| Crop Advisor — Crop Prediction tab | `/crop-advisor.html` |
-| Crop Advisor — IoT Sensors tab | `/crop-advisor.html?tab=iot` |
-| Login / Sign up | `/login.html`, `/signup.html` |
+### 3.6 AI chat + voice (OpenAI)
+`BASE/ai-agent.html` → type a question (any of the 5 languages), send a crop/soil **photo**,
+or tap the **mic** to speak (audio → Whisper → text → reply). Needs `OPENAI_API_KEY`.
 
-> **App structure:** the home page is a portfolio that funnels into the app via its
-> CTA buttons (which open the **Dashboard**). The Dashboard and **Crop Advisor**
-> (Crop AI + IoT sensors, merged into one tabbed page) are the actual application.
+### 3.7 Auth
+`BASE/signup.html` → create account → `BASE/login.html` → log in → dashboard.
+
+### 3.8 WhatsApp / SMS
+Needs Twilio + a public URL (your Render URL, or ngrok locally). See §5.4.
 
 ---
 
-## 5. Feature-by-feature test checklist
+## 4. Deployment — Vercel + Render + Neon
 
-Replace `BASE` below with your printed base URL (`http://localhost:80` or `:5000`).
+The frontend (Vercel) and backend (Render) are **separate origins**; the database is **Neon**.
 
-### ✅ 5.1 Crop prediction (core ML)
-1. Open `BASE/crop-advisor.html` (the **Crop Prediction** tab is default).
-2. Fill N=80, P=42, K=42, pH=6.5, Temp=18, Rainfall=70, Region=Punjab, Season=Rabi.
-3. Click **Get Best Crop Recommendation**.
-4. **Expect:** result card shows **Wheat** with ~94% confidence + top-3 list.
+### 4.1 Database — Neon Postgres (free)
+1. Create a project at **neon.tech** → copy the **connection string**
+   (`postgresql://…?sslmode=require`).
+2. You'll paste it into Render as `DATABASE_URL` (step 4.2). Tables are created automatically
+   on first backend start.
 
-CLI check (PowerShell):
-```powershell
-Invoke-RestMethod -Uri "http://localhost:80/api/predict-crop" -Method Post -ContentType "application/json" -Body '{"nitrogen":80,"phosphorus":42,"potassium":42,"ph":6.5,"temperature":18,"rainfall":70,"region":"Punjab","season":"Rabi"}'
-```
-Expect `crop: wheat`, `confidence: ~94`.
+### 4.2 Backend — Render (free)
+1. Push the repo to GitHub. Ensure `backend/models/**` is committed (the `.pkl` files are
+   needed at runtime — they're ~17 MB total, well under GitHub limits).
+2. Render → **New → Blueprint** → pick the repo (it reads **`render.yaml`** automatically:
+   root `backend`, build `pip install -r requirements.txt`, start `gunicorn app:app`).
+3. In the Render dashboard set the env vars (all marked `sync:false` in the blueprint):
+   `DATABASE_URL`, `OPENAI_API_KEY`, `WEATHER_API_KEY`, `TWILIO_ACCOUNT_SID`,
+   `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE`.
+4. Deploy. Note your backend URL: `https://<your-app>.onrender.com`.
 
-### ✅ 5.2 IoT Soil Sensor Simulator (the highlight)
-1. Open `BASE/crop-advisor.html?tab=iot` (or the **IoT Sensors** tab).
-2. Click a preset (e.g. **🌾 Rice**) or drag the sliders.
-3. Watch the **radar chart**, **soil core**, and **wiring diagram values** update live.
-4. Click **Transmit Reading** → wires animate, and the **AI Crop Recommendation**
-   card fills in from the real model (Rice ≈ 67%).
-5. Try **Auto-Stream (5s)** to simulate a live device.
+> **Free-tier notes:** the service sleeps after ~15 min idle (first request is slow), and
+> 512 MB RAM is tight with the 14 MB model — upgrade to **Starter** if it OOMs. Neon keeps
+> data persistent regardless.
 
-CLI check:
-```powershell
-Invoke-RestMethod -Uri "http://localhost:80/api/sensor-ingest" -Method Post -ContentType "application/json" -Body '{"nitrogen":95,"phosphorus":55,"potassium":45,"ph":6.2,"temperature":28,"rainfall":210,"moisture":85,"region":"Sindh","season":"Kharif","node_id":"SIM-NODE-01"}'
-```
-Expect `predicted_crop: rice` and a `prediction` object with `top3`.
+### 4.3 Frontend — Vercel (free)
+1. Edit **`frontend/js/config.js`** → set `BACKEND_URL` to your Render URL → commit & push.
+2. Vercel → **New Project** → import the repo → set **Root Directory = `frontend`** →
+   framework preset **Other** (static) → Deploy.
+3. Visit your Vercel URL. It calls the Render backend (CORS is already enabled).
 
-### ✅ 5.3 Virtual sensor (no-hardware IoT, command line)
-With the server running, in a second terminal:
-```powershell
-cd backend
-venv\Scripts\activate
-python virtual_sensor.py --once                 # send one reading
-python virtual_sensor.py --interval 3           # stream every 3s (Ctrl+C to stop)
-python virtual_sensor.py --node ESP32-A0        # pretend to be hardware
-```
-Then open `BASE/dashboard.html` → the **Connected Soil Node** tile shows the live reading.
-
-### ✅ 5.4 Dashboard live tile
-1. Open `BASE/dashboard.html`.
-2. In another tab, transmit from the simulator (5.2) or run the virtual sensor (5.3).
-3. **Expect:** the "Connected Soil Node" card switches to **Live** and shows the values + suggested crop within ~3s.
-
-### ✅ 5.5 Weather
-1. Dashboard → change the city dropdown.
-2. CLI: `Invoke-RestMethod "http://localhost:80/api/weather?city=lahore"`
-3. **Expect:** temp/humidity/wind. (Mock data if `WEATHER_API_KEY` not set — still 200 OK.)
-
-### ✅ 5.6 Soil image analysis *(needs `ANTHROPIC_API_KEY`)*
-1. `BASE/crop-advisor.html` → **Open Camera** or upload a soil photo.
-2. **Expect:** detected soil type + estimated NPK/pH + Urdu description.
-3. Without the key it returns a clear "not configured / fallback" message (no crash).
-
-### ✅ 5.7 Voice AI chat *(needs `ANTHROPIC_API_KEY`, Chrome recommended)*
-1. `BASE/crop-advisor.html?mode=voice` → toggle Voice Mode → tap the mic, speak.
-2. **Expect:** speech-to-text + a short spoken reply.
-
-### ✅ 5.8 Auth (login / signup)
-1. `BASE/signup.html` → create an account → should succeed and store a token.
-2. `BASE/login.html` → log in with the same credentials → redirects to dashboard.
-3. CLI:
-```powershell
-Invoke-RestMethod -Uri "http://localhost:80/signup" -Method Post -ContentType "application/json" -Body '{"name":"Test","email":"t@t.com","password":"secret123"}'
-```
-
-### ✅ 5.9 WhatsApp / SMS *(needs Twilio + a public URL — see §6.4)*
-- Local testing requires a tunnel (ngrok) because Twilio can't reach `localhost`.
-
-### Quick smoke test (all core endpoints at once)
-```powershell
-$base = "http://localhost:80"
-"GET  /";              (Invoke-WebRequest "$base/").StatusCode
-"GET  crop-advisor";   (Invoke-WebRequest "$base/crop-advisor.html").StatusCode
-"GET  favicon";        (Invoke-WebRequest "$base/assets/favicon.svg").StatusCode
-"GET  weather";        (Invoke-RestMethod "$base/api/weather?city=multan").temperature
-"POST predict-crop";   (Invoke-RestMethod "$base/api/predict-crop" -Method Post -ContentType "application/json" -Body '{"nitrogen":80,"phosphorus":42,"potassium":42,"ph":6.5,"temperature":18,"rainfall":70,"region":"Punjab","season":"Rabi"}').crop
-```
-
----
-
-## 6. Deployment
-
-The app is a single Flask service that serves **both** the API and the static frontend,
-so you deploy **one thing**.
-
-### 6.0 Pre-deploy hardening (do this first)
-1. **Turn off debug.** In `backend/app.py` the dev server uses `debug=True`. For
-   production use a real WSGI server (below) — don't run `python app.py` in prod.
-2. **Don't commit secrets.** Keep `.env` out of git; set the same keys as
-   environment variables on the host.
-3. **Bind the host's port.** Most platforms inject a `$PORT` env var — use it.
-
-A production-friendly entry is simply the existing `app` object in `backend/app.py`
-(`app = Flask(...)`), so any WSGI server can serve `app:app`.
-
-### 6.1 Option A — Render.com (easiest free host)
-1. Push the repo to GitHub.
-2. Add `gunicorn>=22.0` to `backend/requirements.txt` (uncomment the line already there).
-3. Create a **Web Service** on Render → connect the repo.
-   - **Root Directory:** `backend`
-   - **Build Command:** `pip install -r requirements.txt`
-   - **Start Command:** `gunicorn app:app --bind 0.0.0.0:$PORT`
-4. Add environment variables (ANTHROPIC_API_KEY, WEATHER_API_KEY, Twilio…) in the dashboard.
-5. Deploy. Your app is at `https://<your-app>.onrender.com`.
-
-> SQLite works on a single Render instance but resets on redeploy/restart (ephemeral
-> disk). For persistent data, attach a Render Disk mounted at `backend/database/`,
-> or move to Postgres later.
-
-### 6.2 Option B — Railway
-1. New Project → Deploy from GitHub.
-2. Set **Root Directory** = `backend`.
-3. Start command: `gunicorn app:app --bind 0.0.0.0:$PORT`
-4. Add env vars. Railway gives you a public domain.
-
-### 6.3 Option C — Windows VPS / your own machine
-Use **waitress** (pure-Python, Windows-friendly):
-```powershell
-cd backend
-venv\Scripts\activate
-pip install waitress
-waitress-serve --listen=0.0.0.0:8000 app:app
-```
-Put Nginx/Caddy in front for HTTPS if exposing publicly.
-
-### 6.4 Twilio WhatsApp / SMS webhooks
-After deploying to a public HTTPS URL:
+### 4.4 Twilio WhatsApp / SMS webhooks
+After the backend is public:
 1. Twilio Console → WhatsApp Sandbox / Messaging.
-2. Set the inbound webhook to `https://<your-domain>/whatsapp` (and `/sms`).
-3. For **local** testing use ngrok:
-   ```powershell
-   ngrok http 80           # or 5000 / 8000 — match your running port
-   ```
-   then point the Twilio webhook at the ngrok HTTPS URL.
+2. Set the inbound webhook to `https://<your-app>.onrender.com/whatsapp` (and `/sms`).
+3. For local testing use `ngrok http 80` and point the webhook at the ngrok HTTPS URL.
 
-### 6.5 Frontend → backend URL
-Pages call the API with **relative paths** (e.g. `/api/sensor-ingest`), so once the
-frontend is served by the same Flask app, **no URL changes are needed** in production.
-(The login page already auto-detects the origin.)
+### 4.5 Frontend → backend URL (how it resolves)
+`frontend/js/config.js` is the single source of truth. It:
+- uses `http://localhost:5000` when opened as a `file://`,
+- uses same-origin when served by Flask locally,
+- otherwise uses `BACKEND_URL` (your Render URL) — i.e. on Vercel.
+
+Every page loads `config.js` first, and every API call is routed through it.
 
 ---
 
-## 7. Retraining the model
+## 5. Retraining the models
 
 ```powershell
 cd model-training
-python train_model.py                # retrains crop model → writes backend/ml_models/*.pkl
-python train_soil_cnn.py             # (optional) soil-image classifier
+python train_model.py        # → backend/models/local-trained-modal/crop_model.pkl + encoders
+python train_soil_cnn.py     # (optional) → soil_classifier.pkl
 ```
-The crop script prints accuracy and saves `crop_model.pkl` + encoders into
-`backend/ml_models/`. Restart the backend to load the new model.
+Restart the backend to load new artifacts. Keep the scikit-learn version close to the one in
+`requirements.txt` so the pickles load cleanly.
 
 ---
 
-## 8. Troubleshooting
+## 6. Troubleshooting
 
 | Symptom | Cause / Fix |
 |---------|-------------|
-| "Backend offline" in the simulator | Server not running, or wrong port — check the URL the server printed and that the Ingest URL field matches. |
-| Port 80 error on start | Run as admin, or just let it fall back to 5000 (automatic), or change the port in `app.py`. |
-| Predictions look like guesses, low variety | Confirm `[OK] ML Model load ho gaya!` appears at startup. If you see a model-load warning, the `.pkl` files in `backend/ml_models/` are missing — retrain (§7). |
-| Soil image / voice "not configured" | `ANTHROPIC_API_KEY` not set in `backend/.env`. |
-| Weather shows generic values | `WEATHER_API_KEY` not set → mock data (expected). |
-| WhatsApp messages never arrive | Twilio webhook must point at a **public** URL, not localhost (use ngrok / deployed URL). |
-| Images/logo not showing | Confirm they exist under `frontend/assets/images/` and pages reference `assets/images/...`. |
-| sklearn "InconsistentVersionWarning" | Harmless version notice; the model still loads and predicts. Retrain to silence it. |
+| Vercel site loads but API calls fail | `BACKEND_URL` in `frontend/js/config.js` not set to the Render URL (or Render is asleep — retry after ~30s). |
+| `[OK] Database ready! (SQLite)` in prod | `DATABASE_URL` not set on Render → set the Neon string and redeploy. |
+| Chat/voice error "OpenAI API key not set" | Add `OPENAI_API_KEY` on Render (and `backend/.env` locally). |
+| Weather shows "—" | `WEATHER_API_KEY` missing — real data only, no mock. |
+| Model-load warning at startup | Harmless sklearn version notice; the model still predicts. Retrain to silence. |
+| Render build fails on a pinned wheel | Keep `requirements.txt` on version floors (`>=`); `PYTHON_VERSION` is pinned to 3.12 for stable wheels. |
+| WhatsApp messages never arrive | Twilio webhook must point at the public Render URL, not localhost. |
 
 ---
 
-## 9. Pre-deploy checklist
+## 7. Pre-deploy checklist
 
 - [ ] `pip install -r requirements.txt` succeeds in a fresh venv
-- [ ] `python app.py` boots and prints `[OK] ML Model load ho gaya!`
-- [ ] Crop prediction returns a sensible crop (§5.1)
-- [ ] Simulator transmits and shows a model result (§5.2)
-- [ ] Dashboard live tile updates (§5.4)
-- [ ] Favicon + images load (no 404s in browser dev tools → Network)
-- [ ] Secrets are in env vars, not committed
-- [ ] Production server (`gunicorn`/`waitress`) used instead of the dev server
-- [ ] Twilio webhooks point at the public URL (if using WhatsApp/SMS)
+- [ ] `python app.py` boots, prints `[OK] ML Model load ho gaya!` and the DB mode
+- [ ] Crop prediction, dashboard, weather, chat all work locally (§3)
+- [ ] `backend/models/**` committed to git
+- [ ] Neon `DATABASE_URL` + all API keys set in Render env (not committed)
+- [ ] `frontend/js/config.js` → `BACKEND_URL` = Render URL
+- [ ] Frontend deployed on Vercel (Root Directory = `frontend`)
+- [ ] Twilio webhooks point at the public Render URL (if using WhatsApp/SMS)
+- [ ] Any credentials shared during development have been rotated
 
 ---
 

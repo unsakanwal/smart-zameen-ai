@@ -1,55 +1,71 @@
+"""
+voice_routes.py — Speech-to-text for the Crop Advisor chat (OpenAI Whisper).
+
+The voice feature lives inside the main chat: the browser records the farmer's
+voice, uploads it here, and we transcribe it with OpenAI Whisper (far more
+accurate for Urdu / Punjabi / Sindhi / Pashto than the browser's built-in
+recognizer). The transcribed text is then sent through the normal /api/chat
+flow, so a single OpenAI-powered assistant handles text, image AND voice.
+
+    from routes.voice_routes import voice_bp
+    app.register_blueprint(voice_bp)
+"""
+
 import os
-import anthropic
+import requests
 from flask import Blueprint, request, jsonify
 
 voice_bp = Blueprint('voice', __name__)
 
-@voice_bp.route('/api/voice-chat', methods=['POST'])
-def voice_chat():
+OPENAI_TRANSCRIBE_URL = "https://api.openai.com/v1/audio/transcriptions"
+WHISPER_MODEL = os.getenv("OPENAI_WHISPER_MODEL", "whisper-1")
+
+# UI language code -> ISO-639-1 hint for Whisper (improves accuracy a lot).
+LANG_HINT = {'ur': 'ur', 'pa': 'pa', 'sd': 'sd', 'ps': 'ps', 'en': 'en'}
+
+
+@voice_bp.route('/api/transcribe', methods=['POST'])
+def transcribe():
+    """Accept an uploaded audio blob ('audio' multipart field) and return its
+    text via OpenAI Whisper. Optional 'lang' form field hints the language."""
+    key = os.getenv("OPENAI_API_KEY")
+    if not key:
+        return jsonify({'ok': False,
+                        'error': 'OpenAI API key not set. Add OPENAI_API_KEY to backend/.env.'}), 503
+
+    if 'audio' not in request.files:
+        return jsonify({'ok': False, 'error': 'No audio uploaded.'}), 400
+
+    audio = request.files['audio']
+    lang = (request.form.get('lang') or '').strip().lower()
+
     try:
-        data    = request.get_json()
-        message = data.get('message', '').strip()
-        lang    = data.get('lang', 'ur-PK')
-        history = data.get('history', [])
+        files = {'file': (audio.filename or 'voice.webm',
+                          audio.stream,
+                          audio.mimetype or 'audio/webm')}
+        data = {'model': WHISPER_MODEL}
+        if lang in LANG_HINT:
+            data['language'] = LANG_HINT[lang]
 
-        if not message:
-            return jsonify({'error': 'Message khali hai!'}), 400
-
-        lang_name = {
-            'ur-PK': 'Urdu', 'pa-PK': 'Punjabi',
-            'sd-PK': 'Sindhi', 'ps-AF': 'Pashto', 'en-US': 'English'
-        }.get(lang, 'Urdu')
-
-        system = f"""You are SmartZameen AI — a friendly, expert agricultural assistant for Pakistani farmers.
-
-RULES:
-- Reply ONLY in {lang_name} language
-- Keep replies SHORT: 2-3 sentences maximum
-- Use simple, easy words that farmers understand
-- Be warm, helpful, and encouraging
-- Topics: crops, soil, fertilizer, pesticides, irrigation, weather, pests, diseases, harvest, market prices, seeds
-- If asked soil form data: tell them to say province + season + numbers like "Punjab, Rabi, 80 40 30 6.8 24 150"
-- Never give harmful advice
-- Always give practical, actionable tips"""
-
-        messages = []
-        for h in history[-6:]:
-            if h.get('role') in ('user', 'assistant'):
-                messages.append({'role': h['role'], 'content': h['content']})
-        messages.append({'role': 'user', 'content': message})
-
-        client = anthropic.Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY', ''))
-        response = client.messages.create(
-            model      = 'claude-haiku-4-5-20251001',
-            max_tokens = 300,
-            system     = system,
-            messages   = messages,
+        res = requests.post(
+            OPENAI_TRANSCRIBE_URL,
+            headers={'Authorization': f'Bearer {key}'},
+            files=files,
+            data=data,
+            timeout=60,
         )
+        if res.status_code != 200:
+            detail = ''
+            try:
+                detail = res.json().get('error', {}).get('message', '')
+            except Exception:
+                detail = res.text[:200]
+            return jsonify({'ok': False, 'error': f'Whisper error ({res.status_code}): {detail}'}), 502
 
-        reply = response.content[0].text.strip()
-        return jsonify({'success': True, 'reply': reply})
+        text = (res.json().get('text') or '').strip()
+        return jsonify({'ok': True, 'text': text})
 
-    except anthropic.APIError as e:
-        return jsonify({'error': f'AI error: {str(e)}'}), 500
+    except requests.exceptions.Timeout:
+        return jsonify({'ok': False, 'error': 'Transcription timed out — please try again.'}), 504
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'ok': False, 'error': f'Transcription failed: {type(e).__name__}: {e}'}), 500

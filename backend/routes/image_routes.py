@@ -68,9 +68,20 @@ def extract_cnn_features(image_bytes):
 # ===================================================
 # CLASSIFIER MODEL LOADER
 # ===================================================
-MODEL_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'ml_models')
-MODEL_PATH = os.path.join(MODEL_DIR, 'soil_classifier.pkl')
-CLASSES_PATH = os.path.join(MODEL_DIR, 'soil_classes.json')
+# Resolve against the reorganised model folder (models/local-trained-modal/),
+# falling back to the legacy ml_models/ layout if that's what's on disk.
+_BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+def _model_file(name):
+    for root in (os.path.join(_BACKEND_DIR, 'models', 'local-trained-modal'),
+                 os.path.join(_BACKEND_DIR, 'models'),
+                 os.path.join(_BACKEND_DIR, 'ml_models')):
+        p = os.path.join(root, name)
+        if os.path.exists(p):
+            return p
+    return os.path.join(_BACKEND_DIR, 'models', 'local-trained-modal', name)
+
+MODEL_PATH = _model_file('soil_classifier.pkl')
+CLASSES_PATH = _model_file('soil_classes.json')
 
 clf = None
 classes = None
@@ -227,13 +238,14 @@ def analyze_soil_image():
         # 3. Retrieve predefined soil characteristics
         properties = SOIL_PROPERTIES.get(predicted_class, SOIL_PROPERTIES['loam'])
 
+        # Only fill what the image actually informs (soil NPK + pH from the
+        # detected soil type). Temperature & rainfall are environmental — the
+        # farmer enters those, so we don't fabricate them here.
         auto_fill = {
             'nitrogen':    properties['nitrogen'],
             'phosphorus':  properties['phosphorus'],
             'potassium':   properties['potassium'],
             'ph':          properties['ph'],
-            'temperature': 24,  # default placeholder
-            'rainfall':    150, # default placeholder
         }
 
         soil_analysis = {

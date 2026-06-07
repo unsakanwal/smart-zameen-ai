@@ -27,9 +27,10 @@ PAKISTAN_CITIES = {
 def get_weather():
     city = request.args.get('city', 'multan').lower()
 
-    # API key check karo
-    if WEATHER_API_KEY == 'YOUR_API_KEY_HERE':
-        return jsonify(get_mock_weather(city))
+    # Real data only — no mock fallback. Requires a configured WEATHER_API_KEY.
+    if not WEATHER_API_KEY or WEATHER_API_KEY == 'YOUR_API_KEY_HERE':
+        return jsonify({'success': False,
+                        'error': 'Weather service not configured. Set WEATHER_API_KEY.'}), 503
 
     try:
         city_info = PAKISTAN_CITIES.get(city, PAKISTAN_CITIES['multan'])
@@ -42,7 +43,7 @@ def get_weather():
             'lang':  'ur'
         }
 
-        res  = requests.get(WEATHER_URL, params=params, timeout=5)
+        res  = requests.get(WEATHER_URL, params=params, timeout=8)
         data = res.json()
 
         if res.status_code == 200:
@@ -58,13 +59,13 @@ def get_weather():
                 'rainfall':    data.get('rain', {}).get('1h', 0),
                 'icon':        data['weather'][0]['icon'],
             })
-        else:
-            return jsonify(get_mock_weather(city))
+        return jsonify({'success': False,
+                        'error': data.get('message', 'Weather provider error')}), 502
 
     except requests.exceptions.Timeout:
-        return jsonify(get_mock_weather(city))
+        return jsonify({'success': False, 'error': 'Weather request timed out.'}), 504
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 # ===== ROUTE 2: AGLAY 5 DIN KA MAUSAM =====
@@ -72,8 +73,9 @@ def get_weather():
 def get_forecast():
     city = request.args.get('city', 'multan').lower()
 
-    if WEATHER_API_KEY == 'YOUR_API_KEY_HERE':
-        return jsonify(get_mock_forecast(city))
+    if not WEATHER_API_KEY or WEATHER_API_KEY == 'YOUR_API_KEY_HERE':
+        return jsonify({'success': False,
+                        'error': 'Weather service not configured. Set WEATHER_API_KEY.'}), 503
 
     try:
         city_info = PAKISTAN_CITIES.get(city, PAKISTAN_CITIES['multan'])
@@ -86,7 +88,7 @@ def get_forecast():
             'cnt':   5   # aglay 5 readings
         }
 
-        res  = requests.get(FORECAST_URL, params=params, timeout=5)
+        res  = requests.get(FORECAST_URL, params=params, timeout=8)
         data = res.json()
 
         if res.status_code == 200:
@@ -101,10 +103,11 @@ def get_forecast():
                 })
             return jsonify({'success': True, 'city': city, 'forecast': forecast})
 
-        return jsonify(get_mock_forecast(city))
+        return jsonify({'success': False,
+                        'error': data.get('message', 'Weather provider error')}), 502
 
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 # ===== ROUTE 3: SAARE SHAHAR =====
@@ -117,44 +120,3 @@ def get_cities():
             for k, v in PAKISTAN_CITIES.items()
         ]
     })
-
-
-# ===== MOCK DATA =====
-def get_mock_weather(city):
-    mock = {
-        'lahore':    {'temp': 22, 'humidity': 60, 'desc': 'Halka Mausam'},
-        'karachi':   {'temp': 28, 'humidity': 75, 'desc': 'Humid Mausam'},
-        'multan':    {'temp': 24, 'humidity': 55, 'desc': 'Dhoop, Halki Hawa'},
-        'peshawar':  {'temp': 19, 'humidity': 50, 'desc': 'Thanda Mausam'},
-        'quetta':    {'temp': 16, 'humidity': 45, 'desc': 'Sard Mausam'},
-        'faisalabad':{'temp': 23, 'humidity': 58, 'desc': 'Halki Dhoop'},
-        'islamabad': {'temp': 20, 'humidity': 62, 'desc': 'Halki Baarish'},
-        'hyderabad': {'temp': 26, 'humidity': 70, 'desc': 'Garmi ka Mausam'},
-    }
-    m = mock.get(city, mock['multan'])
-    return {
-        'success':     True,
-        'city':        city,
-        'urdu_city':   PAKISTAN_CITIES.get(city, {}).get('urdu', city),
-        'temperature': m['temp'],
-        'feels_like':  m['temp'] - 2,
-        'humidity':    m['humidity'],
-        'description': m['desc'],
-        'wind_speed':  18,
-        'rainfall':    0,
-        'note':        'Mock data — API key lagayen real data ke liye'
-    }
-
-
-def get_mock_forecast(city):
-    return {
-        'success': True,
-        'city': city,
-        'forecast': [
-            {'time': 'Aaj',         'temperature': 24, 'humidity': 55, 'rainfall': 0,    'description': 'Dhoop'},
-            {'time': 'Kal',         'temperature': 22, 'humidity': 60, 'rainfall': 5,    'description': 'Partial Clouds'},
-            {'time': 'Parson',      'temperature': 20, 'humidity': 65, 'rainfall': 12,   'description': 'Halki Baarish'},
-            {'time': '3 din baad',  'temperature': 23, 'humidity': 58, 'rainfall': 0,    'description': 'Dhoop'},
-            {'time': '4 din baad',  'temperature': 25, 'humidity': 52, 'rainfall': 0,    'description': 'Saaf Asman'},
-        ]
-    }

@@ -6,6 +6,7 @@
   <title>Weather — SmartZameen AI</title>
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="stylesheet" href="css/theme.css">
+  <script src="js/config.js"></script>
   <style>
     .wx-wrap { max-width: 1100px; margin: 0 auto; padding: 28px clamp(16px,4vw,40px) 60px; }
     .wx-head { display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:14px; margin-bottom:24px; }
@@ -137,7 +138,7 @@
     const pill = (icon,label,val) => `${ICONS[icon]}<span>${label} <b>${val}</b></span>`;
 
     function load(city){
-      fetch('/api/weather?city='+city).then(r=>r.json()).then(d=>{
+      fetch((window.SZ_API || '') + '/api/weather?city='+city).then(r=>r.json()).then(d=>{
         document.getElementById('wx-icon').innerHTML = pick(d.description||'');
         document.getElementById('wx-cityname').textContent = (d.urdu_city||city);
         document.getElementById('wx-temp').textContent = d.temperature ?? '—';
@@ -149,7 +150,7 @@
         document.getElementById('wx-note').textContent = d.note ? '⚠ '+d.note : '';
       }).catch(()=>{ document.getElementById('wx-desc').textContent='Backend offline'; });
 
-      fetch('/api/weather/forecast?city='+city).then(r=>r.json()).then(d=>{
+      fetch((window.SZ_API || '') + '/api/weather/forecast?city='+city).then(r=>r.json()).then(d=>{
         const el = document.getElementById('wx-forecast');
         if(!d.forecast){ el.innerHTML=''; return; }
         el.innerHTML = d.forecast.map(f=>{

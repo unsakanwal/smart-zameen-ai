@@ -1,19 +1,21 @@
+// The backend base is normally resolved once in js/config.js (loaded first) and
+// exposed as window.API_URL / window.SZ_API. These blocks are a safety net for
+// the rare case config.js didn't load — they only run if those are still unset.
 if (typeof API_URL === 'undefined') {
     var API_URL = (window.location.protocol === 'file:' || (window.location.port !== '' && window.location.port !== '80'))
       ? 'http://localhost'
       : window.location.origin;
 }
 
-// Shared backend base used by all fetches. Relative ('') when the page is served
-// by Flask (normal). If you preview via file:// or a dev server (Live Server 5500,
-// etc.), it points at the Flask fallback port; override with window.SZ_BACKEND.
-window.SZ_API = (function () {
-    if (window.SZ_BACKEND) return window.SZ_BACKEND;
-    var dev = ['5500', '5501', '5502', '3000', '4200', '8080'];
-    if (location.protocol === 'file:') return 'http://localhost:5000';
-    if (dev.indexOf(location.port) !== -1) return 'http://' + location.hostname + ':5000';
-    return ''; // same-origin (served by Flask)
-})();
+if (typeof window.SZ_API === 'undefined') {
+    window.SZ_API = (function () {
+        if (window.SZ_BACKEND) return window.SZ_BACKEND;
+        var dev = ['5500', '5501', '5502', '3000', '4200', '8080'];
+        if (location.protocol === 'file:') return 'http://localhost:5000';
+        if (dev.indexOf(location.port) !== -1) return 'http://' + location.hostname + ':5000';
+        return ''; // same-origin (served by Flask)
+    })();
+}
 
 
 // =============
@@ -250,27 +252,6 @@ function displayResult(result) {
         // Smooth scroll karo result tak
         resultBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-    const _origDisplay = window.displayResult;
-    window.displayResult = function(result) {
-        if (_origDisplay) _origDisplay(result);
-    
-        // Speak result button add karo
-        const resultBox = document.getElementById('result-box');
-        if (resultBox && !document.getElementById('speak-btn')) {
-            const btn = document.createElement('button');
-            btn.id        = 'speak-btn';
-            btn.className = 'speak-result-btn';
-            btn.innerHTML = '🔊 <span class="urdu-font">نتیجہ سنیں</span>';
-            btn.onclick   = function() {
-                speakResult(
-                    result.crop,
-                    result.confidence,
-                    result.urdu
-                );
-            };
-            resultBox.querySelector('.result-card').appendChild(btn);
-        }
-    };
 }
 
 

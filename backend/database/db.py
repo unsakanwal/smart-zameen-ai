@@ -1,26 +1,30 @@
 """
-db.py  —  SQLite data layer for SmartZameen AI
+db.py  —  Data layer for SmartZameen AI (Neon Postgres OR SQLite)
 
-Switched from MySQL to SQLite: zero setup, zero server, zero cost. The whole
-database is a single file (smartzameen.db) created automatically next to this
-module on first run. Nothing to install — sqlite3 ships with Python.
+Dual-mode, picked automatically at startup:
+
+  • DATABASE_URL is set  ->  Neon / Postgres   (production, e.g. on Render)
+  • DATABASE_URL is empty ->  SQLite file       (local dev — zero setup)
+
+So locally you just run `python app.py` (SQLite, nothing to install), and in
+production you set DATABASE_URL to your Neon connection string and the SAME code
+talks to Postgres instead. Neon persists data across restarts/redeploys, which
+a file-based SQLite on Render's ephemeral disk does not.
 
 Public API is unchanged so the rest of the app needs no edits:
-    get_connection()    -> a DB connection (dict-style rows) or None
-    create_database()   -> creates tables + seeds sample crops (idempotent)
-    save_prediction()   -> store one crop prediction
-    get_all_crops()     -> list[dict] of seeded crops
-    save_sensor_reading() -> persist one IoT soil-sensor reading (NEW)
+    get_connection()      -> a DB connection (dict-style rows) or None
+    create_database()     -> creates tables + seeds sample crops (idempotent)
+    save_prediction()     -> store one crop prediction
+    get_all_crops()       -> list[dict] of seeded crops
+    save_sensor_reading() -> persist one IoT soil-sensor reading
 
-Compatibility shim: existing code uses MySQL-style "%s" placeholders. The
-cursor below transparently rewrites "%s" -> "?" so that raw SQL in app.py keeps
-working untouched.
+Both backends use MySQL/Postgres-style "%s" placeholders. Postgres uses them
+natively; for SQLite a tiny cursor shim rewrites "%s" -> "?".
 """
 
-import sqlite3
 import os
 
-# .env is optional now (only used for API keys elsewhere). Never let a missing
+# .env is optional (used for DATABASE_URL + API keys). Never let a missing
 # python-dotenv break the database layer.
 try:
     from dotenv import load_dotenv
@@ -28,27 +32,37 @@ try:
 except Exception:
     pass
 
-# Single-file database, created on demand right next to this module.
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'smartzameen.db')
+# Neon / Postgres when DATABASE_URL is provided; otherwise local SQLite file.
+DATABASE_URL = os.environ.get('DATABASE_URL', '').strip()
+USE_PG = bool(DATABASE_URL)
 
+if USE_PG:
+    import psycopg
+    from psycopg.rows import dict_row
+else:
+    import sqlite3
+    # Single-file database, created on demand right next to this module.
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'smartzameen.db')
 
-class _Cursor(sqlite3.Cursor):
-    """Cursor that accepts MySQL-style %s placeholders (rewritten to ?)."""
-    def execute(self, sql, params=()):
-        return super().execute(sql.replace('%s', '?'), params)
+    class _Cursor(sqlite3.Cursor):
+        """Cursor that accepts Postgres-style %s placeholders (rewritten to ?)."""
+        def execute(self, sql, params=()):
+            return super().execute(sql.replace('%s', '?'), params)
 
-    def executemany(self, sql, seq):
-        return super().executemany(sql.replace('%s', '?'), seq)
+        def executemany(self, sql, seq):
+            return super().executemany(sql.replace('%s', '?'), seq)
 
-
-class _Connection(sqlite3.Connection):
-    def cursor(self, factory=_Cursor):
-        return super().cursor(factory)
+    class _Connection(sqlite3.Connection):
+        def cursor(self, factory=_Cursor):
+            return super().cursor(factory)
 
 
 def get_connection():
-    """Return a SQLite connection with dict-style rows, or None on failure."""
+    """Return a DB connection with dict-style rows, or None on failure."""
     try:
+        if USE_PG:
+            # row_factory=dict_row makes rows behave like dicts: row['name'].
+            return psycopg.connect(DATABASE_URL, row_factory=dict_row)
         conn = sqlite3.connect(DB_PATH, timeout=5, factory=_Connection)
         conn.row_factory = sqlite3.Row        # rows behave like dicts: row['name']
         return conn
@@ -57,18 +71,25 @@ def get_connection():
         return None
 
 
+# ── Tiny dialect helpers (the only SQL that differs between the two backends) ──
+def _pk():
+    """Auto-incrementing primary-key clause for the active backend."""
+    return "SERIAL PRIMARY KEY" if USE_PG else "INTEGER PRIMARY KEY AUTOINCREMENT"
+
+
 def create_database():
     """Create all tables (idempotent) and seed sample crops."""
     conn = get_connection()
     if not conn:
-        print("[WARNING] SQLite database khol nahi saka")
+        print("[WARNING] Database khol nahi saka")
         return
     try:
         cursor = conn.cursor()
+        pk = _pk()
 
-        cursor.execute("""
+        cursor.execute(f"""
             CREATE TABLE IF NOT EXISTS users (
-                id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                id         {pk},
                 name       TEXT NOT NULL,
                 email      TEXT UNIQUE NOT NULL,
                 password   TEXT NOT NULL,
@@ -77,9 +98,9 @@ def create_database():
             )
         """)
 
-        cursor.execute("""
+        cursor.execute(f"""
             CREATE TABLE IF NOT EXISTS crops (
-                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                id          {pk},
                 name        TEXT NOT NULL UNIQUE,
                 urdu_name   TEXT,
                 season      TEXT,
@@ -91,9 +112,9 @@ def create_database():
             )
         """)
 
-        cursor.execute("""
+        cursor.execute(f"""
             CREATE TABLE IF NOT EXISTS predictions (
-                id             INTEGER PRIMARY KEY AUTOINCREMENT,
+                id             {pk},
                 nitrogen       REAL, phosphorus REAL,
                 potassium      REAL, ph         REAL,
                 temperature    REAL, rainfall   REAL,
@@ -104,9 +125,9 @@ def create_database():
             )
         """)
 
-        cursor.execute("""
+        cursor.execute(f"""
             CREATE TABLE IF NOT EXISTS soil_data (
-                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                id          {pk},
                 region      TEXT,
                 nitrogen    REAL, phosphorus REAL,
                 potassium   REAL, ph_value   REAL,
@@ -114,10 +135,10 @@ def create_database():
             )
         """)
 
-        # NEW: persistent log of IoT soil-sensor readings (virtual sensor / simulator).
-        cursor.execute("""
+        # Persistent log of IoT soil-sensor readings (virtual sensor / simulator).
+        cursor.execute(f"""
             CREATE TABLE IF NOT EXISTS sensor_readings (
-                id             INTEGER PRIMARY KEY AUTOINCREMENT,
+                id             {pk},
                 node_id        TEXT, source TEXT,
                 nitrogen       REAL, phosphorus REAL, potassium REAL, ph REAL,
                 temperature    REAL, rainfall   REAL, moisture  REAL,
@@ -128,12 +149,14 @@ def create_database():
         """)
 
         # Migration: older databases may not have the users.region column.
-        # Add it so profile updates (name/region/password) never fail.
         try:
-            cols = [r['name'] for r in cursor.execute("PRAGMA table_info(users)").fetchall()]
-            if 'region' not in cols:
-                cursor.execute("ALTER TABLE users ADD COLUMN region TEXT")
-                print("[migration] added users.region")
+            if USE_PG:
+                cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS region TEXT")
+            else:
+                cols = [r['name'] for r in cursor.execute("PRAGMA table_info(users)").fetchall()]
+                if 'region' not in cols:
+                    cursor.execute("ALTER TABLE users ADD COLUMN region TEXT")
+                    print("[migration] added users.region")
         except Exception as _e:
             print(f"[migration] users.region skipped: {_e}")
 
@@ -142,7 +165,7 @@ def create_database():
         conn.commit()
         cursor.close()
         conn.close()
-        print("[OK] Database aur tables tayar hain!")
+        print(f"[OK] Database ready! ({'Neon/Postgres' if USE_PG else 'SQLite'})")
 
     except Exception as e:
         print(f"[WARNING] Database error: {e}")
@@ -159,12 +182,15 @@ def insert_sample_crops(cursor):
         ('Chickpea',  'چنے',  'rabi',   20,  40,  10, 25, 6.0, 8.0, 'Balochistan',   'Khuski zameen'),
         ('Mango',     'آم',   'kharif', 75,  200, 24, 40, 5.5, 7.5, 'Punjab,Sindh',  'Phal'),
     ]
-    # INSERT OR IGNORE = SQLite equivalent of MySQL's INSERT IGNORE.
-    cursor.executemany("""
-        INSERT OR IGNORE INTO crops
+    # "do nothing on duplicate name" — Postgres ON CONFLICT vs SQLite OR IGNORE.
+    conflict = "ON CONFLICT (name) DO NOTHING" if USE_PG else ""
+    or_ignore = "" if USE_PG else "OR IGNORE"
+    cursor.executemany(f"""
+        INSERT {or_ignore} INTO crops
         (name, urdu_name, season, min_rain, max_rain,
          min_temp, max_temp, min_ph, max_ph, region, description)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        {conflict}
     """, crops)
     print("[OK] Sample crops data ready!")
 
@@ -233,7 +259,7 @@ def get_all_crops():
     try:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM crops")
-        # Convert sqlite3.Row -> plain dict so Flask's jsonify can serialize them.
+        # Convert rows -> plain dict so Flask's jsonify can serialize them.
         crops = [dict(r) for r in cursor.fetchall()]
         cursor.close()
         conn.close()
@@ -257,10 +283,17 @@ def get_prediction_stats():
         cur.execute("SELECT COUNT(*) AS c FROM predictions")
         total = cur.fetchone()['c']
 
-        cur.execute("""
-            SELECT COUNT(*) AS c FROM predictions
-            WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')
-        """)
+        # "predictions made this calendar month" — Postgres to_char vs SQLite strftime.
+        if USE_PG:
+            cur.execute("""
+                SELECT COUNT(*) AS c FROM predictions
+                WHERE to_char(created_at, 'YYYY-MM') = to_char(now(), 'YYYY-MM')
+            """)
+        else:
+            cur.execute("""
+                SELECT COUNT(*) AS c FROM predictions
+                WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')
+            """)
         this_month = cur.fetchone()['c']
 
         cur.execute("SELECT AVG(confidence) AS a FROM predictions")

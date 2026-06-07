@@ -179,7 +179,7 @@ function showCamControls(state) {
 }
 
 // ══════════════════════════════════════════════
-//  ANALYZE SOIL IMAGE → Claude Vision API
+//  ANALYZE SOIL IMAGE → local soil-classifier (/api/analyze-soil-image)
 // ══════════════════════════════════════════════
 async function analyzeSoilImage() {
   if (!capturedImageData) {

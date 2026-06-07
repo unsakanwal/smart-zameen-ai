@@ -28,6 +28,13 @@ app.register_blueprint(voice_bp)
 app.register_blueprint(sensor_bp)
 app.register_blueprint(chat_bp)
 
+# Ensure tables exist at import time too — under gunicorn (production) the
+# __main__ block below never runs, so create them here. Idempotent + safe.
+try:
+    create_database()
+except Exception as _e:
+    print(f"[WARNING] DB init at startup skipped: {_e}")
+
 
 # ===== HELPERS =====
 def hash_password(password):
@@ -191,12 +198,12 @@ if __name__ == '__main__':
     except Exception as e:
         print(f"[WARNING] Database error: {e}")
 
-    # Anthropic API key check
-    if not os.environ.get('ANTHROPIC_API_KEY'):
-        print("[WARNING] ANTHROPIC_API_KEY set nahi - soil image analysis fallback will be used if needed")
-        print("    Terminal mein chalao: set ANTHROPIC_API_KEY=your_key_here")
+    # OpenAI powers the chat + voice (Whisper). Warn if the key is missing.
+    if not os.environ.get('OPENAI_API_KEY'):
+        print("[WARNING] OPENAI_API_KEY set nahi — chat aur voice kaam nahi karenge.")
+        print("    backend/.env mein OPENAI_API_KEY daalein.")
     else:
-        print("[OK] Anthropic API key ready!")
+        print("[OK] OpenAI API key ready!")
 
     # Port 80 often needs admin rights on Windows (or is taken by IIS/Skype).
     # Try 80 first; if it can't bind, fall back to 5000 so the app ALWAYS runs.

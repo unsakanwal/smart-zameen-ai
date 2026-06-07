@@ -1,0 +1,35 @@
+# Render Blueprint — one service that runs the Flask backend AND serves the
+# frontend (app.py serves ../frontend as static files).
+#
+# Deploy: push this repo to GitHub -> render.com -> New -> Blueprint -> pick repo.
+# Then set the secret env vars below (they're marked sync:false) in the dashboard.
+#
+# Database: create a free Postgres at neon.tech, copy its connection string,
+# and paste it into DATABASE_URL. Without it the app falls back to SQLite, which
+# does NOT persist on Render's ephemeral disk — so set DATABASE_URL in production.
+services:
+  - type: web
+    name: smartzameen-ai
+    runtime: python
+    rootDir: backend
+    plan: free                      # 512MB RAM; upgrade to "starter" if it OOMs on the 14MB model
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --workers 1 --threads 4 --timeout 120 --bind 0.0.0.0:$PORT
+    healthCheckPath: /
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"             # stable wheels for sklearn/scipy/numpy/psycopg
+      - key: DATABASE_URL           # Neon Postgres connection string (sslmode=require)
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: WEATHER_API_KEY
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_PHONE
+        sync: false

@@ -15,13 +15,17 @@ joblib>=1.4
 scipy>=1.15
 Pillow>=11.0
 
+# --- Database ---
+# SQLite (stdlib) is used locally when DATABASE_URL is unset. In production set
+# DATABASE_URL to your Neon connection string and psycopg talks to Postgres.
+psycopg[binary]>=3.1   # Neon / Postgres driver
+
 # --- External services ---
-anthropic>=0.40        # soil-image AI fallback
 twilio>=9.3            # WhatsApp + SMS routes
 
 # --- Model training scripts in model-training/ (optional at runtime) ---
 pandas>=2.2
 
-# --- Production server (deployment only) ---
-# gunicorn>=22.0      # uncomment for Linux deploys: `gunicorn app:app`
-# waitress>=3.0       # cross-platform alternative: `waitress-serve --port=8000 app:app`
+# --- Production server (deployment) ---
+gunicorn>=22.0         # Linux deploys (Render): `gunicorn app:app`
+# waitress>=3.0        # cross-platform alternative: `waitress-serve --port=8000 app:app`

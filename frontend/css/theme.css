@@ -58,6 +58,13 @@ body {
 
 [dir="rtl"] { font-family: var(--font-urdu); }
 
+/* ---------------- Global responsive baseline ----------------
+   Keeps mobile (esp. Android) from overflowing horizontally and
+   makes media/tables shrink to the viewport instead of stretching it. */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+html, body { max-width: 100%; overflow-x: hidden; }
+img, video, canvas { max-width: 100%; height: auto; }
+
 /* ---------------- Navbar ---------------- */
 .navbar {
   display: flex; align-items: center;
@@ -169,6 +176,28 @@ body {
 .lang-option:hover { background: var(--bg-light); color: var(--accent); }
 .lang-option.on { background: #f0f8f0; color: var(--accent); font-weight: 600; }
 
+/* ---------------- Globe language switcher (header, all pages) ----------------
+   Built by lang.js and pinned to the top-right of the navbar so it stays
+   visible on every device (it never collapses into the hamburger). */
+.lang-switch { position: relative; display: flex; align-items: center; flex: 0 0 auto; }
+.lang-globe {
+  display: inline-flex; align-items: center; gap: 5px; cursor: pointer;
+  background: rgba(255,255,255,0.6); border: 1px solid var(--border);
+  color: var(--primary); padding: 7px 10px; border-radius: 10px;
+  font-family: inherit; line-height: 1; transition: var(--transition);
+}
+.lang-globe:hover { background: var(--accent-soft); border-color: var(--accent-light); }
+.lang-globe svg { width: 18px; height: 18px; display: block; }
+.lang-globe .lang-caret { font-size: 9px; opacity: 0.7; }
+/* Right-anchor the dropdown under the globe (overrides the centered base rule) */
+.lang-switch .lang-menu {
+  top: calc(100% + 8px); left: auto; right: 0; transform: none;
+  margin-top: 0; min-width: 150px;
+}
+[dir="rtl"] .lang-switch .lang-menu { left: 0; right: auto; }
+.lang-switch .lang-option { text-align: left; }
+[dir="rtl"] .lang-switch .lang-option { text-align: right; }
+
 /* ---------------- Generic card / buttons ---------------- */
 .sz-card {
   background: var(--bg); border: 1px solid var(--border);
@@ -239,7 +268,10 @@ body {
   body[data-app] .nav-center { display: none !important; }
 }
 @media (max-width: 480px) {
-  .nav-right .btn-login, .nav-right .btn-signup { padding: 7px 14px; font-size: 13px; }
+  .nav-right { gap: 8px; }
+  .nav-right .btn-login, .nav-right .btn-signup { padding: 7px 12px; font-size: 13px; }
+  .lang-globe { padding: 6px 8px; }
+  .lang-globe .lang-caret { display: none; }
 }
 
 /* ============== Shared App Sidebar (dashboard + feature pages) ============== */
@@ -265,9 +297,9 @@ body {
 .app-sidebar-divider { height: 1px; background: var(--border); margin: 14px 6px; }
 .app-main { min-width: 0; }
 
-/* Top nav: user pill + Languages dropdown removed (moved into the sidebar panel) */
-.user-pill { display: none !important; }
-.navbar .lang-btn, .navbar .lang-menu { display: none !important; }
+/* On app pages the user pill lives in the sidebar, so hide the top-nav one there.
+   (Scoped to data-app — on home/login/signup the pill must still show when logged in.) */
+body[data-app] .user-pill { display: none !important; }
 
 /* Sidebar: Languages + Logout */
 .app-sidebar-sub { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-light); padding: 6px 14px 4px; display: flex; align-items: center; gap: 8px; }

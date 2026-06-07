@@ -54,7 +54,7 @@ dist/
 *.spec
 
 # ---------- Notes ----------
-# Kept ON PURPOSE (needed to run / retrain):
-#   backend/ml_models/*.pkl          trained model artifacts
+# Kept ON PURPOSE (needed to run / retrain — must be committed for deploy):
+#   backend/models/**/*.pkl          trained model artifacts (local-trained + crop-reccomendation)
 #   model-training/dataset/**        training data (CSV + soil images)
 #   frontend/assets/**               images + favicon

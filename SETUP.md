@@ -1,46 +1,60 @@
 # SmartZameen AI — Setup & Run Guide
 
-AI crop-recommendation system with a **fully virtual IoT soil-sensor layer**
-(no hardware, no cost). Backend is **Flask + SQLite**; frontend is plain
-**HTML/CSS/JS** served by the same backend.
+AI crop-recommendation platform for Pakistani farmers.
 
-- **Database:** SQLite — a single file, created automatically. Nothing to install or configure.
-- **IoT:** simulated entirely in software (a Python virtual sensor + an HTML simulator). No ESP8266 needed.
-- **Python:** works on **Python 3.14+**. **No virtual environment required.**
+- **Frontend:** plain HTML/CSS/JS (deployed on **Vercel**).
+- **Backend:** Flask + scikit-learn (deployed on **Render**).
+- **Database:** **Neon Postgres** in production; **SQLite** locally (zero setup).
+- **AI:** **OpenAI** powers chat + voice (Whisper). Weather via OpenWeather, bots via Twilio.
+
+> Run locally with one backend that **also serves the frontend** (single origin), so you
+> don't need Vercel for development.
 
 ---
 
 ## 1. Prerequisites
 
-- **Python 3.14+** installed and on your PATH. Check:
-  ```powershell
-  python --version
-  ```
-- That's it. SQLite ships with Python — no database server to install.
+- **Python 3.10+** (3.12 recommended; matches the Render runtime). Check: `python --version`
+- That's it for local dev — SQLite ships with Python, so you don't need a database server.
 
 ---
 
 ## 2. Install dependencies (one time)
 
-From the project root:
-
 ```powershell
 cd c:\Users\Faizan\Desktop\smart-zameen-ai\backend
+python -m venv venv
+venv\Scripts\activate            # Windows  (source venv/bin/activate on macOS/Linux)
 pip install -r requirements.txt
 ```
 
-If you get a permissions warning, install into your user account instead:
-
-```powershell
-pip install --user -r requirements.txt
-```
-
-> This installs Flask, scikit-learn, NumPy, Pillow, SciPy, Twilio, Anthropic, etc.
-> The versions are chosen to have Python 3.14 wheels, so pip just downloads them — no compiling.
+This installs Flask, scikit-learn, NumPy/SciPy, Pillow, joblib, **psycopg** (Postgres),
+gunicorn, requests and Twilio.
 
 ---
 
-## 3. Run the backend
+## 3. Configure `backend/.env`
+
+Copy `backend/.env.example` to `backend/.env` and fill in your values:
+
+```
+# Leave DATABASE_URL UNSET to use a local SQLite file (no setup).
+# Set it to your Neon string to use Postgres locally too.
+# DATABASE_URL=postgresql://USER:PASSWORD@ep-xxxx.neon.tech/neondb?sslmode=require
+
+OPENAI_API_KEY=sk-...            # required for chat + voice
+WEATHER_API_KEY=...             # required for the Weather page
+TWILIO_ACCOUNT_SID=...           # optional: WhatsApp/SMS bot
+TWILIO_AUTH_TOKEN=...
+TWILIO_PHONE=+14155238886
+```
+
+> The core app (crop prediction, IoT simulator, dashboard, auth) runs without any keys.
+> Chat/voice need `OPENAI_API_KEY`; the Weather page needs `WEATHER_API_KEY`.
+
+---
+
+## 4. Run the backend (serves the API + the frontend)
 
 ```powershell
 cd c:\Users\Faizan\Desktop\smart-zameen-ai\backend
@@ -51,101 +65,67 @@ On first run you'll see:
 
 ```
 SmartZameen Backend
-Database setup...
-[OK] Sample crops data ready!
-[OK] Database aur tables tayar hain!
-[OK] ML Model load ho gaya!          <- or a rule-based fallback notice (both fine)
-Server: http://localhost:80
+[OK] Database ready! (SQLite)        <- or "(Neon/Postgres)" if DATABASE_URL is set
+[OK] ML Model load ho gaya!
+[OK] OpenAI API key ready!
+Server: http://localhost:80          <- falls back to :5000 if port 80 is busy
 ```
 
-The SQLite file `backend/database/smartzameen.db` is created automatically here.
-
-> **Port 80 note (Windows):** if you see `PermissionError` / `OSError 10013`
-> ("only one usage of each socket address"), port 80 is taken or reserved.
-> Easiest fix: **close Skype/IIS** or **run the terminal as Administrator**, then
-> `python app.py` again. (The frontend is wired for port 80, so keeping 80 is the
-> smoothest path.)
-
----
-
-## 4. Open the app (frontend)
-
-The backend serves the frontend, so just open these in your browser:
+Open the printed URL:
 
 | Page | URL |
 |---|---|
 | Landing | http://localhost:80/ |
-| Login / Signup | http://localhost:80/login.html |
+| Login / Signup | http://localhost:80/login.html · /signup.html |
 | Dashboard | http://localhost:80/dashboard.html |
-| **Crop Advisor** (Crop AI + IoT) | http://localhost:80/crop-advisor.html |
-| Crop Advisor → IoT Sensors tab | http://localhost:80/crop-advisor.html?tab=iot |
+| Crop Advisor (chat + voice + image) | http://localhost:80/ai-agent.html |
+| Crop prediction + IoT simulator | http://localhost:80/crop-advisor.html |
 
-> Do **not** open the HTML files directly from disk (`file://`). Always go through
-> `http://localhost:80/...` so the frontend can reach the backend API.
+> **Port 80 note (Windows):** `PermissionError` / `OSError 10013` means port 80 is taken —
+> run the terminal as Administrator or close Skype/IIS; otherwise the app auto-falls back to
+> port 5000. Open whatever URL it prints.
+
+When opened via `http://localhost`, the frontend talks to the same-origin backend
+automatically (`frontend/js/config.js` handles this).
 
 ---
 
-## 5. Run the virtual IoT sensor (the "no-hardware" IoT)
+## 5. Run the virtual IoT sensor (no hardware)
 
-This is the part that replaces a physical ESP8266 + soil sensor. It's a Python
-script that pretends to be a field device and streams live readings to the
-backend. **Open a second terminal** (keep the backend running in the first):
+In a **second terminal** (keep the backend running):
 
 ```powershell
 cd c:\Users\Faizan\Desktop\smart-zameen-ai\backend
-python virtual_sensor.py
+venv\Scripts\activate
+python virtual_sensor.py                 # stream a reading every 3s
+python virtual_sensor.py --once          # one reading
+python virtual_sensor.py --node ESP8266-A0   # show up as "hardware"
 ```
 
-You'll see readings flow every 3 seconds, each one auto-getting a crop suggestion:
-
-```
-[200 OK] N75 P45 K50 pH6.8 temp27.0C  ->  suggests wheat
-```
-
-Useful options:
-
-```powershell
-python virtual_sensor.py --interval 2          # faster stream
-python virtual_sensor.py --once                # send a single reading
-python virtual_sensor.py --node ESP8266-A0     # show up as "hardware" on the dashboard
-python virtual_sensor.py --region Sindh --season Kharif
-```
-
-Now open **http://localhost:80/dashboard.html** — the **Connected Soil Node** tile
-goes *Live* and updates every 3 seconds with N/P/K/pH/temperature/moisture and the
-AI-suggested crop.
-
-> Prefer clicking over the command line? The **HTML simulator**
-> (`/crop-advisor.html?tab=iot`) does the same thing with sliders and a
-> "Start Auto-Stream" button. The virtual sensor and the HTML simulator are
-> interchangeable — both POST to the same endpoint.
+Open **http://localhost:80/dashboard.html** → the **Connected Soil Node** tile goes *Live*.
+Every reading is stored in the database (`sensor_readings`). The HTML simulator on
+`/crop-advisor.html` (IoT tab) does the same thing with sliders.
 
 ---
 
-## 6. Full demo in 4 steps
+## 6. Use Neon Postgres locally (optional)
 
-1. **Terminal 1:** `python app.py`  → backend on http://localhost:80
-2. **Browser:** open http://localhost:80/dashboard.html
-3. **Terminal 2:** `python virtual_sensor.py`
-4. Watch the **Connected Soil Node** tile on the dashboard light up and update live, with a crop suggestion from the soil readings.
-
-Every reading is also saved permanently in SQLite (`sensor_readings` table).
+To test against the real production database from your machine, set `DATABASE_URL` in
+`backend/.env` to your Neon connection string and restart. You'll see
+`[OK] Database ready! (Neon/Postgres)`. Tables are created automatically on first run.
 
 ---
 
-## 7. Optional — external API keys
+## 7. Deploy
 
-The app **runs fine without any keys** (it uses sensible fallbacks). To enable the
-extra features, fill these into `backend/.env`:
+See **`PROJECT-GUIDE.md` §Deployment** for the full Vercel + Render + Neon runbook.
+Short version:
 
-| Feature | Key(s) in `.env` |
-|---|---|
-| Soil-image AI analysis | `ANTHROPIC_API_KEY` (or set it as an environment variable) |
-| WhatsApp / SMS bot | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE` |
-| Live weather | `WEATHER_API_KEY` |
-
-The old `DB_HOST` / `DB_USER` / `DB_PASSWORD` / `DB_NAME` entries are **no longer
-used** (we moved to SQLite) — you can ignore or delete them.
+1. **Neon** → create a free Postgres, copy the connection string.
+2. **Render** → New → Blueprint → pick the repo (uses `render.yaml`). Set env vars
+   (`DATABASE_URL`, `OPENAI_API_KEY`, `WEATHER_API_KEY`, Twilio…). Note the Render URL.
+3. **`frontend/js/config.js`** → set `BACKEND_URL` to that Render URL, commit.
+4. **Vercel** → deploy the `frontend/` directory as a static site.
 
 ---
 
@@ -153,19 +133,11 @@ used** (we moved to SQLite) — you can ignore or delete them.
 
 | Symptom | Fix |
 |---|---|
-| `PermissionError` / `OSError 10013` on start | Port 80 is busy/reserved — run terminal as Administrator, or close Skype/IIS. |
-| `ModuleNotFoundError: No module named 'flask'` (etc.) | Run `pip install -r requirements.txt` in the `backend` folder. |
-| `[WARNING] Model load fail ... rule-based prediction use hogi` | Harmless. The old model pickle didn't match the new scikit-learn; the app falls back to rule-based crop logic. To get the exact model back, retrain: `python model-training/train_model.py`. |
-| Virtual sensor says `[OFFLINE] Cannot reach backend` | Start the backend first (`python app.py`), then run the sensor. |
-| Dashboard tile stays "Waiting for node…" | Make sure the virtual sensor (or HTML simulator) is transmitting, and that you opened the dashboard via `http://localhost:80/...`, not `file://`. |
-| Want a clean database | Stop the backend and delete `backend/database/smartzameen.db`. It's recreated on next start. |
-
----
-
-## What changed in this refactor
-
-- **MySQL → SQLite** (`backend/database/db.py`): single-file DB, zero setup, zero cost. Public API unchanged; a compatibility shim keeps existing `%s`-style SQL working.
-- **Python 3.14 ready**: dependency versions bumped to ones with 3.14 wheels; model loading made resilient so a version mismatch falls back to rule-based prediction instead of crashing.
-- **Virtual IoT** (`backend/virtual_sensor.py`): a software soil-sensor node — the IoT layer with no hardware and no money spent.
-- **IoT persistence**: every sensor reading is now logged to the SQLite `sensor_readings` table.
-- **No venv needed**: install straight into your Python 3.14.
+| `ModuleNotFoundError: No module named 'flask'` / `psycopg` | Activate the venv and `pip install -r requirements.txt` in `backend/`. |
+| `[OK] Database ready! (SQLite)` but you wanted Neon | `DATABASE_URL` isn't set — add it to `backend/.env` and restart. |
+| Chat/voice says "OpenAI API key not set" | Add `OPENAI_API_KEY` to `backend/.env`. |
+| Weather shows "—" / unavailable | Add `WEATHER_API_KEY` (real data only — there is no mock). |
+| Frontend on Vercel can't reach the API | Set `BACKEND_URL` in `frontend/js/config.js` to your Render URL and redeploy. |
+| Model load warning at startup | Harmless sklearn version notice; the model still predicts. |
+| Virtual sensor `[OFFLINE]` | Start the backend first, then run the sensor. |
+| Want a clean local DB | Stop the backend, delete `backend/database/smartzameen.db` (SQLite only). |

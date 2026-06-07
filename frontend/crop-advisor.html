@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Nastaliq+Urdu:wght@400;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="stylesheet" href="css/theme.css">
+  <script src="js/config.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -1384,22 +1385,10 @@
 
   <footer class="footer">© 2026 SmartZameen  -  Empowering Pakistani Farmers with AI.</footer>
 
-  <script src="js/voice.js"></script>
   <script src="js/camera.js"></script>
 
   <script>
     let _lastResult = null;
-
-    function speakCurrentResult() {
-      if (_lastResult) speakResult(_lastResult.crop, _lastResult.confidence, _lastResult.urdu, null, true);
-    }
-
-    const _origToggle = window.toggleVoiceMode;
-    window.toggleVoiceMode = function() {
-      _origToggle();
-      const bar = document.getElementById('voice-toggle-bar');
-      if (bar) bar.classList.toggle('active', voiceEnabled);
-    };
 
     const _origDisplayResult = window.displayResult;
     window.displayResult = function(result) {
@@ -1428,9 +1417,6 @@
       if (resultBox) { resultBox.style.display = 'block'; resultBox.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
       const rc = document.getElementById('result-card-main');
       if (rc) rc.classList.add('show');
-      const speakBtn = document.getElementById('speak-result-btn');
-      if (speakBtn) speakBtn.style.display = voiceEnabled ? 'flex' : 'none';
-      if (voiceEnabled) autoSpeakAfterResult(result);
     }
 
     function showTop3(top3, cropIcons) {
@@ -1498,16 +1484,7 @@
       });
     });
 
-    document.getElementById('langToggle').addEventListener('click', function(e) {
-      e.stopPropagation();
-      document.getElementById('langMenu').classList.toggle('active');
-    });
-    document.addEventListener('click', function(e) {
-      const menu = document.getElementById('langMenu');
-      if (menu && !e.target.closest('[id="langToggle"]') && !e.target.closest('#langMenu')) {
-        menu.classList.remove('active');
-      }
-    });
+    // Language switcher toggle is wired centrally in js/lang.js (delegated).
 
     // Dashboard stays the active nav item across all app sub-pages.
   </script>
@@ -1768,7 +1745,9 @@
     }
     function pulseWires(){ wiring.classList.add("transmitting"); setTimeout(()=>wiring.classList.remove("transmitting"),1400); }
     async function transmit(){
-      const url=document.getElementById("endpoint").value.trim(), p=buildPayload();
+      let url=document.getElementById("endpoint").value.trim();
+      if(url.startsWith("/")) url=(window.SZ_API||"")+url;   // resolve against the Render backend in prod
+      const p=buildPayload();
       const tag=p.source==="hardware"?"HW":"SIM"; setState("Transmitting…","on"); pulseWires();
       try{
         const res=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)});
