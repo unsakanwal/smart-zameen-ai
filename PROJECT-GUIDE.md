@@ -169,7 +169,8 @@ Restart the backend to load new artifacts. Keep the scikit-learn version close t
 | Chat/voice error "OpenAI API key not set" | Add `OPENAI_API_KEY` on Render (and `backend/.env` locally). |
 | Weather shows "—" | `WEATHER_API_KEY` missing — real data only, no mock. |
 | Model-load warning at startup | Harmless sklearn version notice; the model still predicts. Retrain to silence. |
-| Render build fails on a pinned wheel | Keep `requirements.txt` on version floors (`>=`); `PYTHON_VERSION` is pinned to 3.12 for stable wheels. |
+| Render build fails on a pinned wheel | Keep `requirements.txt` on version floors (`>=`); `PYTHON_VERSION` is pinned to 3.14 (matches local + the model pickles). |
+| `ModuleNotFoundError: No module named 'your_application'` | Render's **default** start command is running. Set **Start Command** to `gunicorn app:app --bind 0.0.0.0:$PORT` and **Root Directory** to `backend` (or redeploy via the Blueprint so `render.yaml` applies). |
 | WhatsApp messages never arrive | Twilio webhook must point at the public Render URL, not localhost. |
 
 ---

@@ -18,7 +18,7 @@ services:
     healthCheckPath: /
     envVars:
       - key: PYTHON_VERSION
-        value: "3.12.7"             # stable wheels for sklearn/scipy/numpy/psycopg
+        value: "3.14.3"             # matches local + the .pkl models (sklearn 1.9 wheels exist for 3.14)
       - key: DATABASE_URL           # Neon Postgres connection string (sslmode=require)
         sync: false
       - key: OPENAI_API_KEY
