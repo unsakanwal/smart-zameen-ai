@@ -94,7 +94,7 @@
       margin: 0;
       padding: 0;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-end;
     }
 
     .nav-center a {
@@ -133,7 +133,7 @@
       display: flex;
       align-items: center;
       gap: 20px;
-      flex: 1 1 0%;
+      flex: 0 0 auto;
       justify-content: flex-end;
     }
     /* Auth Buttons */
@@ -262,7 +262,19 @@
     .form { width: 100%; display: flex; flex-direction: column; gap: 14px; }
     .form input { width: 100%; padding: 12px 16px; border-radius: 8px; border: 1.5px solid var(--border); font-size: 14px; font-family: inherit; transition: border-color 0.2s; background: var(--bg-light); }
     .form input:focus { outline: none; border-color: var(--accent); background: #fff; }
-    .forgot-link { font-size: 13px; text-decoration: none; color: var(--primary); text-align: right; display: block; }
+    /* show/hide password */
+    .pw-wrap { position: relative; display: flex; }
+    .pw-wrap input { padding-right: 44px; }
+    .pw-toggle {
+      position: absolute; top: 50%; right: 8px; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; color: var(--text-light);
+      padding: 4px; line-height: 0; opacity: 0.65; transition: opacity 0.2s, color 0.2s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .pw-toggle svg { width: 19px; height: 19px; display: block; }
+    .pw-toggle:hover { opacity: 1; color: var(--primary); }
+    [dir="rtl"] .pw-wrap input { padding-right: 16px; padding-left: 44px; }
+    [dir="rtl"] .pw-toggle { right: auto; left: 8px; }
     .submit-btn { padding: 13px; border-radius: 25px; border: none; background: var(--primary); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.3s; margin-top: 4px; }
     .submit-btn:hover { background: var(--primary-light); transform: translateY(-1px); }
     .error { font-size: 12px; color: #e53e3e; margin-top: -8px; }
@@ -338,9 +350,11 @@
         <form class="form" id="loginForm">
           <input type="email"    id="email"    placeholder="Email">
           <span id="emailError"    class="error"></span>
-          <input type="password" id="password" placeholder="Password">
+          <div class="pw-wrap">
+            <input type="password" id="password" placeholder="Password">
+            <button type="button" class="pw-toggle" id="pwToggle" aria-label="Show password" title="Show password"></button>
+          </div>
           <span id="passwordError" class="error"></span>
-          <a href="#" class="forgot-link" id="forgot-password">Forgot your password?</a>
           <button type="submit" class="submit-btn" id="signin-btn">SIGN IN</button>
         </form>
       </div>
@@ -357,6 +371,23 @@
 
   <script>
     // Language switcher toggle is wired centrally in js/lang.js (delegated).
+
+    // ── Show / hide password (SVG eye toggle) ──
+    (function () {
+      const btn = document.getElementById('pwToggle');
+      const pw  = document.getElementById('password');
+      if (!btn || !pw) return;
+      const EYE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>';
+      const EYE_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20C5 20 1 12 1 12a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+      btn.innerHTML = EYE;
+      btn.addEventListener('click', () => {
+        const show = pw.type === 'password';
+        pw.type = show ? 'text' : 'password';
+        btn.innerHTML = show ? EYE_OFF : EYE;
+        btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+        btn.title = show ? 'Hide password' : 'Show password';
+      });
+    })();
 
     // ── Toast helper ──
     function showToast(msg, type) {

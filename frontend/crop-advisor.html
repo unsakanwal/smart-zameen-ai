@@ -75,7 +75,7 @@
       margin: 0;
       padding: 0;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-end;
     }
 
     .nav-center a {
@@ -112,7 +112,7 @@
       display: flex;
       align-items: center;
       gap: 20px;
-      flex: 1 1 0%;
+      flex: 0 0 auto;
       justify-content: flex-end;
     }
 
@@ -1350,7 +1350,7 @@
       </div>
 
       <div class="sz-card" style="margin-bottom:18px">
-        <div class="card-h">AI Crop Recommendation <span class="hint">live inference · Random Forest (crop_model.pkl)</span></div>
+        <div class="card-h">AI Crop Recommendation <span class="hint">live inference · model auto-selected (shown on result)</span></div>
         <div id="aiResult"><div class="ai-empty">Transmit a reading to run the model…</div></div>
       </div>
 
@@ -1717,7 +1717,10 @@
       setT("wireCrop", `${cap(pred.crop)} ${pred.confidence?pred.confidence+'%':''}`);
       const conf=pred.confidence||0, C=2*Math.PI*54, off=C*(1-conf/100);
       const top3=(pred.top3&&pred.top3.length)?pred.top3:[{crop:pred.crop,confidence:conf,urdu:pred.urdu}];
-      const src = pred.source==="rule-based" ? `<span class="tag rule">RULE-BASED</span> model fallback` : `<span class="tag">RANDOM FOREST</span> 8 features · live inference`;
+      // Show WHICH model produced this result (overlaid on the result as a badge).
+      const modelKey=pred.model_key||(pred.source==="rule-based"?"rule-based":"random-forest");
+      const modelLabel=pred.model||(pred.source==="rule-based"?"Rule-based fallback":"Local RandomForest");
+      const src = `<span class="tag${modelKey==='rule-based'?' rule':''}">${modelLabel}</span> · live inference`;
       document.getElementById("aiResult").innerHTML = `
         <div class="ai">
           <div class="ring">

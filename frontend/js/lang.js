@@ -55,15 +55,6 @@ const LANG = {
     confidence: 'Accuracy',
     other_crops: 'Other Possible Crops',
     dash_title: 'My Dashboard',
-    user_name: 'Muhammad Ali',
-    alert_msg: 'Time to irrigate wheat  -  water within 2 days',
-    current_crop: 'Current Crop',
-    crop_wheat: 'Wheat',
-    crop_area: '5 acres  -  Punjab',
-    crop_status: 'In good condition',
-    predicted_yield: 'Predicted Yield',
-    yield_value: '24 Maunds',
-    yield_per: 'Per acre estimate',
     today_weather: "Today's Weather  -  Multan",
     weather_humidity: 'Humidity',
     weather_rainfall: 'Rainfall',
@@ -180,15 +171,6 @@ const LANG = {
     confidence: 'درست اندازہ',
     other_crops: 'دیگر ممکنہ فصلیں',
     dash_title: 'میرا ڈیش بورڈ',
-    user_name: 'محمد علی',
-    alert_msg: 'گندم کی فصل کے لیے پانی دینے کا وقت  -  اگلے ۲ دن میں آبپاشی کریں',
-    current_crop: 'موجودہ فصل',
-    crop_wheat: 'گندم',
-    crop_area: '۵ ایکڑ  -  پنجاب',
-    crop_status: 'اچھی حالت میں',
-    predicted_yield: 'متوقع پیداوار',
-    yield_value: '۲۴ من',
-    yield_per: 'فی ایکڑ اندازہ',
     today_weather: 'آج کا موسم  -  ملتان',
     weather_humidity: 'نمی',
     weather_rainfall: 'بارش',
@@ -303,15 +285,6 @@ const LANG = {
     confidence: 'سہی اندازہ',
     other_crops: 'ہور ممکنہ فصلاں',
     dash_title: 'میرا ڈیش بورڈ',
-    user_name: 'محمد علی',
-    alert_msg: 'گندم لئی پانی دینے دا ویلا آ گیا  -  اگلے ۲ دن وچ۔',
-    current_crop: 'ہالی فصل',
-    crop_wheat: 'گندم',
-    crop_area: '۵ ایکڑ  -  پنجاب',
-    crop_status: 'چنگی حالت وچ',
-    predicted_yield: 'اندازی پیداوار',
-    yield_value: '۲۴ من',
-    yield_per: 'فی ایکڑ اندازہ',
     today_weather: 'اج دا موسم  -  ملتان',
     weather_humidity: 'نمی',
     weather_rainfall: 'مینہ',
@@ -426,15 +399,6 @@ const LANG = {
     confidence: 'صحيح اندازو',
     other_crops: 'ٻيا ممڪنه فصلون',
     dash_title: 'منهنجو ڊيش بورڊ',
-    user_name: 'محمد علي',
-    alert_msg: 'گندم لاءِ پاڻي ڏيڻ جو وقت آيو۔',
-    current_crop: 'موجوده فصل',
-    crop_wheat: 'گندم',
-    crop_area: '۵ ايڪڙ  -  پنجاب',
-    crop_status: 'سٺي حالت ۾',
-    predicted_yield: 'اندازي پيداوار',
-    yield_value: '۲۴ من',
-    yield_per: 'في ايڪڙ اندازو',
     today_weather: 'اڄ جو موسم  -  ملتان',
     weather_humidity: 'نمي',
     weather_rainfall: 'مينهن',
@@ -549,15 +513,6 @@ const LANG = {
     confidence: 'سم اټکل',
     other_crops: 'نور ممکنه فصلونه',
     dash_title: 'زما ډيش بورډ',
-    user_name: 'محمد علي',
-    alert_msg: 'د غنمو لپاره د اوبو ورکولو وخت راغلی دی۔',
-    current_crop: 'اوسنی فصل',
-    crop_wheat: 'غنم',
-    crop_area: '۵ ايکړ  -  پنجاب',
-    crop_status: 'ښه حالت کې',
-    predicted_yield: 'د حاصل اټکل',
-    yield_value: '۲۴ من',
-    yield_per: 'د ایکړ اټکل',
     today_weather: 'د نن هوا  -  ملتان',
     weather_humidity: 'لندبل',
     weather_rainfall: 'باران',
@@ -706,31 +661,16 @@ function setLang(lang, btn) {
     if (val) opt.textContent = val;
   });
 
-  // ── Dashboard page ──
+  // ── Dashboard page (real-data layout — only elements that actually exist) ──
   set('dash-title',        t.dash_title);
-  set('current-crop',      t.current_crop);
-  set('crop-wheat',        t.crop_wheat);
-  set('crop-area',         t.crop_area);
-  set('crop-status',       t.crop_status);
-  set('predicted-yield',   t.predicted_yield);
-  set('yield-value',       t.yield_value);
-  set('yield-per',         t.yield_per);
-  // 'today-weather' is set by main.js loadWeather() to include the selected city
-  set('weather-humidity',  t.weather_humidity);
-  set('weather-rainfall',  t.weather_rainfall);
-  set('weather-wind',      t.weather_wind);
-  set('weather-temp',      t.weather_temp);
-  set('soil-condition',    t.soil_condition);
-  set('soil-nitrogen',     t.soil_nitrogen);
-  set('soil-phosphorus',   t.soil_phosphorus);
-  set('soil-potassium',    t.soil_potassium);
-  set('ai-recommendation', t.ai_recommendation);
-  set('accuracy-label',    t.accuracy_label);
+  // 'today-weather' / temp / humidity values are set by main.js loadWeather().
+  set('weather-humidity',  t.weather_humidity);   // pill label
+  set('weather-wind',      t.weather_wind);        // pill label
+  set('ai-recommendation', t.ai_recommendation);   // "Recent Predictions" heading
 
   // ── Login page ──
   set('login-title',       t.login_title);
   set('login-desc',        t.login_desc);
-  set('forgot-password',   t.forgot_password);
   set('signin-btn',        t.signin_btn);
   set('welcome-title',     t.welcome_title);
   set('welcome-desc',      t.welcome_desc);

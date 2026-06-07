@@ -475,10 +475,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Saved language apply karo
-    const savedLang = localStorage.getItem('sa_lang') || 'ur';
-    const langBtn   = document.querySelector(`.lb[onclick="setLang('${savedLang}',this)"]`);
-    if (langBtn && typeof setLang === 'function') {
-        setLang(savedLang, langBtn);
-    }
+    // NOTE: the saved language is applied centrally in js/lang.js on
+    // DOMContentLoaded (reads 'sz_lang', default 'en', flips RTL, persists).
+    // Do NOT re-apply it here — a second pass with a different key/default
+    // only causes a flicker and can fight lang.js.
 });

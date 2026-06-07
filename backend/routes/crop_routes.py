@@ -36,6 +36,12 @@ LE_REGION_PATH = _model('le_region.pkl')
 NEW_MODEL_PATH = _model('crop-reccomendation-modal', 'soil.pkl')
 NEW_LE_PATH    = _model('crop-reccomendation-modal', 'label_encoder.pkl')
 
+# Human-readable labels so the UI can show WHICH model produced a result.
+# `key` is a short slug for styling; `label` is shown on the result card.
+MODEL_KAGGLE = {"key": "kaggle",        "label": "Crop Recommendation AI · 22 crops"}
+MODEL_LOCAL  = {"key": "random-forest", "label": "Local RandomForest · region/season"}
+MODEL_RULE   = {"key": "rule-based",    "label": "Rule-based fallback"}
+
 model     = None
 encoder   = None
 le_season = None
@@ -125,9 +131,12 @@ def predict_crop():
         humidity    = data.get('humidity', None)
 
         # Prefer the high-accuracy Kaggle model when humidity is available.
+        # `model_used` records which model answered so the UI can label it
+        # (and so the SAME input through any entry point is explained, not random).
         if new_model is not None and humidity not in (None, ''):
             crop_name, confidence, top3 = predict_new(
                 nitrogen, phosphorus, potassium, temperature, float(humidity), ph, rainfall)
+            model_used = MODEL_KAGGLE
         elif model is not None and encoder is not None:
             season_enc = le_season.transform([season])[0] if season in le_season.classes_ else 0
             region_enc = le_region.transform([region])[0] if region in le_region.classes_ else 0
@@ -147,9 +156,11 @@ def predict_crop():
                 }
                 for i in top3_idx
             ]
+            model_used = MODEL_LOCAL
         else:
             crop_name, confidence, top3 = rule_based_predict(
                 temperature, rainfall, season, region)
+            model_used = MODEL_RULE
 
         info = CROP_INFO.get(crop_name, {})
         save_prediction(data, crop_name, confidence)
@@ -163,7 +174,10 @@ def predict_crop():
             'best_time': info.get('time', ''),
             'water':     info.get('water', ''),
             'yield':     info.get('yield', ''),
-            'top3':      top3
+            'top3':      top3,
+            'model':     model_used['label'],   # which model produced this result
+            'model_key': model_used['key'],
+            'source':    'rule-based' if model_used is MODEL_RULE else 'model',
         })
 
     except ValueError as e:

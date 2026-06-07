@@ -68,12 +68,15 @@ def _try_predict(reading):
         le_region = crop_routes.le_region
 
         # Prefer the high-accuracy Kaggle model when humidity is present.
+        # Mirror crop_routes exactly AND report which model answered so the UI
+        # can label it (same input → same model → same result, explained).
         if crop_routes.new_model is not None and humidity not in (None, -1, ""):
             crop_name, conf, top3 = crop_routes.predict_new(
                 reading["nitrogen"], reading["phosphorus"], reading["potassium"],
                 reading["temperature"], float(humidity), reading["ph"], reading["rainfall"])
             return {"crop": crop_name, "confidence": conf, "urdu": crop_routes.crop_urdu(crop_name),
-                    "top3": top3, "source": "model"}
+                    "top3": top3, "source": "model",
+                    "model": crop_routes.MODEL_KAGGLE["label"], "model_key": crop_routes.MODEL_KAGGLE["key"]}
 
         if model is not None and encoder is not None:
             season_enc = le_season.transform([season])[0] if season in le_season.classes_ else 0
@@ -100,6 +103,8 @@ def _try_predict(reading):
                 "urdu":       top3[0]["urdu"],
                 "top3":       top3,
                 "source":     "model",
+                "model":      crop_routes.MODEL_LOCAL["label"],
+                "model_key":  crop_routes.MODEL_LOCAL["key"],
             }
 
         # Model not loaded — same fallback crop_routes uses.
@@ -112,6 +117,8 @@ def _try_predict(reading):
             "top3":       [{"crop": crop_name, "confidence": conf,
                             "urdu": crop_routes.CROP_INFO.get(crop_name, {}).get("urdu", "")}],
             "source":     "rule-based",
+            "model":      crop_routes.MODEL_RULE["label"],
+            "model_key":  crop_routes.MODEL_RULE["key"],
         }
     except Exception:
         return None
