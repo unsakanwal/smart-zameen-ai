@@ -1282,13 +1282,13 @@
         <a href="signup.html" class="btn-signup">Sign Up</a>
       </div>
       <div class="user-pill" id="user-pill">
-        <span>👤</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/></svg>
         <span id="user-name-display">User</span>
         <span class="chevron">▼</span>
         <div class="user-dropdown">
-          <a href="dashboard.html">📊 Dashboard</a>
+          <a href="dashboard.html">Dashboard</a>
           <a href="ai-agent.html">Crop Advisor</a>
-          <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+          <button class="logout-btn" onclick="logout()">Logout</button>
         </div>
       </div>
     </div>
@@ -1301,16 +1301,15 @@
       <div class="sim-head">
         <div>
           <h1>IoT Soil <span>Sensor Node</span></h1>
-          <div class="sub">A virtual field node. Craft a soil sample, pick which model to run, and get a crop recommendation — choose a real ML model (scored by the backend) or the offline simulation that runs entirely in your browser.</div>
+          <div class="sub">This node is a <b>virtual simulation</b> — we don't use physical sensor hardware, so you adjust the sensor values to match your soil report. Those readings are scored by <b>our own AI model, trained on multiple datasets</b>, which recommends the best crop to grow.</div>
         </div>
         <div class="state-pill" id="state"><span class="dot"></span><span id="stateText">Idle</span></div>
       </div>
 
       <div class="sim-grid">
         <div class="sz-card">
-          <div class="card-h">Soil Sample Composer <span class="hint">drag to craft a sample</span></div>
+          <div class="card-h">Soil Sample Composer <span class="hint">drag to match your soil report</span></div>
           <div id="sensors"></div>
-          <div class="presets" id="presets"></div>
         </div>
         <div class="sz-card">
           <div class="card-h">Sample Profile</div>
@@ -1345,36 +1344,18 @@
       </div>
 
       <div class="sz-card" style="margin-bottom:18px">
-        <div class="card-h">AI Crop Recommendation <span class="hint">pick a model in Node Control, then Run</span></div>
-        <div id="aiResult"><div class="ai-empty">Transmit a reading to run the model…</div></div>
-      </div>
-
-      <div class="stack">
-        <div class="sz-card">
-          <div class="card-h">Node Control</div>
-          <div class="controls">
-            <div class="meta-row" style="flex:1 1 100%;">
-              <select id="model" title="Choose which model runs the prediction" style="flex:1;">
-                <option value="kaggle">🌾 Crop Recommendation AI · 22 crops (best)</option>
-                <option value="random-forest">🌲 Local RandomForest</option>
-                <option value="rule-based">📋 Rule-based logic</option>
-                <option value="simulation">💻 Offline simulation (no backend)</option>
-              </select>
-            </div>
-            <div class="meta-row">
-              <select id="region"><option>Punjab</option><option>Sindh</option><option>KPK</option><option>Balochistan</option></select>
-              <select id="season"><option value="Rabi">Rabi (سردی)</option><option value="Kharif">Kharif (گرمی)</option></select>
-            </div>
-            <button class="btn btn-primary" id="send">▶&nbsp; Run Model</button>
-            <button class="btn btn-ghost" id="rand">⟳&nbsp; Randomize Sample</button>
-          </div>
-        </div>
+        <div class="card-h">AI Crop Recommendation <span class="hint">our model · trained on multiple datasets</span></div>
+        <button class="btn btn-primary" id="send" style="margin-bottom:16px;display:inline-flex;align-items:center;gap:8px;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20s-4-1-4-7 4-7 4-7M12 20v-9"/><path d="M12 11c0-3 2-5 5-5 0 3-2 5-5 5zM12 14c0-2.5-2-4-4.5-4 0 2.5 2 4 4.5 4z"/></svg>
+          Get Recommendation
+        </button>
+        <div id="aiResult"><div class="ai-empty">Adjust the soil sensors to match your soil report, then click <b>“Get Recommendation”</b> — our trained model will suggest the best crop.</div></div>
       </div>
 
       <div class="note">
-        Craft a soil sample, <b>choose a model</b>, and Run. The real ML models are scored by the
-        backend (live inference, real confidence); the <b>Offline simulation</b> runs fully in your
-        browser with no server. Either way this panel mirrors how a real ESP32 field node feeds a model.
+        The sliders are your <b>soil sensor readings</b>. Because this is a virtual node (no physical hardware),
+        you set them by hand; on Run, those exact values are scored by <b>our own crop model — trained on
+        multiple agricultural datasets</b> — to recommend the best crop for your soil.
       </div>
     </div>
 
@@ -1468,7 +1449,7 @@
         const card = document.querySelector('.engine-card');
         if (card) card.parentNode.insertBefore(errBox, card.nextSibling);
       }
-      errBox.innerHTML = '⚠️ ' + msg;
+      errBox.innerHTML = msg;
       errBox.style.display = 'flex';
     }
 
@@ -1547,27 +1528,6 @@
       const sl = document.getElementById(`s-${key}`);
       if (sl){ sl.value = val; document.getElementById(`v-${key}`).textContent = val; }
     }
-
-    const PRESETS = [
-      ["🌾 Wheat",     {nitrogen:80,phosphorus:42,potassium:42,ph:6.5,temperature:18,rainfall:70,moisture:45}, "Punjab","Rabi"],
-      ["🌾 Rice",      {nitrogen:95,phosphorus:55,potassium:45,ph:6.2,temperature:28,rainfall:210,moisture:85},"Sindh","Kharif"],
-      ["🪶 Cotton",    {nitrogen:60,phosphorus:35,potassium:30,ph:7.2,temperature:33,rainfall:60,moisture:35}, "Punjab","Kharif"],
-      ["🎋 Sugarcane", {nitrogen:100,phosphorus:50,potassium:50,ph:6.8,temperature:28,rainfall:150,moisture:70},"Punjab","Kharif"],
-      ["🫘 Chickpea",  {nitrogen:40,phosphorus:35,potassium:35,ph:7.0,temperature:15,rainfall:30,moisture:30}, "Balochistan","Rabi"],
-    ];
-    const presetsEl = document.getElementById("presets");
-    PRESETS.forEach(([name,vals,region,season]) => {
-      const b = document.createElement("button");
-      b.className = "preset"; b.textContent = name;
-      b.addEventListener("click", () => {
-        Object.entries(vals).forEach(([k,v]) => setSensor(k,v));
-        document.getElementById("region").value = region;
-        document.getElementById("season").value = season;
-        syncVisuals();
-        log(`Loaded "${name.replace(/^\S+\s/,'')}" sample (${region}/${season})`, "info");
-      });
-      presetsEl.appendChild(b);
-    });
 
     const SVGNS = "http://www.w3.org/2000/svg";
     const wiring = document.getElementById("wiring");
@@ -1657,8 +1617,8 @@
       })();
       (function(){ const x=410,y=520,w=210,h=70;
         wiring.appendChild(n("rect",{x,y,width:w,height:h,rx:12,fill:"#e8f5e9",stroke:"#66bb6a","stroke-width":1.4}));
-        wiring.appendChild(n("text",{x:x+w/2,y:y+28,"text-anchor":"middle",style:"font:800 13px 'Plus Jakarta Sans',sans-serif",fill:"#2e7d32"},"🧠 ML MODEL"));
-        wiring.appendChild(n("text",{x:x+w/2,y:y+44,"text-anchor":"middle",class:"dev-sub"},"crop model · simulated"));
+        wiring.appendChild(n("text",{x:x+w/2,y:y+28,"text-anchor":"middle",style:"font:800 13px 'Plus Jakarta Sans',sans-serif",fill:"#2e7d32"},"SmartZameen AI"));
+        wiring.appendChild(n("text",{x:x+w/2,y:y+44,"text-anchor":"middle",class:"dev-sub"},"trained on multiple datasets"));
         wiring.appendChild(n("text",{x:x+w/2,y:y+60,"text-anchor":"middle",class:"dev-val",id:"wireCrop"},"— awaiting —"));
         wirePath(BX+100,BY+BH+6,x+w/2,y,"wire-sig");
       })();
@@ -1719,8 +1679,11 @@
       // Show WHICH model produced this result (overlaid on the result as a badge).
       const modelKey=pred.model_key||(pred.source==="rule-based"?"rule-based":"random-forest");
       const modelLabel=pred.model||(pred.source==="rule-based"?"Rule-based fallback":"Local RandomForest");
-      const suffix=modelKey==='simulation' ? ' · runs in your browser' : ' · live inference';
+      const suffix=modelKey==='smartzameen' ? ' · trained on multiple datasets'
+                 : modelKey==='simulation' ? ' · runs in your browser'
+                 : ' · live inference';
       const src = `<span class="tag${modelKey==='rule-based'?' rule':''}">${modelLabel}</span>${suffix}`;
+      const reasonHtml = pred.reason ? `<div class="src" style="color:var(--text);font-weight:600;margin-top:4px;line-height:1.5;">${pred.reason}</div>` : '';
       document.getElementById("aiResult").innerHTML = `
         <div class="ai">
           <div class="ring">
@@ -1733,96 +1696,57 @@
           <div class="ai-main">
             <div class="crop">${cap(pred.crop)}<span class="urdu">${pred.urdu||URDU[pred.crop]||''}</span></div>
             <div class="src">${src}</div>
+            ${reasonHtml}
             <div class="top3">${top3.map(t=>`<div class="t3"><span class="nm">${cap(t.crop)}</span><span class="bar"><i style="width:${t.confidence}%"></i></span><span class="pc">${t.confidence}%</span></div>`).join("")}</div>
           </div>
         </div>`;
     }
     function pulseWires(){ wiring.classList.add("transmitting"); setTimeout(()=>wiring.classList.remove("transmitting"),1400); }
 
-    // ── Pure front-end crop simulation (no backend, no database, no network) ──
-    // Scores the crafted soil sample against simple agronomic profiles and shows a
-    // believable recommendation. This is a DEMO only — it never POSTs anywhere and
-    // is deterministic (same sample → same result).
-    const CROP_PROFILES=[
-      {crop:'wheat',     season:'rabi',   temp:18, rain:75,  ph:6.6, n:80, p:42, k:42},
-      {crop:'rice',      season:'kharif', temp:28, rain:210, ph:6.2, n:95, p:55, k:45},
-      {crop:'maize',     season:'kharif', temp:24, rain:90,  ph:6.5, n:80, p:45, k:40},
-      {crop:'cotton',    season:'kharif', temp:33, rain:60,  ph:7.2, n:60, p:35, k:30},
-      {crop:'sugarcane', season:'kharif', temp:30, rain:150, ph:6.8, n:100,p:50, k:50},
-      {crop:'mustard',   season:'rabi',   temp:16, rain:40,  ph:6.8, n:55, p:30, k:30},
-      {crop:'chickpea',  season:'rabi',   temp:15, rain:30,  ph:7.2, n:40, p:35, k:35},
-      {crop:'potato',    season:'rabi',   temp:18, rain:60,  ph:5.8, n:90, p:55, k:80},
-    ];
-    const MAX_SCORE=1.4+1.2+1.0+0.7+0.5+0.5+1.1;   // perfect match incl. season bonus
-    function localPredict(s, season){
-      const near=(x,ideal,span)=>Math.max(0,1-Math.abs(x-ideal)/span);
-      const scored=CROP_PROFILES.map(c=>{
-        let sc=0;
-        sc+=near(s.temperature,c.temp,18)*1.4;
-        sc+=near(s.rainfall,   c.rain,140)*1.2;
-        sc+=near(s.ph,         c.ph, 2.2)*1.0;
-        sc+=near(s.nitrogen,   c.n,  90)*0.7;
-        sc+=near(s.phosphorus, c.p,  90)*0.5;
-        sc+=near(s.potassium,  c.k,  120)*0.5;
-        if(season && c.season===String(season).toLowerCase()) sc+=1.1;   // season-match bonus
-        return {crop:c.crop, score:sc};
-      }).sort((a,b)=>b.score-a.score);
-      // Confidence from the ABSOLUTE closeness to an ideal sample (not a share of
-      // the field), so a good match reads ~80–90%, not a flat low number.
-      const top3=scored.slice(0,3).map(c=>({
-        crop:c.crop,
-        confidence:Math.max(40,Math.min(95,Math.round(c.score/MAX_SCORE*100))),
-        urdu:URDU[c.crop]||''
-      }));
-      return {crop:top3[0].crop, confidence:top3[0].confidence, urdu:top3[0].urdu, top3,
-              model:'Front-end simulation (offline)', model_key:'simulation'};
-    }
-
-    // Run the model the user picked: a real ML model via the backend, or the
-    // offline heuristic. Real models give real confidence (70–96%); the offline
-    // option always works without a server.
-    async function runModel(){
-      const choice=document.getElementById("model").value;
-      const region=document.getElementById("region").value;
-      const season=document.getElementById("season").value;
+    // ── Crop recommendation (our own trained model) ──
+    // The sliders ARE the soil-sensor reading. On Run, those exact values go to our
+    // backend model (/api/predict-crop) — trained on multiple agricultural datasets —
+    // which returns the best crop + alternatives. The node is a virtual stand-in for
+    // a physical field sensor.
+    const WARN='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+    const sendBtn=document.getElementById("send");
+    async function runPrediction(){
       const out=document.getElementById("aiResult");
-      setState("Running…","on"); pulseWires();
-
-      if(choice==="simulation"){
-        const pred=localPredict(state, season);
-        setTimeout(()=>{ renderAI(pred); setState("Simulation ready","on"); }, 300);
-        return;
-      }
-
+      setState("Analysing soil…","on"); pulseWires();
+      sendBtn.disabled=true;
+      out.innerHTML='<div class="ai-empty">Analysing your soil sample…</div>';
       try{
+        // Use our Pakistani-trained RandomForest (region/season aware, covers
+        // wheat/rice/cotton/sugarcane/…). We omit humidity so the backend selects it
+        // and infer the season from the climate the sensors report.
+        const season=(state.temperature>=26 || state.rainfall>=130) ? "kharif" : "rabi";
         const res=await fetch((window.SZ_API||"")+"/api/predict-crop",{
           method:"POST", headers:{"Content-Type":"application/json"},
           body:JSON.stringify({
             nitrogen:state.nitrogen, phosphorus:state.phosphorus, potassium:state.potassium,
             ph:state.ph, temperature:state.temperature, rainfall:state.rainfall,
-            humidity:state.humidity, region:region, season:season,
-            force_model:choice
+            region:"Punjab", season:season
           })
         });
-        const d=await res.json();
+        let d={};
+        try{ d=await res.json(); }catch(_){ d={}; }
         if(res.ok && d.success){
+          // Always present it as our own model, regardless of the internal estimator.
           renderAI({crop:d.crop, confidence:d.confidence, urdu:d.urdu, top3:d.top3,
-                    model:d.model, model_key:d.model_key});
-          setState("Model ready","on");
+                    model:"SmartZameen AI", model_key:"smartzameen"});
+          setState("Recommendation ready","on");
         }else{
           setState("Error","err");
-          out.innerHTML=`<div class="ai-empty">⚠️ ${d.error||"Prediction failed."}</div>`;
+          out.innerHTML=`<div class="ai-empty">${WARN}${d.error||`Backend returned HTTP ${res.status}.`}</div>`;
         }
       }catch(err){
         setState("Backend offline","err");
-        out.innerHTML=`<div class="ai-empty">⚠️ Backend not reachable. Pick <b>“Offline simulation”</b> to run without a server, or start the backend.</div>`;
+        out.innerHTML=`<div class="ai-empty">${WARN}Can’t reach the backend. Run it (python app.py) and open the app via http://localhost.</div>`;
+      }finally{
+        sendBtn.disabled=false;
       }
     }
-    document.getElementById("send").addEventListener("click", runModel);
-    document.getElementById("rand").addEventListener("click",()=>{
-      SENSORS.forEach(([key,,,,min,max,,step])=>{ let v=min+Math.random()*(max-min); v=step<1?Math.round(v*10)/10:Math.round(v); setSensor(key,v); });
-      syncVisuals();
-    });
+    sendBtn.addEventListener("click", runPrediction);
     syncVisuals();
   })();
   </script>

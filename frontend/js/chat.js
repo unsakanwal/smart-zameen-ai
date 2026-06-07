@@ -30,7 +30,7 @@
     wrap.className = 'chat-msg ' + role;
     let inner = '';
     if (opts.image) inner += `<img class="chat-img" src="${opts.image}" alt="attachment">`;
-    if (opts.file)  inner += `<div class="chat-file">📎 ${esc(opts.file)}</div>`;
+    if (opts.file)  inner += `<div class="chat-file"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>${esc(opts.file)}</div>`;
     if (opts.text)  inner += `<div class="chat-text">${esc(opts.text).replace(/\n/g, '<br>')}</div>`;
     wrap.innerHTML = `<div class="chat-bubble">${inner}</div>`;
     log.appendChild(wrap);
@@ -74,10 +74,10 @@
       if (readable) {
         const text = await file.text();
         pendingFile = { name: file.name, text: text.slice(0, 8000) }; pendingImage = null;
-        showAttach(`<div class="chat-attach-file">📄 ${esc(file.name)}</div>`);
+        showAttach(`<div class="chat-attach-file"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>${esc(file.name)}</div>`);
       } else {
         pendingFile = { name: file.name, text: '' }; pendingImage = null;
-        showAttach(`<div class="chat-attach-file">📄 ${esc(file.name)} <em>(name only — non-text file)</em></div>`);
+        showAttach(`<div class="chat-attach-file"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>${esc(file.name)} <em>(name only — non-text file)</em></div>`);
       }
     }
   }
@@ -121,7 +121,7 @@
   async function startRecording() {
     if (!navigator.mediaDevices || !window.MediaRecorder) return browserSTTFallback();
     try { recordStream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
-    catch (e) { bubble('assistant', { text: '⚠️ Mic permission needed for voice input.' }); return; }
+    catch (e) { bubble('assistant', { text: 'Mic permission needed for voice input.' }); return; }
     audioChunks = [];
     mediaRecorder = new MediaRecorder(recordStream);
     mediaRecorder.ondataavailable = e => { if (e.data && e.data.size) audioChunks.push(e.data); };
@@ -150,10 +150,10 @@
         input.value = (input.value ? input.value + ' ' : '') + d.text; autosize();
         sendChat();
       } else {
-        bubble('assistant', { text: '⚠️ ' + (d.error || 'Could not transcribe audio.') });
+        bubble('assistant', { text: '' + (d.error || 'Could not transcribe audio.') });
       }
     } catch (e) {
-      bubble('assistant', { text: "⚠️ Can't reach the backend for transcription." });
+      bubble('assistant', { text: "Can't reach the backend for transcription." });
     } finally {
       input.placeholder = prevPh; micBtn.disabled = false;
     }
@@ -225,11 +225,11 @@
         history.push({ role: 'assistant', content: d.reply });
         speak(d.reply);
       } else {
-        bubble('assistant', { text: '⚠️ ' + (d.error || 'Something went wrong.') });
+        bubble('assistant', { text: '' + (d.error || 'Something went wrong.') });
       }
     } catch (e) {
       untyping();
-      bubble('assistant', { text: "⚠️ Can't reach the backend. Make sure the app is opened via Flask (http://localhost) and python app.py is running." });
+      bubble('assistant', { text: "Can't reach the backend. Make sure the app is opened via Flask (http://localhost) and python app.py is running." });
     } finally {
       sendBtn.disabled = false;
     }
@@ -241,5 +241,5 @@
   input.addEventListener('input', autosize);
 
   // greeting
-  bubble('assistant', { text: 'Assalam-o-Alaikum! 🌾 I\'m your Crop Advisor. Ask me anything about crops, soil, weather or pests — type, talk (🎤), or send a photo (📷) of your crop or soil.' });
+  bubble('assistant', { text: "Assalam-o-Alaikum! I'm your Crop Advisor. Ask me anything about crops, soil, weather or pests — type, talk, or send a photo of your crop or soil." });
 })();

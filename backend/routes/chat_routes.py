@@ -11,6 +11,7 @@ text, with conversation history. Uses the OpenAI Chat Completions REST API via
 
 from flask import Blueprint, request, jsonify
 import os
+import json
 import requests
 
 chat_bp = Blueprint("chat", __name__)
@@ -101,3 +102,103 @@ def chat():
         return jsonify({"ok": False, "error": "OpenAI request timed out — please try again."}), 504
     except Exception as e:
         return jsonify({"ok": False, "error": f"Chat failed: {type(e).__name__}: {e}"}), 500
+
+
+@chat_bp.route("/api/ai-recommend", methods=["POST"])
+def ai_recommend():
+    """OpenAI-powered crop recommendation from soil-sensor values.
+
+    The IoT node sends the soil sample the farmer crafted with the sliders; OpenAI
+    (the same key that powers the chat) plays agronomist and returns a structured
+    recommendation. Shape: {ok, success, crop, urdu, confidence, top3[], reason,
+    model, model_key}. This replaces the on-disk ML models for the node.
+    """
+    data = request.get_json(silent=True) or {}
+
+    key = os.getenv("OPENAI_API_KEY")
+    if not key:
+        return jsonify({
+            "ok": False,
+            "error": "OpenAI API key not set. Add OPENAI_API_KEY to backend/.env and restart."
+        }), 503
+
+    def _val(k):
+        v = data.get(k)
+        return v if v not in (None, "", -1, "-1") else None
+
+    soil = {
+        "nitrogen":    _val("nitrogen"),    "phosphorus": _val("phosphorus"),
+        "potassium":   _val("potassium"),   "ph":         _val("ph"),
+        "temperature": _val("temperature"), "rainfall":   _val("rainfall"),
+        "humidity":    _val("humidity"),    "moisture":   _val("moisture"),
+    }
+    reading = ", ".join(f"{k}={v}" for k, v in soil.items() if v is not None) or "no values provided"
+    region = (data.get("region") or "Pakistan").strip() or "Pakistan"
+    season = (data.get("season") or "").strip()
+    lang   = data.get("lang") or "en"
+    lang_name = LANG_NAMES.get(lang, "English")
+
+    system = (
+        "You are SmartZameen AI, an expert agronomist for Pakistani farms. Given soil "
+        "sensor values, recommend the single best crop to grow plus two alternatives, "
+        "considering common Pakistani crops and the Rabi/Kharif seasons. "
+        "Respond with ONLY a compact JSON object (no prose, no markdown) of exactly this shape:\n"
+        '{"crop":"<english crop name, lowercase>","urdu":"<urdu name>","confidence":<integer 0-100>,'
+        '"top3":[{"crop":"<eng>","urdu":"<urdu>","confidence":<int>},{...},{...}],'
+        '"reason":"<one short sentence in ' + lang_name + '>"}\n'
+        "top3[0] MUST be the same as the main crop. Make confidence realistic for the soil."
+    )
+    user = (f"Soil sensor reading: {reading}. Region: {region}. "
+            f"Season: {season or 'unspecified'}. Recommend the best crop for this soil.")
+
+    try:
+        res = requests.post(
+            OPENAI_URL,
+            headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+            json={
+                "model": OPENAI_MODEL,
+                "messages": [{"role": "system", "content": system},
+                             {"role": "user", "content": user}],
+                "temperature": 0.3, "max_tokens": 400,
+                "response_format": {"type": "json_object"},
+            },
+            timeout=60,
+        )
+        if res.status_code != 200:
+            try:
+                detail = res.json().get("error", {}).get("message", "")
+            except Exception:
+                detail = res.text[:200]
+            return jsonify({"ok": False, "error": f"OpenAI error ({res.status_code}): {detail}"}), 502
+
+        rec = json.loads(res.json()["choices"][0]["message"]["content"])
+
+        def _crop(o):
+            try:
+                conf = int(round(float(o.get("confidence", 0))))
+            except (TypeError, ValueError):
+                conf = 0
+            return {"crop": str(o.get("crop", "")).strip().lower(),
+                    "urdu": o.get("urdu", ""),
+                    "confidence": max(0, min(100, conf))}
+
+        top3 = [_crop(o) for o in (rec.get("top3") or []) if o][:3]
+        main = _crop(rec)
+        if not main["crop"] and top3:
+            main = top3[0]
+        if not top3:
+            top3 = [main]
+
+        return jsonify({
+            "ok": True, "success": True,
+            "crop": main["crop"], "urdu": main["urdu"], "confidence": main["confidence"],
+            "top3": top3, "reason": rec.get("reason", ""),
+            "model": "OpenAI · " + OPENAI_MODEL, "model_key": "openai",
+        })
+
+    except requests.exceptions.Timeout:
+        return jsonify({"ok": False, "error": "OpenAI request timed out — please try again."}), 504
+    except (ValueError, KeyError) as e:
+        return jsonify({"ok": False, "error": f"Could not parse the AI response ({e})."}), 502
+    except Exception as e:
+        return jsonify({"ok": False, "error": f"Recommend failed: {type(e).__name__}: {e}"}), 500

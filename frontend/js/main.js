@@ -86,7 +86,7 @@ async function predictCrop() {
         // Agar Flask nahi chal raha
         if (error.message.includes('Failed to fetch') ||
             error.message.includes('NetworkError')) {
-            showError('⚠️ Backend server nahi chal raha! Terminal mein chalao: python app.py');
+            showError('Backend server nahi chal raha! Terminal mein chalao: python app.py');
         } else {
             showError('Error: ' + error.message);
         }
@@ -201,7 +201,7 @@ async function predictCropFarmer() {
 
         if (error.message.includes('Failed to fetch') ||
             error.message.includes('NetworkError')) {
-            showError('⚠️ Backend server nahi chal raha! Terminal mein chalao: python app.py');
+            showError('Backend server nahi chal raha! Terminal mein chalao: python app.py');
         } else {
             showError('Error: ' + error.message);
         }
@@ -370,7 +370,7 @@ function showError(msg) {
         if (card) card.after(errBox);
     }
 
-    errBox.innerHTML = '⚠️ ' + msg;
+    errBox.innerHTML = '' + msg;
     errBox.style.display = 'flex';
 }
 
