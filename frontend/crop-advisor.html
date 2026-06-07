@@ -1301,7 +1301,7 @@
       <div class="sim-head">
         <div>
           <h1>IoT Soil <span>Sensor Node</span></h1>
-          <div class="sub">A front-end simulation of a field node. Craft a soil sample with the sliders and see a likely crop — this demo runs entirely in your browser and is not connected to the live system.</div>
+          <div class="sub">A virtual field node. Craft a soil sample, pick which model to run, and get a crop recommendation — choose a real ML model (scored by the backend) or the offline simulation that runs entirely in your browser.</div>
         </div>
         <div class="state-pill" id="state"><span class="dot"></span><span id="stateText">Idle</span></div>
       </div>
@@ -1345,7 +1345,7 @@
       </div>
 
       <div class="sz-card" style="margin-bottom:18px">
-        <div class="card-h">AI Crop Recommendation <span class="hint">offline simulation · runs in your browser</span></div>
+        <div class="card-h">AI Crop Recommendation <span class="hint">pick a model in Node Control, then Run</span></div>
         <div id="aiResult"><div class="ai-empty">Transmit a reading to run the model…</div></div>
       </div>
 
@@ -1353,20 +1353,28 @@
         <div class="sz-card">
           <div class="card-h">Node Control</div>
           <div class="controls">
+            <div class="meta-row" style="flex:1 1 100%;">
+              <select id="model" title="Choose which model runs the prediction" style="flex:1;">
+                <option value="kaggle">🌾 Crop Recommendation AI · 22 crops (best)</option>
+                <option value="random-forest">🌲 Local RandomForest</option>
+                <option value="rule-based">📋 Rule-based logic</option>
+                <option value="simulation">💻 Offline simulation (no backend)</option>
+              </select>
+            </div>
             <div class="meta-row">
               <select id="region"><option>Punjab</option><option>Sindh</option><option>KPK</option><option>Balochistan</option></select>
               <select id="season"><option value="Rabi">Rabi (سردی)</option><option value="Kharif">Kharif (گرمی)</option></select>
             </div>
-            <button class="btn btn-primary" id="send">▶&nbsp; Run Simulation</button>
+            <button class="btn btn-primary" id="send">▶&nbsp; Run Model</button>
             <button class="btn btn-ghost" id="rand">⟳&nbsp; Randomize Sample</button>
           </div>
         </div>
       </div>
 
       <div class="note">
-        This is a <b>front-end only simulation</b> — craft a soil sample with the sliders and the
-        demo scores a likely crop right here in your browser. It does <b>not</b> connect to the
-        backend or store anything; it just illustrates how a real ESP32 field node would feed a model.
+        Craft a soil sample, <b>choose a model</b>, and Run. The real ML models are scored by the
+        backend (live inference, real confidence); the <b>Offline simulation</b> runs fully in your
+        browser with no server. Either way this panel mirrors how a real ESP32 field node feeds a model.
       </div>
     </div>
 
@@ -1745,6 +1753,7 @@
       {crop:'chickpea',  season:'rabi',   temp:15, rain:30,  ph:7.2, n:40, p:35, k:35},
       {crop:'potato',    season:'rabi',   temp:18, rain:60,  ph:5.8, n:90, p:55, k:80},
     ];
+    const MAX_SCORE=1.4+1.2+1.0+0.7+0.5+0.5+1.1;   // perfect match incl. season bonus
     function localPredict(s, season){
       const near=(x,ideal,span)=>Math.max(0,1-Math.abs(x-ideal)/span);
       const scored=CROP_PROFILES.map(c=>{
@@ -1758,22 +1767,58 @@
         if(season && c.season===String(season).toLowerCase()) sc+=1.1;   // season-match bonus
         return {crop:c.crop, score:sc};
       }).sort((a,b)=>b.score-a.score);
-      const total=scored.reduce((t,c)=>t+c.score,0)||1;
+      // Confidence from the ABSOLUTE closeness to an ideal sample (not a share of
+      // the field), so a good match reads ~80–90%, not a flat low number.
       const top3=scored.slice(0,3).map(c=>({
         crop:c.crop,
-        confidence:Math.max(35,Math.min(96,Math.round(c.score/total*160))),
+        confidence:Math.max(40,Math.min(95,Math.round(c.score/MAX_SCORE*100))),
         urdu:URDU[c.crop]||''
       }));
       return {crop:top3[0].crop, confidence:top3[0].confidence, urdu:top3[0].urdu, top3,
               model:'Front-end simulation (offline)', model_key:'simulation'};
     }
-    function runSimulation(){
+
+    // Run the model the user picked: a real ML model via the backend, or the
+    // offline heuristic. Real models give real confidence (70–96%); the offline
+    // option always works without a server.
+    async function runModel(){
+      const choice=document.getElementById("model").value;
+      const region=document.getElementById("region").value;
       const season=document.getElementById("season").value;
-      setState("Simulating…","on"); pulseWires();
-      const pred=localPredict(state, season);
-      setTimeout(()=>{ renderAI(pred); setState("Simulation ready","on"); }, 350);
+      const out=document.getElementById("aiResult");
+      setState("Running…","on"); pulseWires();
+
+      if(choice==="simulation"){
+        const pred=localPredict(state, season);
+        setTimeout(()=>{ renderAI(pred); setState("Simulation ready","on"); }, 300);
+        return;
+      }
+
+      try{
+        const res=await fetch((window.SZ_API||"")+"/api/predict-crop",{
+          method:"POST", headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({
+            nitrogen:state.nitrogen, phosphorus:state.phosphorus, potassium:state.potassium,
+            ph:state.ph, temperature:state.temperature, rainfall:state.rainfall,
+            humidity:state.humidity, region:region, season:season,
+            force_model:choice
+          })
+        });
+        const d=await res.json();
+        if(res.ok && d.success){
+          renderAI({crop:d.crop, confidence:d.confidence, urdu:d.urdu, top3:d.top3,
+                    model:d.model, model_key:d.model_key});
+          setState("Model ready","on");
+        }else{
+          setState("Error","err");
+          out.innerHTML=`<div class="ai-empty">⚠️ ${d.error||"Prediction failed."}</div>`;
+        }
+      }catch(err){
+        setState("Backend offline","err");
+        out.innerHTML=`<div class="ai-empty">⚠️ Backend not reachable. Pick <b>“Offline simulation”</b> to run without a server, or start the backend.</div>`;
+      }
     }
-    document.getElementById("send").addEventListener("click", runSimulation);
+    document.getElementById("send").addEventListener("click", runModel);
     document.getElementById("rand").addEventListener("click",()=>{
       SENSORS.forEach(([key,,,,min,max,,step])=>{ let v=min+Math.random()*(max-min); v=step<1?Math.round(v*10)/10:Math.round(v); setSensor(key,v); });
       syncVisuals();

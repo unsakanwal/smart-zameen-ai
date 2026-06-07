@@ -130,14 +130,28 @@ def predict_crop():
         season      = data.get('season', 'rabi').strip().lower()
         humidity    = data.get('humidity', None)
 
-        # Prefer the high-accuracy Kaggle model when humidity is available.
-        # `model_used` records which model answered so the UI can label it
-        # (and so the SAME input through any entry point is explained, not random).
-        if new_model is not None and humidity not in (None, ''):
+        # Decide WHICH model answers. The UI may force one via `force_model`
+        # ('kaggle' | 'random-forest' | 'rule-based'); otherwise auto-pick
+        # (humidity present -> high-accuracy Kaggle model, else local RF, else rules).
+        # `model_used` is reported back so the result card can label it.
+        force      = (data.get('force_model') or '').strip().lower()
+        can_kaggle = new_model is not None and humidity not in (None, '')
+        can_local  = model is not None and encoder is not None
+
+        if force == 'kaggle':
+            which = 'kaggle' if can_kaggle else ('local' if can_local else 'rule')
+        elif force in ('random-forest', 'local'):
+            which = 'local' if can_local else 'rule'
+        elif force == 'rule-based':
+            which = 'rule'
+        else:  # auto
+            which = 'kaggle' if can_kaggle else ('local' if can_local else 'rule')
+
+        if which == 'kaggle':
             crop_name, confidence, top3 = predict_new(
                 nitrogen, phosphorus, potassium, temperature, float(humidity), ph, rainfall)
             model_used = MODEL_KAGGLE
-        elif model is not None and encoder is not None:
+        elif which == 'local':
             season_enc = le_season.transform([season])[0] if season in le_season.classes_ else 0
             region_enc = le_region.transform([region])[0] if region in le_region.classes_ else 0
             features   = np.array([[nitrogen, phosphorus, potassium, ph,
