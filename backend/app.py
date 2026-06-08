@@ -182,7 +182,20 @@ def serve_static(path):
         return send_from_directory(FRONTEND_DIR, path)
     return send_from_directory(FRONTEND_DIR, 'index.html')
 
-
+# ===== META WEBHOOK VERIFY =====
+@app.route('/webhook', methods=['GET', 'POST'])
+def meta_webhook():
+    if request.method == 'GET':
+        mode = request.args.get('hub.mode')
+        token = request.args.get('hub.verify_token')
+        challenge = request.args.get('hub.challenge')
+        
+        if mode == 'subscribe' and token == 'smartzameen123':
+            return challenge, 200
+        return 'Forbidden', 403
+    
+    return 'OK', 200
+    
 # ===== ERROR HANDLERS =====
 @app.errorhandler(404)
 def not_found(e):
