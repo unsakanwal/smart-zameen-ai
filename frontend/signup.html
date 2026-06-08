@@ -320,8 +320,8 @@
     </div>
     <div class="nav-right">
       <div id="auth-buttons" style="display:flex;gap:10px;align-items:center;">
-        <a href="login.html" class="btn-login">Login</a>
-        <a href="signup.html" class="btn-signup">Sign Up</a>
+        <a href="login.html" class="btn-login" data-i18n="nav_login">Login</a>
+        <a href="signup.html" class="btn-signup" data-i18n="nav_signup">Sign Up</a>
       </div>
       <!-- User pill (shown when logged in) -->
       <div class="user-pill" id="user-pill">
@@ -329,9 +329,9 @@
         <span id="user-name-display">User</span>
         <span style="font-size:10px;color:#666">▼</span>
         <div class="user-dropdown">
-          <a href="dashboard.html">Dashboard</a>
-          <a href="ai-agent.html">Crop Advisor</a>
-          <button class="logout-btn" onclick="logout()">Logout</button>
+          <a href="dashboard.html" data-i18n="dash">Dashboard</a>
+          <a href="ai-agent.html" data-i18n="nav_advisor">Crop Advisor</a>
+          <button class="logout-btn" onclick="logout()" data-i18n="logout">Logout</button>
         </div>
       </div>
     </div>
@@ -455,7 +455,7 @@
   <!-- Floating WhatsApp Bot Button -->
   <a href="https://wa.me/14155238886?text=hello" target="_blank" class="whatsapp-float" title="Chat with WhatsApp AI Bot">
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="whatsapp-icon-svg" style="flex-shrink:0;"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.717-1.458L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.42 9.864-9.858.002-2.634-1.01-5.11-2.85-6.953C16.646 1.952 14.177.95 11.545.95 6.11.95 1.687 5.37 1.683 10.81c-.001 1.73.454 3.42 1.316 4.925l-.994 3.635 3.72-.975zm12.353-7.25c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
-    <span class="whatsapp-text">WhatsApp Bot</span>
+    <span class="whatsapp-text" data-i18n="wa_bot">WhatsApp Bot</span>
   </a>
 </body>
 </html>

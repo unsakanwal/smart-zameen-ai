@@ -1,5 +1,5 @@
 /* ============================================================
-   SmartZameen AI — Shared Design System (theme.css)
+   SmartZameen AI - Shared Design System (theme.css)
    Single source of truth for colors, typography, and the
    components reused across every page (nav, buttons, cards,
    forms, badges, footer, WhatsApp button). Pulled from the
@@ -69,7 +69,7 @@ img, video, canvas { max-width: 100%; height: auto; }
 .navbar {
   display: flex; align-items: center;
   padding: 14px clamp(16px, 4vw, 48px);
-  /* glassmorphism — !important so page-level inline styles can't flatten it */
+  /* glassmorphism - !important so page-level inline styles can't flatten it */
   background: rgba(255, 255, 255, 0.62) !important;
   -webkit-backdrop-filter: blur(16px) saturate(170%);
   backdrop-filter: blur(16px) saturate(170%);
@@ -102,7 +102,7 @@ img, video, canvas { max-width: 100%; height: auto; }
   flex: 0 0 auto; justify-content: flex-end;
 }
 
-/* hamburger (mobile) — injected by main.js */
+/* hamburger (mobile) - injected by main.js */
 .nav-toggle {
   display: none; background: none; border: none; cursor: pointer; padding: 6px;
   color: var(--primary); margin-left: auto;
@@ -298,7 +298,7 @@ img, video, canvas { max-width: 100%; height: auto; }
 .app-main { min-width: 0; }
 
 /* On app pages the user pill lives in the sidebar, so hide the top-nav one there.
-   (Scoped to data-app — on home/login/signup the pill must still show when logged in.) */
+   (Scoped to data-app - on home/login/signup the pill must still show when logged in.) */
 body[data-app] .user-pill { display: none !important; }
 
 /* Sidebar: Languages + Logout */

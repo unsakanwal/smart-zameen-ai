@@ -113,6 +113,146 @@ const LANG = {
     opt_fert_high: 'High / Normal',
     opt_fert_low: 'Low',
     btn_predict_farmer: 'Get Crop Recommendation',
+
+    // ── Shared navbar / sidebar ──
+    nav_login: 'Login',
+    nav_signup: 'Sign Up',
+    nav_advisor: 'Crop Advisor',
+    nav_node: 'IoT Node',
+    nav_weather: 'Weather',
+    nav_history: 'History',
+    nav_profile: 'Profile',
+    logout: 'Logout',
+    wa_bot: 'WhatsApp Bot',
+    btn_get_started: 'Get Started',
+
+    // ── Home: tools cards ──
+    tool_reco_title: 'AI Crop Recommendation',
+    tool_reco_desc: 'Personalized insights based on your soil profile, climate trends, and historical performance data.',
+    tool_soil_title: 'Soil Image Analysis',
+    tool_soil_desc: 'Upload a photo of your soil to detect nutrient deficiencies, pH levels, and overall health status instantly using our vision AI.',
+    tool_voice_title: 'Voice AI Chat',
+    tool_voice_desc: 'Ask farming questions in your local dialect and get instant, easy-to-understand audio responses.',
+    tool_weather_title: 'Weather Forecast',
+    tool_weather_desc: 'Hyper-local alerts tailored to your specific field coordinates with minute-by-minute accuracy.',
+    tool_wa_title: 'WhatsApp Bot',
+    tool_wa_desc: 'Access our complete AI insight engine directly through WhatsApp, no new app downloads required.',
+    try_reco: 'Try Recommendation',
+    try_analysis: 'Try Analysis',
+    try_voice: 'Try Voice Chat',
+    try_weather: 'Check Weather',
+    try_wa: 'Try WhatsApp Bot',
+
+    // ── Home: autonomy section ──
+    auto_tag: 'AI-Powered Farming',
+    auto_title: 'Smart Decisions for Higher Yields',
+    auto_desc: "We leverage advanced AI models customized specifically for Pakistan's agricultural environment. From soil NPK estimation to localized advice, we make precision farming simple and accessible.",
+    auto_li1: 'Soil Health & NPK Diagnosis (Vision AI)',
+    auto_li2: 'Localized Crop Recommendation Engine',
+    auto_li3: 'Voice Assistant in Urdu & Regional Languages',
+
+    // ── Home: languages + about ──
+    lang_card_title: '5 Regional Languages',
+    lang_card_desc: 'Designed for the diverse agricultural landscape of Pakistan, with full native support for Urdu, Punjabi, Sindhi, Pashto, and English.',
+    about_title: 'About SmartZameen AI',
+    about_desc: 'SmartZameen AI is a precision-agriculture platform built for Pakistani farmers. We combine machine learning, soil image analysis, and hyper-local weather to turn everyday field data into clear, actionable crop decisions, in five regional languages, on any device. Our mission is to make modern, data-driven farming simple, affordable, and accessible to every grower.',
+    about_v1_t: 'Data-Driven',
+    about_v1_d: 'Decisions backed by a trained ML model, not guesswork.',
+    about_v2_t: 'Local-First',
+    about_v2_d: "Tuned for Pakistan's regions, crops, and seasons.",
+    about_v3_t: '5 Languages',
+    about_v3_d: 'Urdu, Punjabi, Sindhi, Pashto and English.',
+    about_connect: 'Connect with us',
+
+    // ── Home: footer ──
+    footer_brand_desc: "Pioneering sustainable agricultural technology for the future of Pakistan's farmers.",
+    footer_company: 'Company',
+    footer_support: 'Support',
+    footer_legal: 'Legal',
+    footer_mission: 'Our Mission',
+    footer_contact: 'Contact',
+    footer_help: 'Help Center',
+    footer_wa_support: 'WhatsApp Support',
+    footer_privacy: 'Privacy Policy',
+    footer_terms: 'Terms of Service',
+    footer_info: 'Built for Pakistani farmers',
+
+    // ── Dashboard ──
+    dash_subtitle: 'Real-time agricultural insights for your land.',
+    stat_total: 'Total Predictions',
+    stat_month: 'This Month',
+    stat_avg_conf: 'Avg Confidence',
+    stat_top_rec: 'Top Recommended',
+    weather_insights: 'Weather Insights',
+    forecast_5step: '5-Step Forecast',
+    soil_node_title: 'Connected Soil Node',
+    soil_empty_html: 'No live reading yet. Open the <a href="crop-advisor.html" style="color:var(--accent);font-weight:700;">IoT Node</a> and transmit a reading.',
+    meta_node: 'Node',
+    meta_source: 'Source',
+    meta_updated: 'Updated',
+    soil_temp_label: 'Temp',
+    soil_moisture_label: 'Moisture',
+    soil_ai_crop: 'AI Suggested Crop (from live soil)',
+    recent_predictions: 'Recent Predictions',
+    view_all: 'View All',
+    th_date: 'Date',
+    th_region: 'Region',
+    th_season: 'Season',
+    th_reco_crop: 'Recommended Crop',
+    th_confidence: 'Confidence',
+
+    // ── Weather page ──
+    weather_page_title: 'Weather',
+    weather_page_desc: 'Live conditions and a short forecast for Pakistani cities.',
+    short_forecast: 'Short Forecast',
+    wx_feels: 'Feels',
+    wx_rain: 'Rain',
+
+    // ── History page ──
+    hist_title: 'History',
+    hist_desc: "Every crop prediction and IoT sensor reading you've recorded.",
+    hs_preds: 'Crop Predictions',
+    hs_sensors: 'IoT Sensor Readings',
+    th_crop: 'Crop',
+    th_npk: 'NPK',
+    th_ph: 'pH',
+    th_received: 'Received',
+    th_node: 'Node',
+    th_source: 'Source',
+    th_npk_slash: 'N/P/K',
+    th_temp: 'Temp',
+    th_moist: 'Moist',
+
+    // ── Settings page ──
+    set_title: 'Settings',
+    set_desc: 'Manage your account and profile.',
+    set_profile: 'Profile',
+    set_fullname: 'Full Name',
+    set_name_ph: 'Your name',
+    set_email: 'Email',
+    set_email_hint: "Email can't be changed.",
+    set_region: 'Region',
+    set_select_region: 'Select region',
+    set_newpass: 'New Password',
+    set_pass_ph: 'Leave blank to keep current',
+    set_pass_hint: 'Minimum 6 characters.',
+    set_save: 'Save Changes',
+    set_account: 'Account',
+    set_logout_desc: 'Sign out of your account on this device.',
+
+    // ── IoT Node page ──
+    node_h1: 'IoT Soil <span>Sensor Node</span>',
+    node_sub_html: "This node is a <b>virtual simulation</b>, we don't use physical sensor hardware, so you adjust the sensor values to match your soil report. Those readings are scored by <b>our own AI model, trained on multiple datasets</b>, which recommends the best crop to grow.",
+    node_card_composer: 'Soil Sample Composer',
+    node_card_profile: 'Sample Profile',
+    node_card_wiring: 'Field Wiring Diagram',
+    node_card_ai: 'AI Crop Recommendation',
+    node_get_reco: 'Get Recommendation',
+
+    // ── Crop Advisor chat page ──
+    advisor_h1: 'Crop Advisor',
+    advisor_sub: 'Type, talk, or send a photo of your crop or soil, powered by AI.',
+    advisor_input_ph: 'Message Crop Advisor',
   },
 
   ur: {
@@ -228,6 +368,146 @@ const LANG = {
     opt_fert_high: 'زیادہ',
     opt_fert_low: 'کم',
     btn_predict_farmer: 'فصل کا اندازہ لگائیں',
+
+    // ── Shared navbar / sidebar ──
+    nav_login: 'لاگ ان',
+    nav_signup: 'سائن اپ',
+    nav_advisor: 'فصل مشیر',
+    nav_node: 'آئی او ٹی نوڈ',
+    nav_weather: 'موسم',
+    nav_history: 'تاریخ',
+    nav_profile: 'پروفائل',
+    logout: 'لاگ آؤٹ',
+    wa_bot: 'واٹس ایپ بوٹ',
+    btn_get_started: 'شروع کریں',
+
+    // ── Home: tools cards ──
+    tool_reco_title: 'AI فصل کی تجویز',
+    tool_reco_desc: 'آپ کی مٹی، موسمی رجحانات اور ماضی کی کارکردگی کی بنیاد پر ذاتی مشورہ۔',
+    tool_soil_title: 'مٹی کی تصویری جانچ',
+    tool_soil_desc: 'اپنی مٹی کی تصویر اپ لوڈ کریں اور وژن AI سے فوری طور پر غذائی کمی، pH اور مجموعی صحت معلوم کریں۔',
+    tool_voice_title: 'آواز AI چیٹ',
+    tool_voice_desc: 'اپنی مقامی زبان میں کھیتی کے سوال پوچھیں اور فوری، آسان آواز میں جواب پائیں۔',
+    tool_weather_title: 'موسم کی پیش گوئی',
+    tool_weather_desc: 'آپ کے کھیت کے عین مطابق مقامی موسمی انتباہات، لمحہ بہ لمحہ درستگی کے ساتھ۔',
+    tool_wa_title: 'واٹس ایپ بوٹ',
+    tool_wa_desc: 'واٹس ایپ پر براہ راست ہماری مکمل AI سہولت حاصل کریں، کوئی نئی ایپ ڈاؤن لوڈ کرنے کی ضرورت نہیں۔',
+    try_reco: 'تجویز آزمائیں',
+    try_analysis: 'جانچ آزمائیں',
+    try_voice: 'آواز چیٹ آزمائیں',
+    try_weather: 'موسم دیکھیں',
+    try_wa: 'واٹس ایپ بوٹ آزمائیں',
+
+    // ── Home: autonomy section ──
+    auto_tag: 'AI سے چلنے والی کھیتی',
+    auto_title: 'زیادہ پیداوار کے لیے سمارٹ فیصلے',
+    auto_desc: 'ہم پاکستان کے زرعی ماحول کے لیے خاص بنائے گئے جدید AI ماڈلز استعمال کرتے ہیں۔ مٹی کے NPK اندازے سے لے کر مقامی مشورے تک، ہم درست کھیتی کو آسان اور قابل رسائی بناتے ہیں۔',
+    auto_li1: 'مٹی کی صحت اور NPK تشخیص (وژن AI)',
+    auto_li2: 'مقامی فصل تجویز انجن',
+    auto_li3: 'اردو اور علاقائی زبانوں میں آواز اسسٹنٹ',
+
+    // ── Home: languages + about ──
+    lang_card_title: '5 علاقائی زبانیں',
+    lang_card_desc: 'پاکستان کے متنوع زرعی ماحول کے لیے، اردو، پنجابی، سندھی، پشتو اور انگریزی کی مکمل مدد کے ساتھ۔',
+    about_title: 'سمارٹ زمین AI کے بارے میں',
+    about_desc: 'سمارٹ زمین AI پاکستانی کسانوں کے لیے بنایا گیا درست کھیتی کا پلیٹ فارم ہے۔ ہم مشین لرننگ، مٹی کی تصویری جانچ اور مقامی موسم کو ملا کر روزمرہ کھیت کی معلومات کو واضح فصل فیصلوں میں بدلتے ہیں، پانچ علاقائی زبانوں میں، ہر ڈیوائس پر۔ ہمارا مقصد جدید کھیتی کو ہر کسان کے لیے آسان اور سستا بنانا ہے۔',
+    about_v1_t: 'ڈیٹا پر مبنی',
+    about_v1_d: 'فیصلے تربیت یافتہ ML ماڈل پر، اندازے پر نہیں۔',
+    about_v2_t: 'مقامی ترجیح',
+    about_v2_d: 'پاکستان کے علاقوں، فصلوں اور موسموں کے مطابق۔',
+    about_v3_t: '5 زبانیں',
+    about_v3_d: 'اردو، پنجابی، سندھی، پشتو اور انگریزی۔',
+    about_connect: 'ہم سے رابطہ کریں',
+
+    // ── Home: footer ──
+    footer_brand_desc: 'پاکستان کے کسانوں کے مستقبل کے لیے پائیدار زرعی ٹیکنالوجی۔',
+    footer_company: 'کمپنی',
+    footer_support: 'مدد',
+    footer_legal: 'قانونی',
+    footer_mission: 'ہمارا مقصد',
+    footer_contact: 'رابطہ',
+    footer_help: 'مدد مرکز',
+    footer_wa_support: 'واٹس ایپ مدد',
+    footer_privacy: 'رازداری پالیسی',
+    footer_terms: 'شرائط و ضوابط',
+    footer_info: 'پاکستانی کسانوں کے لیے بنایا گیا',
+
+    // ── Dashboard ──
+    dash_subtitle: 'آپ کی زمین کے لیے حقیقی وقت کی زرعی معلومات۔',
+    stat_total: 'کل پیش گوئیاں',
+    stat_month: 'اس مہینے',
+    stat_avg_conf: 'اوسط درستگی',
+    stat_top_rec: 'سب سے زیادہ تجویز',
+    weather_insights: 'موسمی معلومات',
+    forecast_5step: '5 مرحلہ پیش گوئی',
+    soil_node_title: 'منسلک مٹی نوڈ',
+    soil_empty_html: 'ابھی کوئی لائیو ریڈنگ نہیں۔ <a href="crop-advisor.html" style="color:var(--accent);font-weight:700;">آئی او ٹی نوڈ</a> کھولیں اور ریڈنگ بھیجیں۔',
+    meta_node: 'نوڈ',
+    meta_source: 'ذریعہ',
+    meta_updated: 'تازہ کاری',
+    soil_temp_label: 'درجہ حرارت',
+    soil_moisture_label: 'نمی',
+    soil_ai_crop: 'AI تجویز کردہ فصل (لائیو مٹی سے)',
+    recent_predictions: 'حالیہ پیش گوئیاں',
+    view_all: 'سب دیکھیں',
+    th_date: 'تاریخ',
+    th_region: 'علاقہ',
+    th_season: 'موسم',
+    th_reco_crop: 'تجویز کردہ فصل',
+    th_confidence: 'درستگی',
+
+    // ── Weather page ──
+    weather_page_title: 'موسم',
+    weather_page_desc: 'پاکستانی شہروں کے لیے تازہ موسمی حالات اور مختصر پیش گوئی۔',
+    short_forecast: 'مختصر پیش گوئی',
+    wx_feels: 'محسوس',
+    wx_rain: 'بارش',
+
+    // ── History page ──
+    hist_title: 'تاریخ',
+    hist_desc: 'آپ کی ریکارڈ کی گئی ہر فصل کی پیش گوئی اور IoT سینسر ریڈنگ۔',
+    hs_preds: 'فصل کی پیش گوئیاں',
+    hs_sensors: 'IoT سینسر ریڈنگ',
+    th_crop: 'فصل',
+    th_npk: 'NPK',
+    th_ph: 'pH',
+    th_received: 'موصول',
+    th_node: 'نوڈ',
+    th_source: 'ذریعہ',
+    th_npk_slash: 'N/P/K',
+    th_temp: 'درجہ حرارت',
+    th_moist: 'نمی',
+
+    // ── Settings page ──
+    set_title: 'ترتیبات',
+    set_desc: 'اپنا اکاؤنٹ اور پروفائل سنبھالیں۔',
+    set_profile: 'پروفائل',
+    set_fullname: 'پورا نام',
+    set_name_ph: 'آپ کا نام',
+    set_email: 'ای میل',
+    set_email_hint: 'ای میل تبدیل نہیں ہو سکتا۔',
+    set_region: 'علاقہ',
+    set_select_region: 'علاقہ منتخب کریں',
+    set_newpass: 'نیا پاس ورڈ',
+    set_pass_ph: 'موجودہ رکھنے کے لیے خالی چھوڑیں',
+    set_pass_hint: 'کم از کم 6 حروف۔',
+    set_save: 'تبدیلیاں محفوظ کریں',
+    set_account: 'اکاؤنٹ',
+    set_logout_desc: 'اس ڈیوائس پر اپنے اکاؤنٹ سے سائن آؤٹ کریں۔',
+
+    // ── IoT Node page ──
+    node_h1: 'آئی او ٹی مٹی <span>سینسر نوڈ</span>',
+    node_sub_html: 'یہ نوڈ ایک <b>ورچوئل سمولیشن</b> ہے، ہم اصل سینسر ہارڈ ویئر استعمال نہیں کرتے، اس لیے آپ سینسر کی قدریں اپنی مٹی کی رپورٹ کے مطابق سیٹ کرتے ہیں۔ ان قدروں کو <b>ہمارا اپنا AI ماڈل، جو کئی ڈیٹاسیٹس پر تربیت یافتہ ہے</b>، جانچ کر بہترین فصل تجویز کرتا ہے۔',
+    node_card_composer: 'مٹی کا نمونہ ترتیب دیں',
+    node_card_profile: 'نمونہ پروفائل',
+    node_card_wiring: 'فیلڈ وائرنگ خاکہ',
+    node_card_ai: 'AI فصل کی تجویز',
+    node_get_reco: 'تجویز حاصل کریں',
+
+    // ── Crop Advisor chat page ──
+    advisor_h1: 'فصل مشیر',
+    advisor_sub: 'لکھیں، بولیں یا اپنی فصل یا مٹی کی تصویر بھیجیں، AI سے چلتا ہے۔',
+    advisor_input_ph: 'فصل مشیر کو پیغام بھیجیں',
   },
 
   pa: {
@@ -342,6 +622,146 @@ const LANG = {
     opt_fert_high: 'زیادہ',
     opt_fert_low: 'کم',
     btn_predict_farmer: 'فصل دا اندازہ لاؤ',
+
+    // ── Shared navbar / sidebar ──
+    nav_login: 'لاگ ان',
+    nav_signup: 'سائن اپ',
+    nav_advisor: 'فصل مشیر',
+    nav_node: 'آئی او ٹی نوڈ',
+    nav_weather: 'موسم',
+    nav_history: 'تاریخ',
+    nav_profile: 'پروفائل',
+    logout: 'لاگ آؤٹ',
+    wa_bot: 'واٹس ایپ بوٹ',
+    btn_get_started: 'شروع کرو',
+
+    // ── Home: tools cards ──
+    tool_reco_title: 'AI فصل دی تجویز',
+    tool_reco_desc: 'تہاڈی مٹی، موسم تے پچھلی کارکردگی دے مطابق ذاتی مشورہ۔',
+    tool_soil_title: 'مٹی دی تصویر دی جانچ',
+    tool_soil_desc: 'اپنی مٹی دی تصویر اپ لوڈ کرو تے وژن AI نال فوری غذائی کمی، pH تے صحت جانو۔',
+    tool_voice_title: 'آواز AI چیٹ',
+    tool_voice_desc: 'اپنی مقامی بولی وچ کھیتی دے سوال پچھو تے فوری، سوکھے آواز وچ جواب لؤ۔',
+    tool_weather_title: 'موسم دی پیش گوئی',
+    tool_weather_desc: 'تہاڈے کھیت دے عین مطابق مقامی موسمی خبراں، پل پل دی درستگی نال۔',
+    tool_wa_title: 'واٹس ایپ بوٹ',
+    tool_wa_desc: 'واٹس ایپ تے سدھا ساڈی پوری AI سہولت لؤ، کوئی نویں ایپ نہیں چاہیدی۔',
+    try_reco: 'تجویز ازماؤ',
+    try_analysis: 'جانچ ازماؤ',
+    try_voice: 'آواز چیٹ ازماؤ',
+    try_weather: 'موسم ویکھو',
+    try_wa: 'واٹس ایپ بوٹ ازماؤ',
+
+    // ── Home: autonomy section ──
+    auto_tag: 'AI نال چلدی کھیتی',
+    auto_title: 'ودھ پیداوار لئی سمارٹ فیصلے',
+    auto_desc: 'اسیں پاکستان دے زرعی ماحول لئی خاص بنائے جدید AI ماڈل ورتدے ہاں۔ مٹی دے NPK اندازے توں لے کے مقامی مشورے تک، اسیں درست کھیتی نوں سوکھا تے قابل رسائی بنادے ہاں۔',
+    auto_li1: 'مٹی دی صحت تے NPK جانچ (وژن AI)',
+    auto_li2: 'مقامی فصل تجویز انجن',
+    auto_li3: 'اردو تے علاقائی زباناں وچ آواز اسسٹنٹ',
+
+    // ── Home: languages + about ──
+    lang_card_title: '5 علاقائی زباناں',
+    lang_card_desc: 'پاکستان دے ونگ ونگ دے زرعی ماحول لئی، اردو، پنجابی، سندھی، پشتو تے انگریزی دی پوری مدد نال۔',
+    about_title: 'سمارٹ زمین AI بارے',
+    about_desc: 'سمارٹ زمین AI پاکستانی کسانا لئی بنایا درست کھیتی پلیٹ فارم اے۔ اسیں مشین لرننگ، مٹی دی تصویر دی جانچ تے مقامی موسم نوں ملا کے روزانہ کھیت دی معلومات نوں صاف فصل فیصلیاں وچ بدلدے ہاں، پنج علاقائی زباناں وچ، ہر ڈیوائس تے۔ ساڈا مقصد جدید کھیتی نوں ہر کسان لئی سوکھا تے سستا بنانا اے۔',
+    about_v1_t: 'ڈیٹا تے مبنی',
+    about_v1_d: 'فیصلے تربیت یافتہ ML ماڈل تے، اندازے تے نہیں۔',
+    about_v2_t: 'مقامی ترجیح',
+    about_v2_d: 'پاکستان دے علاقیاں، فصلاں تے موسماں دے مطابق۔',
+    about_v3_t: '5 زباناں',
+    about_v3_d: 'اردو، پنجابی، سندھی، پشتو تے انگریزی۔',
+    about_connect: 'سانوں رابطہ کرو',
+
+    // ── Home: footer ──
+    footer_brand_desc: 'پاکستان دے کسانا دے مستقبل لئی پائیدار زرعی ٹیکنالوجی۔',
+    footer_company: 'کمپنی',
+    footer_support: 'مدد',
+    footer_legal: 'قانونی',
+    footer_mission: 'ساڈا مقصد',
+    footer_contact: 'رابطہ',
+    footer_help: 'مدد مرکز',
+    footer_wa_support: 'واٹس ایپ مدد',
+    footer_privacy: 'رازداری پالیسی',
+    footer_terms: 'شرائط',
+    footer_info: 'پاکستانی کسانا لئی بنایا',
+
+    // ── Dashboard ──
+    dash_subtitle: 'تہاڈی زمین لئی حقیقی وقت دی زرعی معلومات۔',
+    stat_total: 'کل پیش گوئیاں',
+    stat_month: 'ایس مہینے',
+    stat_avg_conf: 'اوسط درستگی',
+    stat_top_rec: 'سب توں ودھ تجویز',
+    weather_insights: 'موسمی معلومات',
+    forecast_5step: '5 مرحلے پیش گوئی',
+    soil_node_title: 'جڑیا مٹی نوڈ',
+    soil_empty_html: 'ہالے کوئی لائیو ریڈنگ نہیں۔ <a href="crop-advisor.html" style="color:var(--accent);font-weight:700;">آئی او ٹی نوڈ</a> کھولو تے ریڈنگ بھیجو۔',
+    meta_node: 'نوڈ',
+    meta_source: 'ذریعہ',
+    meta_updated: 'تازہ',
+    soil_temp_label: 'گرمی',
+    soil_moisture_label: 'نمی',
+    soil_ai_crop: 'AI تجویز کیتی فصل (لائیو مٹی توں)',
+    recent_predictions: 'حالیہ پیش گوئیاں',
+    view_all: 'سب ویکھو',
+    th_date: 'تاریخ',
+    th_region: 'علاقہ',
+    th_season: 'موسم',
+    th_reco_crop: 'تجویز کیتی فصل',
+    th_confidence: 'درستگی',
+
+    // ── Weather page ──
+    weather_page_title: 'موسم',
+    weather_page_desc: 'پاکستانی شہراں لئی تازہ موسمی حالات تے مختصر پیش گوئی۔',
+    short_forecast: 'مختصر پیش گوئی',
+    wx_feels: 'محسوس',
+    wx_rain: 'مینہ',
+
+    // ── History page ──
+    hist_title: 'تاریخ',
+    hist_desc: 'تہاڈی ریکارڈ کیتی ہر فصل دی پیش گوئی تے IoT سینسر ریڈنگ۔',
+    hs_preds: 'فصل دیاں پیش گوئیاں',
+    hs_sensors: 'IoT سینسر ریڈنگ',
+    th_crop: 'فصل',
+    th_npk: 'NPK',
+    th_ph: 'pH',
+    th_received: 'موصول',
+    th_node: 'نوڈ',
+    th_source: 'ذریعہ',
+    th_npk_slash: 'N/P/K',
+    th_temp: 'گرمی',
+    th_moist: 'نمی',
+
+    // ── Settings page ──
+    set_title: 'ترتیباں',
+    set_desc: 'اپنا اکاؤنٹ تے پروفائل سنبھالو۔',
+    set_profile: 'پروفائل',
+    set_fullname: 'پورا ناں',
+    set_name_ph: 'تہاڈا ناں',
+    set_email: 'ای میل',
+    set_email_hint: 'ای میل بدل نہیں سکدا۔',
+    set_region: 'علاقہ',
+    set_select_region: 'علاقہ چنو',
+    set_newpass: 'نواں پاسورڈ',
+    set_pass_ph: 'موجودہ رکھن لئی خالی چھڈو',
+    set_pass_hint: 'گھٹ توں گھٹ 6 حرف۔',
+    set_save: 'تبدیلیاں محفوظ کرو',
+    set_account: 'اکاؤنٹ',
+    set_logout_desc: 'ایس ڈیوائس تے اپنے اکاؤنٹ توں سائن آؤٹ کرو۔',
+
+    // ── IoT Node page ──
+    node_h1: 'آئی او ٹی مٹی <span>سینسر نوڈ</span>',
+    node_sub_html: 'ایہہ نوڈ اک <b>ورچوئل سمولیشن</b> اے، اسیں اصل سینسر ہارڈ ویئر نہیں ورتدے، ایس لئی تسیں سینسر دیاں قدراں اپنی مٹی دی رپورٹ مطابق سیٹ کردے او۔ ایہناں قدراں نوں <b>ساڈا اپنا AI ماڈل، جیہڑا کئی ڈیٹاسیٹس تے تربیت یافتہ اے</b>، جانچ کے بہترین فصل دسدا اے۔',
+    node_card_composer: 'مٹی دا نمونہ بناؤ',
+    node_card_profile: 'نمونہ پروفائل',
+    node_card_wiring: 'فیلڈ وائرنگ خاکہ',
+    node_card_ai: 'AI فصل دی تجویز',
+    node_get_reco: 'تجویز لؤ',
+
+    // ── Crop Advisor chat page ──
+    advisor_h1: 'فصل مشیر',
+    advisor_sub: 'لکھو، بولو یا اپنی فصل یا مٹی دی تصویر بھیجو، AI نال چلدا اے۔',
+    advisor_input_ph: 'فصل مشیر نوں پیغام بھیجو',
   },
 
   sd: {
@@ -456,6 +876,146 @@ const LANG = {
     opt_fert_high: 'وڌيڪ',
     opt_fert_low: 'گهٽ',
     btn_predict_farmer: 'فصل جو اندازو لڳايو',
+
+    // ── Shared navbar / sidebar ──
+    nav_login: 'لاگ ان',
+    nav_signup: 'سائن اپ',
+    nav_advisor: 'فصل صلاحڪار',
+    nav_node: 'IoT نوڊ',
+    nav_weather: 'موسم',
+    nav_history: 'تاريخ',
+    nav_profile: 'پروفائل',
+    logout: 'لاگ آئوٽ',
+    wa_bot: 'واٽس ايپ بوٽ',
+    btn_get_started: 'شروع ڪريو',
+
+    // ── Home: tools cards ──
+    tool_reco_title: 'AI فصل جي صلاح',
+    tool_reco_desc: 'توهان جي مٽي، موسم ۽ ماضي جي ڪارڪردگي جي بنياد تي ذاتي صلاح۔',
+    tool_soil_title: 'مٽي جي تصوير جو تجزيو',
+    tool_soil_desc: 'پنهنجي مٽي جي تصوير اپلوڊ ڪريو ۽ وژن AI سان فوري طور تي غذائي کوٽ، pH ۽ صحت معلوم ڪريو۔',
+    tool_voice_title: 'آواز AI چيٽ',
+    tool_voice_desc: 'پنهنجي مقامي ٻولي ۾ پوک جا سوال پڇو ۽ فوري، آسان آواز ۾ جواب وٺو۔',
+    tool_weather_title: 'موسم جي اڳڪٿي',
+    tool_weather_desc: 'توهان جي پوک جي عين مطابق مقامي موسمي خبرون، هر منٽ جي درستگي سان۔',
+    tool_wa_title: 'واٽس ايپ بوٽ',
+    tool_wa_desc: 'واٽس ايپ تي سڌو سنئون اسان جي مڪمل AI سهولت حاصل ڪريو، نئين ايپ جي ضرورت ناهي۔',
+    try_reco: 'صلاح آزمايو',
+    try_analysis: 'تجزيو آزمايو',
+    try_voice: 'آواز چيٽ آزمايو',
+    try_weather: 'موسم ڏسو',
+    try_wa: 'واٽس ايپ بوٽ آزمايو',
+
+    // ── Home: autonomy section ──
+    auto_tag: 'AI سان هلندڙ پوک',
+    auto_title: 'وڌيڪ پيداوار لاءِ سمارٽ فيصلا',
+    auto_desc: 'اسان پاڪستان جي زرعي ماحول لاءِ خاص ٺاهيل جديد AI ماڊل استعمال ڪندا آهيون۔ مٽي جي NPK اندازي کان وٺي مقامي صلاح تائين، اسان درست پوک کي آسان ۽ پهچ ۾ بڻايون ٿا۔',
+    auto_li1: 'مٽي جي صحت ۽ NPK تشخيص (وژن AI)',
+    auto_li2: 'مقامي فصل صلاح انجڻ',
+    auto_li3: 'اردو ۽ علائقائي ٻولين ۾ آواز اسسٽنٽ',
+
+    // ── Home: languages + about ──
+    lang_card_title: '5 علائقائي ٻوليون',
+    lang_card_desc: 'پاڪستان جي مختلف زرعي ماحول لاءِ، اردو، پنجابي، سنڌي، پشتو ۽ انگريزي جي مڪمل مدد سان۔',
+    about_title: 'SmartZameen AI بابت',
+    about_desc: 'SmartZameen AI پاڪستاني هارين لاءِ ٺاهيل هڪ درست پوک پليٽ فارم آهي۔ اسان مشين لرننگ، مٽي جي تصوير جو تجزيو ۽ مقامي موسم کي ملائي روزاني پوک جي ڊيٽا کي واضح فصل فيصلن ۾ بدلايون ٿا، پنجن علائقائي ٻولين ۾، ڪنهن به ڊوائيس تي۔ اسان جو مقصد جديد پوک کي هر هاري لاءِ آسان ۽ سستو بڻائڻ آهي۔',
+    about_v1_t: 'ڊيٽا تي ٻڌل',
+    about_v1_d: 'فيصلا تربيت يافته ML ماڊل تي، اندازي تي نه۔',
+    about_v2_t: 'مقامي ترجيح',
+    about_v2_d: 'پاڪستان جي علائقن، فصلن ۽ موسمن مطابق۔',
+    about_v3_t: '5 ٻوليون',
+    about_v3_d: 'اردو، پنجابي، سنڌي، پشتو ۽ انگريزي۔',
+    about_connect: 'اسان سان رابطو ڪريو',
+
+    // ── Home: footer ──
+    footer_brand_desc: 'پاڪستان جي هارين جي مستقبل لاءِ پائيدار زرعي ٽيڪنالاجي۔',
+    footer_company: 'ڪمپني',
+    footer_support: 'مدد',
+    footer_legal: 'قانوني',
+    footer_mission: 'اسان جو مقصد',
+    footer_contact: 'رابطو',
+    footer_help: 'مدد مرڪز',
+    footer_wa_support: 'واٽس ايپ مدد',
+    footer_privacy: 'رازداري پاليسي',
+    footer_terms: 'شرطون',
+    footer_info: 'پاڪستاني هارين لاءِ ٺاهيل',
+
+    // ── Dashboard ──
+    dash_subtitle: 'توهان جي زمين لاءِ حقيقي وقت جي زرعي معلومات۔',
+    stat_total: 'ڪل اڳڪٿيون',
+    stat_month: 'هن مهيني',
+    stat_avg_conf: 'سراسري درستگي',
+    stat_top_rec: 'سڀ کان وڌيڪ صلاح',
+    weather_insights: 'موسمي معلومات',
+    forecast_5step: '5 قدم اڳڪٿي',
+    soil_node_title: 'ڳنڍيل مٽي نوڊ',
+    soil_empty_html: 'اڃا ڪا لائيو ريڊنگ ناهي۔ <a href="crop-advisor.html" style="color:var(--accent);font-weight:700;">IoT نوڊ</a> کوليو ۽ ريڊنگ موڪليو۔',
+    meta_node: 'نوڊ',
+    meta_source: 'ذريعو',
+    meta_updated: 'تازو',
+    soil_temp_label: 'گرمي',
+    soil_moisture_label: 'نمي',
+    soil_ai_crop: 'AI تجويز ڪيل فصل (لائيو مٽي مان)',
+    recent_predictions: 'تازيون اڳڪٿيون',
+    view_all: 'سڀ ڏسو',
+    th_date: 'تاريخ',
+    th_region: 'علائقو',
+    th_season: 'موسم',
+    th_reco_crop: 'تجويز ڪيل فصل',
+    th_confidence: 'درستگي',
+
+    // ── Weather page ──
+    weather_page_title: 'موسم',
+    weather_page_desc: 'پاڪستاني شهرن لاءِ تازا موسمي حالتون ۽ مختصر اڳڪٿي۔',
+    short_forecast: 'مختصر اڳڪٿي',
+    wx_feels: 'محسوس',
+    wx_rain: 'مينهن',
+
+    // ── History page ──
+    hist_title: 'تاريخ',
+    hist_desc: 'توهان جي رڪارڊ ڪيل هر فصل جي اڳڪٿي ۽ IoT سينسر ريڊنگ۔',
+    hs_preds: 'فصل جون اڳڪٿيون',
+    hs_sensors: 'IoT سينسر ريڊنگ',
+    th_crop: 'فصل',
+    th_npk: 'NPK',
+    th_ph: 'pH',
+    th_received: 'مليو',
+    th_node: 'نوڊ',
+    th_source: 'ذريعو',
+    th_npk_slash: 'N/P/K',
+    th_temp: 'گرمي',
+    th_moist: 'نمي',
+
+    // ── Settings page ──
+    set_title: 'ترتيبون',
+    set_desc: 'پنهنجو اڪائونٽ ۽ پروفائل سنڀاليو۔',
+    set_profile: 'پروفائل',
+    set_fullname: 'پورو نالو',
+    set_name_ph: 'توهان جو نالو',
+    set_email: 'اي ميل',
+    set_email_hint: 'اي ميل تبديل نٿو ٿي سگهي۔',
+    set_region: 'علائقو',
+    set_select_region: 'علائقو چونڊيو',
+    set_newpass: 'نئون پاسورڊ',
+    set_pass_ph: 'موجوده رکڻ لاءِ خالي ڇڏيو',
+    set_pass_hint: 'گهٽ ۾ گهٽ 6 اکر۔',
+    set_save: 'تبديليون محفوظ ڪريو',
+    set_account: 'اڪائونٽ',
+    set_logout_desc: 'هن ڊوائيس تي پنهنجي اڪائونٽ مان سائن آئوٽ ڪريو۔',
+
+    // ── IoT Node page ──
+    node_h1: 'IoT مٽي <span>سينسر نوڊ</span>',
+    node_sub_html: 'هي نوڊ هڪ <b>ورچوئل سموليشن</b> آهي، اسان حقيقي سينسر هارڊويئر استعمال نٿا ڪريون، تنهنڪري توهان سينسر جون قدرون پنهنجي مٽي جي رپورٽ مطابق سيٽ ڪريو ٿا۔ انهن قدرن کي <b>اسان جو پنهنجو AI ماڊل، جيڪو ڪيترن ئي ڊيٽاسيٽن تي تربيت يافته آهي</b>، جاچي بهترين فصل تجويز ڪري ٿو۔',
+    node_card_composer: 'مٽي جو نمونو ٺاهيو',
+    node_card_profile: 'نمونو پروفائل',
+    node_card_wiring: 'فيلڊ وائرنگ نقشو',
+    node_card_ai: 'AI فصل جي صلاح',
+    node_get_reco: 'صلاح حاصل ڪريو',
+
+    // ── Crop Advisor chat page ──
+    advisor_h1: 'فصل صلاحڪار',
+    advisor_sub: 'لکو، ڳالهايو يا پنهنجي فصل يا مٽي جي تصوير موڪليو، AI سان هلي ٿو۔',
+    advisor_input_ph: 'فصل صلاحڪار کي پيغام موڪليو',
   },
 
   ps: {
@@ -570,6 +1130,146 @@ const LANG = {
     opt_fert_high: 'ډیر',
     opt_fert_low: 'لږ',
     btn_predict_farmer: 'د فصل اټکل وکړئ',
+
+    // ── Shared navbar / sidebar ──
+    nav_login: 'ننوتل',
+    nav_signup: 'راجستر',
+    nav_advisor: 'د فصل مشاور',
+    nav_node: 'IoT نوډ',
+    nav_weather: 'هوا',
+    nav_history: 'تاریخچه',
+    nav_profile: 'پروفایل',
+    logout: 'وتل',
+    wa_bot: 'واټساپ بوٹ',
+    btn_get_started: 'پیل وکړئ',
+
+    // ── Home: tools cards ──
+    tool_reco_title: 'د AI فصل وړاندیز',
+    tool_reco_desc: 'ستاسو د خاورې، د هوا حالت او پخوانۍ کارکردګۍ پر بنسټ شخصي مشوره۔',
+    tool_soil_title: 'د خاورې د انځور تحلیل',
+    tool_soil_desc: 'د خپلې خاورې انځور اپلوډ کړئ او د ویژن AI په مرسته سمدستي د خوراکي کمښت، pH او روغتیا معلومات ترلاسه کړئ۔',
+    tool_voice_title: 'غږیز AI چیٹ',
+    tool_voice_desc: 'په خپله سیمه ییزه ژبه د کرنې پوښتنې وکړئ او سمدستي اسانه غږیز ځوابونه ترلاسه کړئ۔',
+    tool_weather_title: 'د هوا وړاندوینه',
+    tool_weather_desc: 'ستاسو د پټي سره سم سیمه ییزه خبرتیاوې، د دقیقې په دقیقه دقت سره۔',
+    tool_wa_title: 'واټساپ بوٹ',
+    tool_wa_desc: 'مستقیم د واټساپ له لارې زموږ بشپړ AI خدمت ترلاسه کړئ، نوي اپ ته اړتیا نشته۔',
+    try_reco: 'وړاندیز وآزمویئ',
+    try_analysis: 'تحلیل وآزمویئ',
+    try_voice: 'غږیز چیٹ وآزمویئ',
+    try_weather: 'هوا وګورئ',
+    try_wa: 'واټساپ بوٹ وآزمویئ',
+
+    // ── Home: autonomy section ──
+    auto_tag: 'د AI په مرسته کرنه',
+    auto_title: 'د ډیر حاصل لپاره هوښیار پرېکړې',
+    auto_desc: 'موږ د پاکستان د کرنیز چاپیریال لپاره ځانګړي پرمختللي AI ماډلونه کاروو۔ د خاورې د NPK اټکل څخه تر سیمه ییز مشورې پورې، موږ دقیقه کرنه اسانه او د لاسرسي وړ کوو۔',
+    auto_li1: 'د خاورې روغتیا او NPK تشخیص (ویژن AI)',
+    auto_li2: 'سیمه ییز د فصل وړاندیز انجن',
+    auto_li3: 'په اردو او سیمه ییزو ژبو کې غږیز مرستیال',
+
+    // ── Home: languages + about ──
+    lang_card_title: '۵ سیمه ییزې ژبې',
+    lang_card_desc: 'د پاکستان د بیلابیل کرنیز چاپیریال لپاره، د اردو، پنجابي، سندي، پښتو او انګلیسي بشپړ ملاتړ سره۔',
+    about_title: 'د SmartZameen AI په اړه',
+    about_desc: 'SmartZameen AI د پاکستاني بزګرانو لپاره جوړ شوی دقیقه کرنیز پلیټ فارم دی۔ موږ ماشین لرننګ، د خاورې انځور تحلیل او سیمه ییزه هوا سره یوځای کوو ترڅو ورځني پټي معلومات په روښانه فصل پرېکړو بدل کړو، په پنځو سیمه ییزو ژبو کې، په هر وسیله۔ زموږ موخه دا ده چې عصري کرنه د هر بزګر لپاره اسانه او ارزانه کړو۔',
+    about_v1_t: 'په ډیټا ولاړ',
+    about_v1_d: 'پرېکړې د روزل شوي ML ماډل پر بنسټ، نه اټکل۔',
+    about_v2_t: 'سیمه ییز لومړیتوب',
+    about_v2_d: 'د پاکستان د سیمو، فصلونو او موسمونو سره سم۔',
+    about_v3_t: '۵ ژبې',
+    about_v3_d: 'اردو، پنجابي، سندي، پښتو او انګلیسي۔',
+    about_connect: 'موږ سره اړیکه ونیسئ',
+
+    // ── Home: footer ──
+    footer_brand_desc: 'د پاکستان د بزګرانو راتلونکي لپاره دوامداره کرنیزه ټکنالوژي۔',
+    footer_company: 'شرکت',
+    footer_support: 'ملاتړ',
+    footer_legal: 'قانوني',
+    footer_mission: 'زموږ موخه',
+    footer_contact: 'اړیکه',
+    footer_help: 'د مرستې مرکز',
+    footer_wa_support: 'د واټساپ ملاتړ',
+    footer_privacy: 'د محرمیت پالیسي',
+    footer_terms: 'شرطونه',
+    footer_info: 'د پاکستاني بزګرانو لپاره جوړ شوی',
+
+    // ── Dashboard ──
+    dash_subtitle: 'ستاسو د ځمکې لپاره ریښتیني وخت کرنیز معلومات۔',
+    stat_total: 'ټولې وړاندوینې',
+    stat_month: 'دا میاشت',
+    stat_avg_conf: 'منځنی دقت',
+    stat_top_rec: 'تر ټولو ډیر وړاندیز',
+    weather_insights: 'د هوا معلومات',
+    forecast_5step: '۵ پړاو وړاندوینه',
+    soil_node_title: 'نښلول شوی د خاورې نوډ',
+    soil_empty_html: 'لا تر اوسه ژوندۍ کتنه نشته۔ <a href="crop-advisor.html" style="color:var(--accent);font-weight:700;">IoT نوډ</a> پرانیزئ او کتنه ولېږئ۔',
+    meta_node: 'نوډ',
+    meta_source: 'سرچینه',
+    meta_updated: 'تازه شوی',
+    soil_temp_label: 'تودوخه',
+    soil_moisture_label: 'لندبل',
+    soil_ai_crop: 'د AI وړاندیز شوی فصل (د ژوندۍ خاورې څخه)',
+    recent_predictions: 'وروستۍ وړاندوینې',
+    view_all: 'ټول وګورئ',
+    th_date: 'نېټه',
+    th_region: 'سیمه',
+    th_season: 'موسم',
+    th_reco_crop: 'وړاندیز شوی فصل',
+    th_confidence: 'دقت',
+
+    // ── Weather page ──
+    weather_page_title: 'هوا',
+    weather_page_desc: 'د پاکستاني ښارونو لپاره ژوندي حالات او لنډه وړاندوینه۔',
+    short_forecast: 'لنډه وړاندوینه',
+    wx_feels: 'احساس',
+    wx_rain: 'باران',
+
+    // ── History page ──
+    hist_title: 'تاریخچه',
+    hist_desc: 'ستاسو ثبت شوې هره د فصل وړاندوینه او IoT سینسر کتنه۔',
+    hs_preds: 'د فصل وړاندوینې',
+    hs_sensors: 'IoT سینسر کتنې',
+    th_crop: 'فصل',
+    th_npk: 'NPK',
+    th_ph: 'pH',
+    th_received: 'ترلاسه شوی',
+    th_node: 'نوډ',
+    th_source: 'سرچینه',
+    th_npk_slash: 'N/P/K',
+    th_temp: 'تودوخه',
+    th_moist: 'لندبل',
+
+    // ── Settings page ──
+    set_title: 'تنظیمات',
+    set_desc: 'خپل حساب او پروفایل اداره کړئ۔',
+    set_profile: 'پروفایل',
+    set_fullname: 'بشپړ نوم',
+    set_name_ph: 'ستاسو نوم',
+    set_email: 'ایمیل',
+    set_email_hint: 'ایمیل نشي بدلیدلی۔',
+    set_region: 'سیمه',
+    set_select_region: 'سیمه وټاکئ',
+    set_newpass: 'نوی پټنوم',
+    set_pass_ph: 'د اوسني ساتلو لپاره یې تش پریږدئ',
+    set_pass_hint: 'لږ تر لږه ۶ توري۔',
+    set_save: 'بدلونونه خوندي کړئ',
+    set_account: 'حساب',
+    set_logout_desc: 'په دې وسیله کې له خپل حساب څخه ووځئ۔',
+
+    // ── IoT Node page ──
+    node_h1: 'IoT خاوره <span>سینسر نوډ</span>',
+    node_sub_html: 'دا نوډ یو <b>مجازي سمولیشن</b> دی، موږ ریښتیني سینسر هارډویر نه کاروو، نو تاسو د سینسر ارزښتونه د خپلې خاورې راپور سره سم تنظیموئ۔ دا کتنې زموږ <b>خپل AI ماډل، چې پر څو ډیټاسیټونو روزل شوی</b>، ازموي او غوره فصل وړاندیز کوي۔',
+    node_card_composer: 'د خاورې نمونه جوړه کړئ',
+    node_card_profile: 'د نمونې پروفایل',
+    node_card_wiring: 'د پټي د بریښنا نقشه',
+    node_card_ai: 'د AI فصل وړاندیز',
+    node_get_reco: 'وړاندیز ترلاسه کړئ',
+
+    // ── Crop Advisor chat page ──
+    advisor_h1: 'د فصل مشاور',
+    advisor_sub: 'ولیکئ، وغږیږئ یا د خپل فصل یا خاورې انځور ولېږئ، د AI په مرسته۔',
+    advisor_input_ph: 'د فصل مشاور ته پیغام ولېږئ',
   },
 };
 
@@ -598,7 +1298,7 @@ function setLang(lang, btn) {
   set('t-home',   t.home);
   set('nav-about', t.nav_about);
   set('t-dash',   t.dash);
-  // The header switcher is a globe icon (built below) — don't overwrite its SVG,
+  // The header switcher is a globe icon (built below), don't overwrite its SVG,
   // just keep an accessible label in sync with the chosen language.
   const langToggleEl = document.getElementById('langToggle');
   if (langToggleEl) {
@@ -661,7 +1361,24 @@ function setLang(lang, btn) {
     if (val) opt.textContent = val;
   });
 
-  // ── Dashboard page (real-data layout — only elements that actually exist) ──
+  // ── Generic attribute-based translation ──
+  // Any element with data-i18n (text), data-i18n-html (innerHTML) or
+  // data-i18n-ph (placeholder) is translated automatically. This is how every
+  // section stays in sync without wiring each one by hand above.
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const val = t[el.getAttribute('data-i18n')];
+    if (val !== undefined) el.textContent = val;
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const val = t[el.getAttribute('data-i18n-html')];
+    if (val !== undefined) el.innerHTML = val;
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    const val = t[el.getAttribute('data-i18n-ph')];
+    if (val !== undefined) el.placeholder = val;
+  });
+
+  // ── Dashboard page (real-data layout, only elements that actually exist) ──
   set('dash-title',        t.dash_title);
   // 'today-weather' / temp / humidity values are set by main.js loadWeather().
   set('weather-humidity',  t.weather_humidity);   // pill label

@@ -1,4 +1,4 @@
-/* sidebar.js — shared app sidebar with green "active" highlight.
+/* sidebar.js - shared app sidebar with green "active" highlight.
    A page opts in via <body data-app="weather"> and an empty
    <aside class="app-sidebar" id="sz-sidebar"></aside> placeholder. */
 (function () {
@@ -19,28 +19,29 @@
     settings:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-2.82 1.17V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 8 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15H4a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 5.6 9.4l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 11 4.6V4a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 19 5.6l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 21 11h.09"/></svg>',
   };
 
+  // 4th item is the i18n key so the label translates with the rest of the UI.
   const ITEMS = [
-    ['dashboard', 'Dashboard',    'dashboard.html'],
-    ['advisor',   'Crop Advisor', 'ai-agent.html'],
-    ['node',      'IoT Node',     'crop-advisor.html'],
-    ['weather',   'Weather',      'weather.html'],
-    ['history',   'History',      'history.html'],
+    ['dashboard', 'Dashboard',    'dashboard.html', 'dash'],
+    ['advisor',   'Crop Advisor', 'ai-agent.html',  'nav_advisor'],
+    ['node',      'IoT Node',     'crop-advisor.html', 'nav_node'],
+    ['weather',   'Weather',      'weather.html',   'nav_weather'],
+    ['history',   'History',      'history.html',   'nav_history'],
   ];
 
-  const top = ITEMS.map(([key, label, href]) =>
-    `<a href="${href}" class="app-sidebar-item${key === page ? ' active' : ''}">${I[key]}<span>${label}</span></a>`
+  const top = ITEMS.map(([key, label, href, i18n]) =>
+    `<a href="${href}" class="app-sidebar-item${key === page ? ' active' : ''}">${I[key]}<span data-i18n="${i18n}">${label}</span></a>`
   ).join('');
 
   const LANGS = [['en','English'],['ur','اردو'],['pa','پنجابی'],['sd','سنڌي'],['ps','پښتو']];
   const langOpts = LANGS.map(([code,label]) => `<button class="lang-option" onclick="setLang('${code}', this)">${label}</button>`).join('');
 
   const bottom =
-    `<div class="app-sidebar-sub">${I.globe}<span>Languages</span></div>`
+    `<div class="app-sidebar-sub">${I.globe}<span data-i18n="lang_btn">Languages</span></div>`
     + `<div class="app-sidebar-langopts">${langOpts}</div>`
-    + `<a href="settings.html" class="app-sidebar-item${page === 'settings' ? ' active' : ''}">${I.profile}<span>Profile</span></a>`
-    + `<button class="app-sidebar-item app-sidebar-logout" onclick="logout()">${I.logout}<span>Logout</span></button>`;
+    + `<a href="settings.html" class="app-sidebar-item${page === 'settings' ? ' active' : ''}">${I.profile}<span data-i18n="nav_profile">Profile</span></a>`
+    + `<button class="app-sidebar-item app-sidebar-logout" onclick="logout()">${I.logout}<span data-i18n="logout">Logout</span></button>`;
 
-  // profile header (reflects the saved profile — updates after editing in Settings)
+  // profile header (reflects the saved profile - updates after editing in Settings)
   const esc = s => (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const email = localStorage.getItem('sz_email') || '';
   const name  = localStorage.getItem('sz_name') || (email ? email.split('@')[0] : 'Guest');
@@ -54,4 +55,11 @@
     + `<div class="app-sidebar-menu">${top}</div>`
     + `<div class="app-sidebar-divider"></div>`
     + `<div class="app-sidebar-menu">${bottom}</div>`;
+
+  // The sidebar is built after lang.js already ran its initial pass, so the
+  // freshly-inserted data-i18n labels still read English. Re-apply the saved
+  // language now (and it will also stay in sync on every later switch).
+  if (typeof setLang === 'function') {
+    setLang(localStorage.getItem('sz_lang') || 'en', null);
+  }
 })();

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Crop Advisor — SmartZameen AI</title>
+  <title>Crop Advisor - SmartZameen AI</title>
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="stylesheet" href="css/theme.css">
   <script src="js/config.js"></script>
@@ -80,15 +80,15 @@
     </div>
     <div class="nav-right">
       <div id="auth-buttons" style="display:flex;gap:10px;align-items:center;">
-        <a href="login.html" class="btn-login">Login</a>
-        <a href="signup.html" class="btn-signup">Sign Up</a>
+        <a href="login.html" class="btn-login" data-i18n="nav_login">Login</a>
+        <a href="signup.html" class="btn-signup" data-i18n="nav_signup">Sign Up</a>
       </div>
       <div class="user-pill" id="user-pill">
         <span id="user-name-display">User</span>
         <div class="user-dropdown">
-          <a href="dashboard.html">Dashboard</a>
-          <a href="ai-agent.html">Crop Advisor</a>
-          <button class="logout-btn" onclick="logout()">Logout</button>
+          <a href="dashboard.html" data-i18n="dash">Dashboard</a>
+          <a href="ai-agent.html" data-i18n="nav_advisor">Crop Advisor</a>
+          <button class="logout-btn" onclick="logout()" data-i18n="logout">Logout</button>
         </div>
       </div>
     </div>
@@ -102,9 +102,9 @@
           <div>
             <h1>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              Crop Advisor
+              <span data-i18n="advisor_h1">Crop Advisor</span>
             </h1>
-            <p>Type, talk, or send a photo of your crop / soil — powered by AI.</p>
+            <p data-i18n="advisor_sub">Type, talk, or send a photo of your crop or soil, powered by AI.</p>
           </div>
         </div>
 
@@ -122,7 +122,7 @@
           <button class="chat-icon-btn" id="chat-mic" title="Voice input">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3"/></svg>
           </button>
-          <textarea id="chat-input" rows="1" placeholder="Message Crop Advisor…"></textarea>
+          <textarea id="chat-input" rows="1" placeholder="Message Crop Advisor…" data-i18n-ph="advisor_input_ph"></textarea>
           <button class="chat-send" id="chat-send" title="Send">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg>
           </button>

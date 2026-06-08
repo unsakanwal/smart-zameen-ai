@@ -1,4 +1,4 @@
-/* chat.js — Crop Advisor full chat (text · image · camera · file · voice) powered by OpenAI. */
+/* chat.js - Crop Advisor full chat (text · image · camera · file · voice) powered by OpenAI. */
 (function () {
   const API = window.SZ_API || '';
   const log = document.getElementById('chat-log');
@@ -77,7 +77,7 @@
         showAttach(`<div class="chat-attach-file"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>${esc(file.name)}</div>`);
       } else {
         pendingFile = { name: file.name, text: '' }; pendingImage = null;
-        showAttach(`<div class="chat-attach-file"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>${esc(file.name)} <em>(name only — non-text file)</em></div>`);
+        showAttach(`<div class="chat-attach-file"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>${esc(file.name)} <em>(name only - non-text file)</em></div>`);
       }
     }
   }
@@ -111,7 +111,7 @@
 
   // ---------- voice input (OpenAI Whisper speech-to-text) ----------
   // Records the mic with MediaRecorder, uploads the clip to /api/transcribe
-  // (OpenAI Whisper — far better at Urdu/regional languages than the browser),
+  // (OpenAI Whisper - far better at Urdu/regional languages than the browser),
   // then drops the text into the chat. Falls back to the browser recognizer
   // when MediaRecorder/getUserMedia isn't available.
   let mediaRecorder = null, audioChunks = [], recordStream = null;
@@ -241,5 +241,5 @@
   input.addEventListener('input', autosize);
 
   // greeting
-  bubble('assistant', { text: "Assalam-o-Alaikum! I'm your Crop Advisor. Ask me anything about crops, soil, weather or pests — type, talk, or send a photo of your crop or soil." });
+  bubble('assistant', { text: "Assalam-o-Alaikum! I'm your Crop Advisor. Ask me anything about crops, soil, weather or pests - type, talk, or send a photo of your crop or soil." });
 })();

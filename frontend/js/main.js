@@ -1,6 +1,6 @@
 // The backend base is normally resolved once in js/config.js (loaded first) and
 // exposed as window.API_URL / window.SZ_API. These blocks are a safety net for
-// the rare case config.js didn't load — they only run if those are still unset.
+// the rare case config.js didn't load, they only run if those are still unset.
 if (typeof API_URL === 'undefined') {
     var API_URL = (window.location.protocol === 'file:' || (window.location.port !== '' && window.location.port !== '80'))
       ? 'http://localhost'
@@ -298,7 +298,7 @@ async function loadWeather(city = 'multan') {
             setEl('weather-desc',       data.description || '');
             // keep the card title in sync with the chosen city
             const cityLabel = data.urdu_city || (city.charAt(0).toUpperCase() + city.slice(1));
-            setEl('today-weather', "Today's Weather – " + cityLabel);
+            setEl('today-weather', "Today's Weather - " + cityLabel);
         }
     } catch (error) {
         console.log('Weather load nahi hua:', error.message);
@@ -477,6 +477,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // NOTE: the saved language is applied centrally in js/lang.js on
     // DOMContentLoaded (reads 'sz_lang', default 'en', flips RTL, persists).
-    // Do NOT re-apply it here — a second pass with a different key/default
+    // Do NOT re-apply it here, a second pass with a different key/default
     // only causes a flicker and can fight lang.js.
 });

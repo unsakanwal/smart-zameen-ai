@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Settings — SmartZameen AI</title>
+  <title>Settings - SmartZameen AI</title>
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="stylesheet" href="css/theme.css">
   <script src="js/config.js"></script>
@@ -60,14 +60,14 @@
     </div>
     <div class="nav-right">
       <div id="auth-buttons" style="display:flex;gap:10px;align-items:center;">
-        <a href="login.html" class="btn-login">Login</a>
-        <a href="signup.html" class="btn-signup">Sign Up</a>
+        <a href="login.html" class="btn-login" data-i18n="nav_login">Login</a>
+        <a href="signup.html" class="btn-signup" data-i18n="nav_signup">Sign Up</a>
       </div>
       <div class="user-pill" id="user-pill">
         <span id="user-name-display">User</span>
         <div class="user-dropdown">
-          <a href="dashboard.html">Dashboard</a>
-          <button class="logout-btn" onclick="logout()">Logout</button>
+          <a href="dashboard.html" data-i18n="dash">Dashboard</a>
+          <button class="logout-btn" onclick="logout()" data-i18n="logout">Logout</button>
         </div>
       </div>
     </div>
@@ -77,8 +77,8 @@
     <aside class="app-sidebar" id="sz-sidebar"></aside>
     <main class="app-main">
       <div class="set-wrap">
-        <h1>Settings</h1>
-        <p>Manage your account and profile.</p>
+        <h1 data-i18n="set_title">Settings</h1>
+        <p data-i18n="set_desc">Manage your account and profile.</p>
 
         <div id="set-gate" class="set-gate" style="display:none;">
           Please <a href="login.html">log in</a> to manage your profile.
@@ -86,42 +86,42 @@
 
         <div id="set-content" style="display:none;">
           <div class="sz-card set-card">
-            <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/></svg> Profile</h2>
+            <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/></svg> <span data-i18n="set_profile">Profile</span></h2>
             <div class="set-toast" id="toast"></div>
             <form id="profile-form" onsubmit="return false;">
               <div class="field">
-                <label for="pf-name">Full Name</label>
-                <input id="pf-name" placeholder="Your name">
+                <label for="pf-name" data-i18n="set_fullname">Full Name</label>
+                <input id="pf-name" placeholder="Your name" data-i18n-ph="set_name_ph">
               </div>
               <div class="field">
-                <label for="pf-email">Email</label>
+                <label for="pf-email" data-i18n="set_email">Email</label>
                 <input id="pf-email" disabled>
-                <span class="hint">Email can't be changed.</span>
+                <span class="hint" data-i18n="set_email_hint">Email can't be changed.</span>
               </div>
               <div class="field">
-                <label for="pf-region">Region</label>
+                <label for="pf-region" data-i18n="set_region">Region</label>
                 <select id="pf-region">
-                  <option value="">Select region</option>
+                  <option value="" data-i18n="set_select_region">Select region</option>
                   <option>Punjab</option><option>Sindh</option><option>KPK</option><option>Balochistan</option>
                 </select>
               </div>
               <div class="field">
-                <label for="pf-pass">New Password</label>
+                <label for="pf-pass" data-i18n="set_newpass">New Password</label>
                 <div class="pw-wrap">
-                  <input id="pf-pass" type="password" placeholder="Leave blank to keep current">
+                  <input id="pf-pass" type="password" placeholder="Leave blank to keep current" data-i18n-ph="set_pass_ph">
                   <button type="button" class="pw-toggle" id="pwToggle" aria-label="Show password" title="Show password"></button>
                 </div>
-                <span class="hint">Minimum 6 characters.</span>
+                <span class="hint" data-i18n="set_pass_hint">Minimum 6 characters.</span>
               </div>
-              <button class="btn btn-primary" id="save-btn" onclick="saveProfile()">Save Changes</button>
+              <button class="btn btn-primary" id="save-btn" onclick="saveProfile()" data-i18n="set_save">Save Changes</button>
             </form>
           </div>
 
           <div class="sz-card set-card">
-            <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg> Account</h2>
+            <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg> <span data-i18n="set_account">Account</span></h2>
             <div class="logout-row">
-              <p>Sign out of your account on this device.</p>
-              <button class="btn btn-danger" onclick="logout()">Logout</button>
+              <p data-i18n="set_logout_desc">Sign out of your account on this device.</p>
+              <button class="btn btn-danger" onclick="logout()" data-i18n="logout">Logout</button>
             </div>
           </div>
         </div>

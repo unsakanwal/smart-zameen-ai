@@ -1,4 +1,4 @@
-/* config.js — single source of truth for the backend API base URL.
+/* config.js - single source of truth for the backend API base URL.
  *
  * The frontend is deployed on Vercel and the backend on Render, so they live on
  * DIFFERENT origins. Set BACKEND_URL below to your Render service URL. When the

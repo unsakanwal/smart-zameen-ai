@@ -1278,17 +1278,17 @@
     </div>
     <div class="nav-right">
       <div id="auth-buttons" style="display:flex;gap:10px;align-items:center;">
-        <a href="login.html" class="btn-login">Login</a>
-        <a href="signup.html" class="btn-signup">Sign Up</a>
+        <a href="login.html" class="btn-login" data-i18n="nav_login">Login</a>
+        <a href="signup.html" class="btn-signup" data-i18n="nav_signup">Sign Up</a>
       </div>
       <div class="user-pill" id="user-pill">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/></svg>
         <span id="user-name-display">User</span>
         <span class="chevron">▼</span>
         <div class="user-dropdown">
-          <a href="dashboard.html">Dashboard</a>
-          <a href="ai-agent.html">Crop Advisor</a>
-          <button class="logout-btn" onclick="logout()">Logout</button>
+          <a href="dashboard.html" data-i18n="dash">Dashboard</a>
+          <a href="ai-agent.html" data-i18n="nav_advisor">Crop Advisor</a>
+          <button class="logout-btn" onclick="logout()" data-i18n="logout">Logout</button>
         </div>
       </div>
     </div>
@@ -1300,19 +1300,19 @@
   <div class="sim-wrap">
       <div class="sim-head">
         <div>
-          <h1>IoT Soil <span>Sensor Node</span></h1>
-          <div class="sub">This node is a <b>virtual simulation</b> — we don't use physical sensor hardware, so you adjust the sensor values to match your soil report. Those readings are scored by <b>our own AI model, trained on multiple datasets</b>, which recommends the best crop to grow.</div>
+          <h1 data-i18n-html="node_h1">IoT Soil <span>Sensor Node</span></h1>
+          <div class="sub" data-i18n-html="node_sub_html">This node is a <b>virtual simulation</b>, we don't use physical sensor hardware, so you adjust the sensor values to match your soil report. Those readings are scored by <b>our own AI model, trained on multiple datasets</b>, which recommends the best crop to grow.</div>
         </div>
         <div class="state-pill" id="state"><span class="dot"></span><span id="stateText">Idle</span></div>
       </div>
 
       <div class="sim-grid">
         <div class="sz-card">
-          <div class="card-h">Soil Sample Composer <span class="hint">drag to match your soil report</span></div>
+          <div class="card-h"><span data-i18n="node_card_composer">Soil Sample Composer</span> <span class="hint">drag to match your soil report</span></div>
           <div id="sensors"></div>
         </div>
         <div class="sz-card">
-          <div class="card-h">Sample Profile</div>
+          <div class="card-h" data-i18n="node_card_profile">Sample Profile</div>
           <div class="profile-wrap">
             <canvas id="radar" width="300" height="300"></canvas>
             <div class="core">
@@ -1322,10 +1322,10 @@
                 <div class="water" id="jarWater"></div>
               </div>
               <div class="core-meta">
-                <div class="row"><span>Soil reaction</span><b id="mPh">—</b></div>
-                <div class="row"><span>Moisture</span><b id="mMoist">—</b></div>
-                <div class="row"><span>Fertility (NPK)</span><b id="mNpk">—</b></div>
-                <div class="row"><span>Climate</span><b id="mClim">—</b></div>
+                <div class="row"><span>Soil reaction</span><b id="mPh">-</b></div>
+                <div class="row"><span>Moisture</span><b id="mMoist">-</b></div>
+                <div class="row"><span>Fertility (NPK)</span><b id="mNpk">-</b></div>
+                <div class="row"><span>Climate</span><b id="mClim">-</b></div>
               </div>
             </div>
           </div>
@@ -1333,7 +1333,7 @@
       </div>
 
       <div class="sz-card" style="margin-bottom:18px">
-        <div class="card-h">Field Wiring Diagram <span class="hint">4 sensors → ESP32 (NPK via MAX485) → cloud model</span></div>
+        <div class="card-h"><span data-i18n="node_card_wiring">Field Wiring Diagram</span> <span class="hint">4 sensors → ESP32 (NPK via MAX485) → cloud model</span></div>
         <svg id="wiring" viewBox="0 0 1000 620" role="img" aria-label="ESP32 sensor wiring diagram"></svg>
         <div class="wire-legend">
           <div class="lg"><i style="background:#e0533f"></i> VCC / 3.3V</div>
@@ -1344,18 +1344,18 @@
       </div>
 
       <div class="sz-card" style="margin-bottom:18px">
-        <div class="card-h">AI Crop Recommendation <span class="hint">our model · trained on multiple datasets</span></div>
+        <div class="card-h"><span data-i18n="node_card_ai">AI Crop Recommendation</span> <span class="hint">our model · trained on multiple datasets</span></div>
         <button class="btn btn-primary" id="send" style="margin-bottom:16px;display:inline-flex;align-items:center;gap:8px;">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20s-4-1-4-7 4-7 4-7M12 20v-9"/><path d="M12 11c0-3 2-5 5-5 0 3-2 5-5 5zM12 14c0-2.5-2-4-4.5-4 0 2.5 2 4 4.5 4z"/></svg>
-          Get Recommendation
+          <span data-i18n="node_get_reco">Get Recommendation</span>
         </button>
-        <div id="aiResult"><div class="ai-empty">Adjust the soil sensors to match your soil report, then click <b>“Get Recommendation”</b> — our trained model will suggest the best crop.</div></div>
+        <div id="aiResult"><div class="ai-empty">Adjust the soil sensors to match your soil report, then click <b>“Get Recommendation”</b> - our trained model will suggest the best crop.</div></div>
       </div>
 
       <div class="note">
         The sliders are your <b>soil sensor readings</b>. Because this is a virtual node (no physical hardware),
-        you set them by hand; on Run, those exact values are scored by <b>our own crop model — trained on
-        multiple agricultural datasets</b> — to recommend the best crop for your soil.
+        you set them by hand; on Run, those exact values are scored by <b>our own crop model - trained on
+        multiple agricultural datasets</b> - to recommend the best crop for your soil.
       </div>
     </div>
 
@@ -1489,7 +1489,7 @@
   </script>
 
   <script>
-  /* ===== IoT simulator — IIFE-scoped so it never collides with predict/main.js globals ===== */
+  /* ===== IoT simulator - IIFE-scoped so it never collides with predict/main.js globals ===== */
   (function () {
     const SENSORS = [
       ["nitrogen",   "Nitrogen",    "N", "mg/kg", 0,  140, 80,  1,   "N",  "#2e7d32"],
@@ -1619,7 +1619,7 @@
         wiring.appendChild(n("rect",{x,y,width:w,height:h,rx:12,fill:"#e8f5e9",stroke:"#66bb6a","stroke-width":1.4}));
         wiring.appendChild(n("text",{x:x+w/2,y:y+28,"text-anchor":"middle",style:"font:800 13px 'Plus Jakarta Sans',sans-serif",fill:"#2e7d32"},"SmartZameen AI"));
         wiring.appendChild(n("text",{x:x+w/2,y:y+44,"text-anchor":"middle",class:"dev-sub"},"trained on multiple datasets"));
-        wiring.appendChild(n("text",{x:x+w/2,y:y+60,"text-anchor":"middle",class:"dev-val",id:"wireCrop"},"— awaiting —"));
+        wiring.appendChild(n("text",{x:x+w/2,y:y+60,"text-anchor":"middle",class:"dev-val",id:"wireCrop"},"- awaiting -"));
         wirePath(BX+100,BY+BH+6,x+w/2,y,"wire-sig");
       })();
     }
@@ -1662,7 +1662,7 @@
     }
     const logEl=document.getElementById("log");
     function log(msg,type="info",src){
-      if(!logEl) return;   // transmission log removed — the node is UI-only now
+      if(!logEl) return;   // transmission log removed - the node is UI-only now
       const line=document.createElement("div"); line.className="log-line "+type;
       const t=new Date().toLocaleTimeString("en-GB");
       line.innerHTML=`<span class="t">${t}</span><span class="m">${msg}</span>`+(src?` <span class="src-tag">${src}</span>`:"");
@@ -1705,7 +1705,7 @@
 
     // ── Crop recommendation (our own trained model) ──
     // The sliders ARE the soil-sensor reading. On Run, those exact values go to our
-    // backend model (/api/predict-crop) — trained on multiple agricultural datasets —
+    // backend model (/api/predict-crop) - trained on multiple agricultural datasets -
     // which returns the best crop + alternatives. The node is a virtual stand-in for
     // a physical field sensor.
     const WARN='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>History — SmartZameen AI</title>
+  <title>History - SmartZameen AI</title>
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="stylesheet" href="css/theme.css">
   <script src="js/config.js"></script>
@@ -55,15 +55,15 @@
     </div>
     <div class="nav-right">
       <div id="auth-buttons" style="display:flex;gap:10px;align-items:center;">
-        <a href="login.html" class="btn-login">Login</a>
-        <a href="signup.html" class="btn-signup">Sign Up</a>
+        <a href="login.html" class="btn-login" data-i18n="nav_login">Login</a>
+        <a href="signup.html" class="btn-signup" data-i18n="nav_signup">Sign Up</a>
       </div>
       <div class="user-pill" id="user-pill">
         <span id="user-name-display">User</span>
         <div class="user-dropdown">
-          <a href="dashboard.html">Dashboard</a>
-          <a href="ai-agent.html">Crop Advisor</a>
-          <button class="logout-btn" onclick="logout()">Logout</button>
+          <a href="dashboard.html" data-i18n="dash">Dashboard</a>
+          <a href="ai-agent.html" data-i18n="nav_advisor">Crop Advisor</a>
+          <button class="logout-btn" onclick="logout()" data-i18n="logout">Logout</button>
         </div>
       </div>
     </div>
@@ -74,25 +74,25 @@
   <main class="app-main">
   <div class="hs-wrap">
     <div class="hs-head">
-      <h1>History</h1>
-      <p>Every crop prediction and IoT sensor reading you've recorded.</p>
+      <h1 data-i18n="hist_title">History</h1>
+      <p data-i18n="hist_desc">Every crop prediction and IoT sensor reading you've recorded.</p>
     </div>
 
     <div class="hs-tabs">
       <button class="hs-tab active" data-tab="preds" onclick="showHsTab('preds')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg> Crop Predictions
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg> <span data-i18n="hs_preds">Crop Predictions</span>
       </button>
       <button class="hs-tab" data-tab="sensors" onclick="showHsTab('sensors')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/><circle cx="12" cy="12" r="2"/></svg> IoT Sensor Readings
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/><circle cx="12" cy="12" r="2"/></svg> <span data-i18n="hs_sensors">IoT Sensor Readings</span>
       </button>
     </div>
 
     <div id="hs-preds" class="hs-panel active">
       <div class="sz-card">
-        <div class="hs-card-h">Crop Predictions</div>
+        <div class="hs-card-h" data-i18n="hs_preds">Crop Predictions</div>
         <div class="tbl-scroll">
           <table class="hs">
-            <thead><tr><th>Date</th><th>Region</th><th>Season</th><th>Crop</th><th>NPK</th><th>pH</th><th>Confidence</th></tr></thead>
+            <thead><tr><th data-i18n="th_date">Date</th><th data-i18n="th_region">Region</th><th data-i18n="th_season">Season</th><th data-i18n="th_crop">Crop</th><th data-i18n="th_npk">NPK</th><th data-i18n="th_ph">pH</th><th data-i18n="th_confidence">Confidence</th></tr></thead>
             <tbody id="preds-body"><tr><td colspan="7" class="hs-empty">Loading…</td></tr></tbody>
           </table>
         </div>
@@ -101,10 +101,10 @@
 
     <div id="hs-sensors" class="hs-panel">
       <div class="sz-card">
-        <div class="hs-card-h">IoT Sensor Readings</div>
+        <div class="hs-card-h" data-i18n="hs_sensors">IoT Sensor Readings</div>
         <div class="tbl-scroll">
           <table class="hs">
-            <thead><tr><th>Received</th><th>Node</th><th>Source</th><th>N/P/K</th><th>pH</th><th>Temp</th><th>Moist</th><th>Crop</th></tr></thead>
+            <thead><tr><th data-i18n="th_received">Received</th><th data-i18n="th_node">Node</th><th data-i18n="th_source">Source</th><th data-i18n="th_npk_slash">N/P/K</th><th data-i18n="th_ph">pH</th><th data-i18n="th_temp">Temp</th><th data-i18n="th_moist">Moist</th><th data-i18n="th_crop">Crop</th></tr></thead>
             <tbody id="sensors-body"><tr><td colspan="8" class="hs-empty">Loading…</td></tr></tbody>
           </table>
         </div>
@@ -131,20 +131,20 @@
       document.querySelector('.hs-tab[data-tab="'+t+'"]').classList.add('active');
     }
     (function(){
-      const cap = s => s ? s.charAt(0).toUpperCase()+s.slice(1) : (s||'—');
-      const fdate = s => s ? new Date(s.replace(' ','T')+(s.includes('T')?'':'Z')).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '—';
-      const num = (v,d=0) => (v==null||v===-1)?'—':Number(v).toFixed(d);
+      const cap = s => s ? s.charAt(0).toUpperCase()+s.slice(1) : (s||'-');
+      const fdate = s => s ? new Date(s.replace(' ','T')+(s.includes('T')?'':'Z')).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '-';
+      const num = (v,d=0) => (v==null||v===-1)?'-':Number(v).toFixed(d);
 
       fetch((window.SZ_API || '') + '/api/history').then(r=>r.json()).then(d=>{
         // predictions
         const pb=document.getElementById('preds-body');
         if(!d.predictions || !d.predictions.length){
-          pb.innerHTML='<tr><td colspan="7" class="hs-empty">No predictions yet — make one in <a href="crop-advisor.html">IoT Node</a>.</td></tr>';
+          pb.innerHTML='<tr><td colspan="7" class="hs-empty">No predictions yet - make one in <a href="crop-advisor.html">IoT Node</a>.</td></tr>';
         } else {
           pb.innerHTML=d.predictions.map(r=>{
             const sc=(r.season||'').toLowerCase()==='kharif'?'kharif':'rabi';
             const c=r.confidence||0;
-            return `<tr><td>${fdate(r.created_at)}</td><td>${r.region||'—'}</td>`
+            return `<tr><td>${fdate(r.created_at)}</td><td>${r.region||'-'}</td>`
               +`<td><span class="season-pill ${sc}">${cap(r.season)}</span></td>`
               +`<td class="crop-cell">${cap(r.predicted_crop)}${r.urdu?' ('+r.urdu+')':''}</td>`
               +`<td>${num(r.nitrogen)}/${num(r.phosphorus)}/${num(r.potassium)}</td>`
@@ -155,11 +155,11 @@
         // sensors
         const sb=document.getElementById('sensors-body');
         if(!d.sensors || !d.sensors.length){
-          sb.innerHTML='<tr><td colspan="8" class="hs-empty">No sensor readings yet — transmit from <a href="crop-advisor.html">IoT Node</a>.</td></tr>';
+          sb.innerHTML='<tr><td colspan="8" class="hs-empty">No sensor readings yet - transmit from <a href="crop-advisor.html">IoT Node</a>.</td></tr>';
         } else {
           sb.innerHTML=d.sensors.map(r=>{
             const hw=(r.source||'')==='hardware';
-            return `<tr><td>${fdate(r.received_at)}</td><td>${r.node_id||'—'}</td>`
+            return `<tr><td>${fdate(r.received_at)}</td><td>${r.node_id||'-'}</td>`
               +`<td><span class="src-tag ${hw?'hw':'sim'}">${hw?'Hardware':'Simulator'}</span></td>`
               +`<td>${num(r.nitrogen)}/${num(r.phosphorus)}/${num(r.potassium)}</td>`
               +`<td>${num(r.ph,1)}</td><td>${num(r.temperature,1)}°</td><td>${num(r.moisture)}%</td>`
@@ -167,7 +167,7 @@
           }).join('');
         }
       }).catch(()=>{
-        document.getElementById('preds-body').innerHTML='<tr><td colspan="7" class="hs-empty">Backend offline — start the server.</td></tr>';
+        document.getElementById('preds-body').innerHTML='<tr><td colspan="7" class="hs-empty">Backend offline - start the server.</td></tr>';
         document.getElementById('sensors-body').innerHTML='<tr><td colspan="8" class="hs-empty">Backend offline.</td></tr>';
       });
     })();

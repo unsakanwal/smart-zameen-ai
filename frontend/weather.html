@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Weather — SmartZameen AI</title>
+  <title>Weather - SmartZameen AI</title>
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="stylesheet" href="css/theme.css">
   <script src="js/config.js"></script>
@@ -57,15 +57,15 @@
     </div>
     <div class="nav-right">
       <div id="auth-buttons" style="display:flex;gap:10px;align-items:center;">
-        <a href="login.html" class="btn-login">Login</a>
-        <a href="signup.html" class="btn-signup">Sign Up</a>
+        <a href="login.html" class="btn-login" data-i18n="nav_login">Login</a>
+        <a href="signup.html" class="btn-signup" data-i18n="nav_signup">Sign Up</a>
       </div>
       <div class="user-pill" id="user-pill">
         <span id="user-name-display">User</span>
         <div class="user-dropdown">
-          <a href="dashboard.html">Dashboard</a>
-          <a href="ai-agent.html">Crop Advisor</a>
-          <button class="logout-btn" onclick="logout()">Logout</button>
+          <a href="dashboard.html" data-i18n="dash">Dashboard</a>
+          <a href="ai-agent.html" data-i18n="nav_advisor">Crop Advisor</a>
+          <button class="logout-btn" onclick="logout()" data-i18n="logout">Logout</button>
         </div>
       </div>
     </div>
@@ -77,8 +77,8 @@
   <div class="wx-wrap">
     <div class="wx-head">
       <div>
-        <h1>Weather</h1>
-        <p>Live conditions and a short forecast for Pakistani cities.</p>
+        <h1 data-i18n="weather_page_title">Weather</h1>
+        <p data-i18n="weather_page_desc">Live conditions and a short forecast for Pakistani cities.</p>
       </div>
       <select class="wx-select" id="wx-city">
         <option value="lahore">Lahore</option>
@@ -96,8 +96,8 @@
       <div class="wx-now">
         <div id="wx-icon" class="icon"></div>
         <div>
-          <div class="wx-city" id="wx-cityname">—</div>
-          <div class="wx-temp"><span id="wx-temp">—</span>°C</div>
+          <div class="wx-city" id="wx-cityname">-</div>
+          <div class="wx-temp"><span id="wx-temp">-</span>°C</div>
           <div class="wx-desc" id="wx-desc">Loading…</div>
           <div class="wx-pills">
             <div class="wx-pill" id="p-hum"></div>
@@ -108,7 +108,7 @@
         </div>
       </div>
 
-      <div class="wx-forecast-title">Short Forecast</div>
+      <div class="wx-forecast-title" data-i18n="short_forecast">Short Forecast</div>
       <div class="wx-forecast" id="wx-forecast"></div>
       <div class="wx-note" id="wx-note"></div>
     </div>
@@ -136,17 +136,20 @@
     };
     const pick = d => /rain|baar|بارش|drizzle|storm/i.test(d) ? ICONS.rain : /cloud|abr|بادل|overcast|mist|fog|haze/i.test(d) ? ICONS.cloud : ICONS.sun;
     const pill = (icon,label,val) => `${ICONS[icon]}<span>${label} <b>${val}</b></span>`;
+    // Current-language labels for the JS-built pills (fall back to English).
+    const T = () => (window.LANG && window.LANG[localStorage.getItem('sz_lang') || 'en']) || {};
 
     function load(city){
+      const t = T();
       fetch((window.SZ_API || '') + '/api/weather?city='+city).then(r=>r.json()).then(d=>{
         document.getElementById('wx-icon').innerHTML = pick(d.description||'');
         document.getElementById('wx-cityname').textContent = (d.urdu_city||city);
-        document.getElementById('wx-temp').textContent = d.temperature ?? '—';
-        document.getElementById('wx-desc').textContent = d.description || '—';
-        document.getElementById('p-hum').innerHTML  = pill('drop','Humidity', (d.humidity ?? '—')+'%');
-        document.getElementById('p-wind').innerHTML = pill('wind','Wind', (d.wind_speed ?? '—')+' km/h');
-        document.getElementById('p-feels').innerHTML= pill('thermo','Feels', (d.feels_like ?? d.temperature ?? '—')+'°C');
-        document.getElementById('p-rain').innerHTML = pill('rain','Rain', (d.rainfall ?? 0)+' mm');
+        document.getElementById('wx-temp').textContent = d.temperature ?? '-';
+        document.getElementById('wx-desc').textContent = d.description || '-';
+        document.getElementById('p-hum').innerHTML  = pill('drop', t.weather_humidity || 'Humidity', (d.humidity ?? '-')+'%');
+        document.getElementById('p-wind').innerHTML = pill('wind', t.weather_wind || 'Wind', (d.wind_speed ?? '-')+' km/h');
+        document.getElementById('p-feels').innerHTML= pill('thermo', t.wx_feels || 'Feels', (d.feels_like ?? d.temperature ?? '-')+'°C');
+        document.getElementById('p-rain').innerHTML = pill('rain', t.wx_rain || 'Rain', (d.rainfall ?? 0)+' mm');
         document.getElementById('wx-note').textContent = d.note ? '⚠ '+d.note : '';
       }).catch(()=>{ document.getElementById('wx-desc').textContent='Backend offline'; });
 
